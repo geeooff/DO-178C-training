@@ -73,14 +73,14 @@ public:
 
     /// Ecretage generique : disponible pour tous les derives, gratuitement.
     avio::f32 to_engineering_clamped(avio::i32 raw) const noexcept {
-        const avio::f32 valeur = to_engineering(raw);
-        if (valeur < value_min()) {
+        const avio::f32 value = to_engineering(raw);
+        if (value < value_min()) {
             return value_min();
         }
-        if (valeur > value_max()) {
+        if (value > value_max()) {
             return value_max();
         }
-        return valeur;
+        return value;
     }
 
 protected:
@@ -127,16 +127,16 @@ public:
 /// Notez qu'il n'y a AUCUN pointeur, AUCUNE vtable, et que le compilateur
 /// peut tout inliner. Une instanciation est produite par type de capteur.
 template <typename SensorT>
-avio::f32 lire_moyenne(const SensorT& capteur, const avio::i32* echantillons,
+avio::f32 read_average(const SensorT& sensor, const avio::i32* samples,
                        avio::usize count) noexcept {
-    if ((echantillons == nullptr) || (count == 0U)) {
-        return capteur.value_min();
+    if ((samples == nullptr) || (count == 0U)) {
+        return sensor.value_min();
     }
-    double somme = 0.0;
+    double sum = 0.0;
     for (avio::usize index = 0U; index < count; ++index) {
-        somme += static_cast<double>(capteur.to_engineering_clamped(echantillons[index]));
+        sum += static_cast<double>(sensor.to_engineering_clamped(samples[index]));
     }
-    return static_cast<avio::f32>(somme / static_cast<double>(count));
+    return static_cast<avio::f32>(sum / static_cast<double>(count));
 }
 
 }  // namespace mod06

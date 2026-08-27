@@ -62,17 +62,17 @@ public:
     /// @return false si un element a ete ecrase (le tampon etait plein)
     bool push(const T& value) noexcept {
         const avio::usize tail = (head_ + count_) % N;
-        bool sans_perte = true;
+        bool without_loss = true;
 
         if (count_ == N) {
             head_ = (head_ + 1U) % N;  // le plus ancien est abandonne
             overwrites_ += 1U;
-            sans_perte = false;
+            without_loss = false;
         } else {
             count_ += 1U;
         }
         storage_[tail] = value;
-        return sans_perte;
+        return without_loss;
     }
 
     /// Retire le plus ancien element.
@@ -133,21 +133,21 @@ T average(const RingBuffer<T, N>& buffer) noexcept {
     if constexpr (std::is_integral_v<T>) {
         // Accumulation en 64 bits : aucun debordement possible tant que
         // N * max(T) tient sur 64 bits.
-        avio::i64 somme = 0;
+        avio::i64 sum = 0;
         for (avio::usize index = 0U; index < buffer.size(); ++index) {
-            T valeur{};
-            (void)buffer.peek(index, valeur);
-            somme += static_cast<avio::i64>(valeur);
+            T value{};
+            (void)buffer.peek(index, value);
+            sum += static_cast<avio::i64>(value);
         }
-        return static_cast<T>(somme / static_cast<avio::i64>(buffer.size()));
+        return static_cast<T>(sum / static_cast<avio::i64>(buffer.size()));
     } else {
-        double somme = 0.0;
+        double sum = 0.0;
         for (avio::usize index = 0U; index < buffer.size(); ++index) {
-            T valeur{};
-            (void)buffer.peek(index, valeur);
-            somme += static_cast<double>(valeur);
+            T value{};
+            (void)buffer.peek(index, value);
+            sum += static_cast<double>(value);
         }
-        return static_cast<T>(somme / static_cast<double>(buffer.size()));
+        return static_cast<T>(sum / static_cast<double>(buffer.size()));
     }
 }
 

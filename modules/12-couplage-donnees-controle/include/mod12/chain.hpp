@@ -158,11 +158,11 @@ public:
         CycleOutcome outcome;
 
         // (1) couplage de controle : Supervisor -> Acquisition
-        const Result<avio::f32> mesure = acquisition_.read();
+        const Result<avio::f32> measurement = acquisition_.read();
 
-        if (mesure.is_error()) {
+        if (measurement.is_error()) {
             consecutive_rejects_ += 1U;
-            outcome.status = mesure.status();
+            outcome.status = measurement.status();
 
             // (4) couplage de controle CONDITIONNEL : Supervisor -> Filter
             if (consecutive_rejects_ >= kMaxConsecutiveRejects) {
@@ -181,18 +181,18 @@ public:
         // (2) couplage de DONNEES : la valeur produite par Acquisition est
         //     consommee par Filter. C'est ici que se logent les erreurs
         //     d'unite et d'echelle.
-        (void)filter_.push(mesure.value());
+        (void)filter_.push(measurement.value());
 
         // (3) couplage de controle : Supervisor -> Filter
-        const Result<avio::f32> moyenne = filter_.average();
-        if (moyenne.is_error()) {
-            outcome.status = moyenne.status();
+        const Result<avio::f32> average_value = filter_.average();
+        if (average_value.is_error()) {
+            outcome.status = average_value.status();
             return outcome;
         }
 
         outcome.status = Status::Ok;
-        outcome.filtered_value = moyenne.value();
-        outcome.alert = moyenne.value() > kAlertThreshold;
+        outcome.filtered_value = average_value.value();
+        outcome.alert = average_value.value() > kAlertThreshold;
         return outcome;
     }
 

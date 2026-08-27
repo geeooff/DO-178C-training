@@ -221,9 +221,9 @@ TEST_REQ(CRTP, fonction_generique_par_instanciation, "LLR-M06-033") {
     const mod06::StaticTemperatureSensor temperature;
     const i32 echantillons[4] = {0, 1365, 2730, 4095};
 
-    // Deux instanciations distinctes de lire_moyenne : deux codes a couvrir.
-    const f32 moyenne_pression = mod06::lire_moyenne(pression, echantillons, 4U);
-    const f32 moyenne_temperature = mod06::lire_moyenne(temperature, echantillons, 4U);
+    // Deux instanciations distinctes de read_average : deux codes a couvrir.
+    const f32 moyenne_pression = mod06::read_average(pression, echantillons, 4U);
+    const f32 moyenne_temperature = mod06::read_average(temperature, echantillons, 4U);
 
     CHECK_NEAR(static_cast<double>(moyenne_pression), 600.0, 1.0);
     CHECK_NEAR(static_cast<double>(moyenne_temperature), 10.0, 1.0);
@@ -231,7 +231,7 @@ TEST_REQ(CRTP, fonction_generique_par_instanciation, "LLR-M06-033") {
 
 TEST_REQ(CRTP, robustesse_entree_nulle, "LLR-M06-034") {
     const mod06::StaticPressureSensor pression;
-    CHECK_NEAR(static_cast<double>(mod06::lire_moyenne(pression, nullptr, 4U)), 0.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(mod06::read_average(pression, nullptr, 4U)), 0.0, 1e-3);
     const i32 echantillons[1] = {100};
-    CHECK_NEAR(static_cast<double>(mod06::lire_moyenne(pression, echantillons, 0U)), 0.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(mod06::read_average(pression, echantillons, 0U)), 0.0, 1e-3);
 }

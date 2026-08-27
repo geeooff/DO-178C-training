@@ -31,16 +31,16 @@ struct Crc8Table {
     avio::u8 values[256];
 
     constexpr Crc8Table() noexcept : values{} {
-        for (avio::u32 octet = 0U; octet < 256U; ++octet) {
-            avio::u8 reste = static_cast<avio::u8>(octet);
+        for (avio::u32 byte = 0U; byte < 256U; ++byte) {
+            avio::u8 remainder = static_cast<avio::u8>(byte);
             for (avio::u32 bit = 0U; bit < 8U; ++bit) {
-                const bool msb_arme = (reste & 0x80U) != 0U;
-                reste = static_cast<avio::u8>(reste << 1U);
-                if (msb_arme) {
-                    reste = static_cast<avio::u8>(reste ^ kCrc8Polynomial);
+                const bool msb_set = (remainder & 0x80U) != 0U;
+                remainder = static_cast<avio::u8>(remainder << 1U);
+                if (msb_set) {
+                    remainder = static_cast<avio::u8>(remainder ^ kCrc8Polynomial);
                 }
             }
-            values[octet] = reste;
+            values[byte] = remainder;
         }
     }
 };
@@ -66,20 +66,20 @@ avio::u8 crc8(avio::Span<const avio::u8> data, avio::u8 initial = 0x00U) noexcep
 /// La MEME fonction sert dans les deux contextes : plus de duplication entre
 /// une macro et une fonction, donc plus de risque de divergence.
 constexpr avio::u64 ipow(avio::u32 base, avio::u32 exponent) noexcept {
-    avio::u64 resultat = 1U;
+    avio::u64 result = 1U;
     for (avio::u32 index = 0U; index < exponent; ++index) {
-        resultat *= static_cast<avio::u64>(base);
+        result *= static_cast<avio::u64>(base);
     }
-    return resultat;
+    return result;
 }
 
 /// Nombre de bits a 1 (population count).
 constexpr avio::u32 popcount(avio::u32 value) noexcept {
     avio::u32 total = 0U;
-    avio::u32 reste = value;
-    while (reste != 0U) {
-        total += (reste & 1U);
-        reste >>= 1U;
+    avio::u32 remainder = value;
+    while (remainder != 0U) {
+        total += (remainder & 1U);
+        remainder >>= 1U;
     }
     return total;
 }
@@ -108,12 +108,12 @@ struct LinearisationTable {
     constexpr LinearisationTable() noexcept : values{} {
         // -60 degres au point 0, +80 degres au point 15, en dixiemes de degre.
         for (avio::usize index = 0U; index < kPointCount; ++index) {
-            const avio::i32 min_dixiemes = -600;
-            const avio::i32 max_dixiemes = 800;
-            const avio::i32 etendue = max_dixiemes - min_dixiemes;
-            const avio::i32 valeur = min_dixiemes + ((etendue * static_cast<avio::i32>(index)) /
-                                                     static_cast<avio::i32>(kPointCount - 1U));
-            values[index] = static_cast<avio::i16>(valeur);
+            const avio::i32 min_tenths = -600;
+            const avio::i32 max_tenths = 800;
+            const avio::i32 span_size = max_tenths - min_tenths;
+            const avio::i32 value = min_tenths + ((span_size * static_cast<avio::i32>(index)) /
+                                                  static_cast<avio::i32>(kPointCount - 1U));
+            values[index] = static_cast<avio::i16>(value);
         }
     }
 };

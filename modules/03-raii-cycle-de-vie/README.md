@@ -209,7 +209,7 @@ les chemins d'erreur.
 | LLR-M03-015 | `DeviceBank::release()` ignore tout identifiant de canal hors domaine. | `RAII.robustesse_liberation_identifiant_invalide` |
 | LLR-M03-020 | `CriticalSection` désactive les interruptions à la construction et les rétablit à la destruction. | `SectionCritique.interruptions_restaurees` |
 | LLR-M03-021 | Les sections critiques imbriquées ne rétablissent les interruptions qu'à la sortie de la plus externe. | `SectionCritique.imbrication` |
-| LLR-M03-022 | Les interruptions sont rétablies sur **tous** les chemins de sortie de `traitement_multi_sorties()`. | `SectionCritique.liberation_sur_tous_les_chemins` |
+| LLR-M03-022 | Les interruptions sont rétablies sur **tous** les chemins de sortie de `multi_exit_processing()`. | `SectionCritique.liberation_sur_tous_les_chemins` |
 
 ---
 

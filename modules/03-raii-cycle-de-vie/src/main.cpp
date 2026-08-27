@@ -34,7 +34,7 @@ void afficher_journal() {
 void ordre_de_destruction() {
     titre("Ordre de destruction : inverse de la construction");
     mod03::LifetimeLog::reset();
-    mod03::demontrer_ordre_destruction();
+    mod03::demonstrate_destruction_order();
     afficher_journal();
     std::printf("\n  Garanti par la norme, donc utilisable comme propriete de conception :\n");
     std::printf("  un membre declare APRES un autre est detruit AVANT lui.\n");
@@ -99,7 +99,7 @@ void section_critique() {
 
     const i32 entrees[3] = {-5, 0, 7};
     for (usize index = 0U; index < 3U; ++index) {
-        const i32 resultat = mod03::traitement_multi_sorties(entrees[index]);
+        const i32 resultat = mod03::multi_exit_processing(entrees[index]);
         std::printf("  traitement(%2d) -> %d ; interruptions actives apres : %s\n", entrees[index],
                     resultat, mod03::InterruptState::enabled() ? "OUI" : "NON");
     }

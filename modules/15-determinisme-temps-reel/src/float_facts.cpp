@@ -10,8 +10,8 @@ bool is_absorbed(avio::f32 x, avio::f32 increment) noexcept {
     // Volatile : empeche le compilateur de conserver le resultat dans un
     // registre plus large que 32 bits, ce qui fausserait la demonstration sur
     // les cibles utilisant encore la pile x87.
-    volatile avio::f32 somme = x + increment;
-    return static_cast<avio::f32>(somme) == x;
+    volatile avio::f32 sum = x + increment;
+    return static_cast<avio::f32>(sum) == x;
 }
 
 /// @satisfies LLR-DET-011
@@ -21,15 +21,15 @@ avio::f32 ulp(avio::f32 value) noexcept {
     }
     // std::nextafter donne le flottant immediatement superieur : la difference
     // est l'ULP (Unit in the Last Place).
-    const avio::f32 suivant = std::nextafter(value, 3.4e38F);
-    return suivant - value;
+    const avio::f32 next_value = std::nextafter(value, 3.4e38F);
+    return next_value - value;
 }
 
 /// @satisfies LLR-DET-012
 bool addition_is_non_associative(avio::f32 a, avio::f32 b, avio::f32 c) noexcept {
-    volatile avio::f32 gauche = (a + b) + c;
-    volatile avio::f32 droite = a + (b + c);
-    return static_cast<avio::f32>(gauche) != static_cast<avio::f32>(droite);
+    volatile avio::f32 left = (a + b) + c;
+    volatile avio::f32 right = a + (b + c);
+    return static_cast<avio::f32>(left) != static_cast<avio::f32>(right);
 }
 
 /// @satisfies LLR-DET-013
@@ -74,7 +74,7 @@ bool close_relative(avio::f32 a, avio::f32 b, avio::f32 relative_tolerance) noex
         (relative_tolerance < 0.0F)) {
         return false;
     }
-    const avio::f32 ecart = std::fabs(a - b);
+    const avio::f32 delta = std::fabs(a - b);
     const avio::f32 magnitude_a = std::fabs(a);
     const avio::f32 magnitude_b = std::fabs(b);
     const avio::f32 reference = (magnitude_a > magnitude_b) ? magnitude_a : magnitude_b;
@@ -82,9 +82,9 @@ bool close_relative(avio::f32 a, avio::f32 b, avio::f32 relative_tolerance) noex
     // Cas particulier : les deux valeurs sont nulles ou quasi nulles. La
     // tolerance relative n'a alors plus de sens ; on retombe sur l'egalite.
     if (reference == 0.0F) {
-        return ecart == 0.0F;
+        return delta == 0.0F;
     }
-    return (ecart / reference) <= relative_tolerance;
+    return (delta / reference) <= relative_tolerance;
 }
 
 }  // namespace mod15

@@ -53,11 +53,11 @@ bool factorial(avio::u32 n, avio::u64& out_result) noexcept {
         return false;
     }
 
-    avio::u64 accumulateur = 1U;
-    for (avio::u32 facteur = 2U; facteur <= n; ++facteur) {
-        accumulateur *= static_cast<avio::u64>(facteur);
+    avio::u64 accumulator = 1U;
+    for (avio::u32 factor = 2U; factor <= n; ++factor) {
+        accumulator *= static_cast<avio::u64>(factor);
     }
-    out_result = accumulateur;
+    out_result = accumulator;
     return true;
 }
 
@@ -78,22 +78,22 @@ bool binary_search(const avio::i32* sorted_values, avio::usize count, avio::i32 
         return false;
     }
 
-    avio::usize bas = 0U;
-    avio::usize haut = count;  // borne exclusive
+    avio::usize lower = 0U;
+    avio::usize upper = count;  // borne exclusive
 
     // Le nombre d'iterations est borne par log2(count) : le WCET est calculable
     // a partir de la taille maximale du tableau, elle-meme connue.
-    while (bas < haut) {
-        const avio::usize milieu = bas + ((haut - bas) / 2U);
-        const avio::i32 valeur = sorted_values[milieu];
-        if (valeur == target) {
-            out_index = milieu;
+    while (lower < upper) {
+        const avio::usize middle = lower + ((upper - lower) / 2U);
+        const avio::i32 value = sorted_values[middle];
+        if (value == target) {
+            out_index = middle;
             return true;
         }
-        if (valeur < target) {
-            bas = milieu + 1U;
+        if (value < target) {
+            lower = middle + 1U;
         } else {
-            haut = milieu;
+            upper = middle;
         }
     }
     return false;
@@ -115,15 +115,15 @@ bool factorial_recursive(avio::u32 n, avio::u64& out_result) noexcept {
         return true;
     }
 
-    avio::u64 partiel = 0U;
+    avio::u64 partial = 0U;
     // Chaque appel consomme une trame de pile supplementaire. Ici la
     // profondeur vaut n, donc au plus 20 : bornee, mais il faut le DEMONTRER
     // et l'inscrire au budget. La version iterative, elle, ne demande rien.
-    if (!factorial_recursive(n - 1U, partiel)) {
+    if (!factorial_recursive(n - 1U, partial)) {
         out_result = 0U;
         return false;
     }
-    out_result = partiel * static_cast<avio::u64>(n);
+    out_result = partial * static_cast<avio::u64>(n);
     return true;
 }
 

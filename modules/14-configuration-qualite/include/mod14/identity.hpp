@@ -40,16 +40,16 @@ struct Crc32Table {
     avio::u32 values[256];
 
     constexpr Crc32Table() noexcept : values{} {
-        for (avio::u32 octet = 0U; octet < 256U; ++octet) {
-            avio::u32 reste = octet;
+        for (avio::u32 byte = 0U; byte < 256U; ++byte) {
+            avio::u32 remainder = byte;
             for (avio::u32 bit = 0U; bit < 8U; ++bit) {
-                const bool lsb_arme = (reste & 1U) != 0U;
-                reste >>= 1U;
-                if (lsb_arme) {
-                    reste ^= kCrc32Polynomial;
+                const bool lsb_set = (remainder & 1U) != 0U;
+                remainder >>= 1U;
+                if (lsb_set) {
+                    remainder ^= kCrc32Polynomial;
                 }
             }
-            values[octet] = reste;
+            values[byte] = remainder;
         }
     }
 };

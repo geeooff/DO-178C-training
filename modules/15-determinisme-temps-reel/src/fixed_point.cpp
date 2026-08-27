@@ -20,8 +20,8 @@ avio::i32 saturate(avio::i64 value) noexcept {
 
 /// @satisfies LLR-FIX-010
 Fixed Fixed::from_int(avio::i32 value) noexcept {
-    const avio::i64 brut = static_cast<avio::i64>(value) * static_cast<avio::i64>(kOne);
-    return Fixed::from_raw(saturate(brut));
+    const avio::i64 raw_value = static_cast<avio::i64>(value) * static_cast<avio::i64>(kOne);
+    return Fixed::from_raw(saturate(raw_value));
 }
 
 /// @satisfies LLR-FIX-011
@@ -35,11 +35,11 @@ Fixed Fixed::from_float(avio::f32 value) noexcept {
         return Fixed();
     }
 
-    const double brut = static_cast<double>(value) * static_cast<double>(kOne);
-    if (brut > static_cast<double>(kRawMax)) {
+    const double raw_value = static_cast<double>(value) * static_cast<double>(kOne);
+    if (raw_value > static_cast<double>(kRawMax)) {
         return Fixed::from_raw(kRawMax);
     }
-    if (brut < static_cast<double>(kRawMin)) {
+    if (raw_value < static_cast<double>(kRawMin)) {
         return Fixed::from_raw(kRawMin);
     }
 
@@ -49,8 +49,8 @@ Fixed Fixed::from_float(avio::f32 value) noexcept {
     // L'erreur de conversion est bornee par kResolution / 2, soit 7,6e-6.
     // Cette borne est CALCULABLE avant execution : c'est tout l'interet de la
     // virgule fixe.
-    const double arrondi = (brut >= 0.0) ? (brut + 0.5) : (brut - 0.5);
-    return Fixed::from_raw(static_cast<avio::i32>(arrondi));
+    const double rounded = (raw_value >= 0.0) ? (raw_value + 0.5) : (raw_value - 0.5);
+    return Fixed::from_raw(static_cast<avio::i32>(rounded));
 }
 
 /// @satisfies LLR-FIX-012
@@ -80,8 +80,8 @@ Fixed Fixed::operator-(Fixed other) const noexcept {
 Fixed Fixed::operator*(Fixed other) const noexcept {
     // Le produit de deux Q16.16 est un Q32.32 : il faut donc 64 bits pendant
     // le calcul, puis un recalage de 16 bits.
-    const avio::i64 produit = static_cast<avio::i64>(raw_) * static_cast<avio::i64>(other.raw_);
-    return Fixed::from_raw(saturate(produit >> kFractionBits));
+    const avio::i64 product = static_cast<avio::i64>(raw_) * static_cast<avio::i64>(other.raw_);
+    return Fixed::from_raw(saturate(product >> kFractionBits));
 }
 
 /// @satisfies LLR-FIX-023
@@ -90,8 +90,8 @@ bool Fixed::divide(Fixed divisor, Fixed& out) const noexcept {
         out = Fixed();
         return false;
     }
-    const avio::i64 numerateur = static_cast<avio::i64>(raw_) << kFractionBits;
-    out = Fixed::from_raw(saturate(numerateur / static_cast<avio::i64>(divisor.raw_)));
+    const avio::i64 numerator = static_cast<avio::i64>(raw_) << kFractionBits;
+    out = Fixed::from_raw(saturate(numerator / static_cast<avio::i64>(divisor.raw_)));
     return true;
 }
 

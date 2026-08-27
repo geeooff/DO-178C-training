@@ -48,12 +48,12 @@ bool is_digit(char character) noexcept {
 
 /// @satisfies LLR-CM-010
 avio::u32 crc32(avio::Span<const avio::u8> data) noexcept {
-    avio::u32 reste = 0xFFFFFFFFU;
+    avio::u32 remainder = 0xFFFFFFFFU;
     for (avio::usize index = 0U; index < data.size(); ++index) {
-        const avio::u32 position = (reste ^ static_cast<avio::u32>(data[index])) & 0xFFU;
-        reste = kCrc32Table.values[position] ^ (reste >> 8U);
+        const avio::u32 position = (remainder ^ static_cast<avio::u32>(data[index])) & 0xFFU;
+        remainder = kCrc32Table.values[position] ^ (remainder >> 8U);
     }
-    return reste ^ 0xFFFFFFFFU;
+    return remainder ^ 0xFFFFFFFFU;
 }
 
 // -----------------------------------------------------------------------------
@@ -127,16 +127,16 @@ const LifeCycleData* find_life_cycle_data(const char* acronym) noexcept {
 
 /// @satisfies LLR-CM-042
 bool control_category_for(const char* acronym, char dal, ControlCategory& out) noexcept {
-    const LifeCycleData* donnee = find_life_cycle_data(acronym);
-    if (donnee == nullptr) {
+    const LifeCycleData* entry = find_life_cycle_data(acronym);
+    if (entry == nullptr) {
         return false;
     }
     if ((dal == 'A') || (dal == 'B')) {
-        out = donnee->dal_ab;
+        out = entry->dal_ab;
         return true;
     }
     if ((dal == 'C') || (dal == 'D')) {
-        out = donnee->dal_cd;
+        out = entry->dal_cd;
         return true;
     }
     // DAL E : aucun objectif DO-178C, donc aucune categorie de controle.

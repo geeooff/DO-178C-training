@@ -149,16 +149,16 @@ avio::f32 FuelTank::fill_ratio_percent() const noexcept {
 }
 
 Mass FuelTank::add(Mass amount) noexcept {
-    const Mass espace_libre = capacity_ - quantity_;
-    const Mass ajoute = smaller_of(amount, espace_libre);
-    quantity_ = quantity_ + ajoute;
-    return ajoute;
+    const Mass free_space = capacity_ - quantity_;
+    const Mass added = smaller_of(amount, free_space);
+    quantity_ = quantity_ + added;
+    return added;
 }
 
 Mass FuelTank::remove(Mass amount) noexcept {
-    const Mass preleve = smaller_of(amount, quantity_);
-    quantity_ = quantity_ - preleve;
-    return preleve;
+    const Mass removed = smaller_of(amount, quantity_);
+    quantity_ = quantity_ - removed;
+    return removed;
 }
 
 bool FuelTank::is_empty() const noexcept {

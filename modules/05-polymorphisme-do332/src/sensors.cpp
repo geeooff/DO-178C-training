@@ -154,8 +154,8 @@ ContractReport verify_contract(const Sensor& sensor, avio::u32 sample_count) noe
     constexpr avio::f32 kTolerance = 0.01F;
 
     // C1 : nom valide
-    const char* nom = sensor.name();
-    report.c1_name_valid = (nom != nullptr) && (nom[0] != '\0');
+    const char* name_text = sensor.name();
+    report.c1_name_valid = (name_text != nullptr) && (name_text[0] != '\0');
 
     // C2 / C3 : domaines coherents
     const avio::i32 raw_min = sensor.raw_min();
@@ -170,43 +170,43 @@ ContractReport verify_contract(const Sensor& sensor, avio::u32 sample_count) noe
     }
 
     // C4 / C5 : parcours du domaine
-    bool dans_domaine = true;
-    bool monotone = true;
-    avio::f32 precedent = value_min;
+    bool in_domain = true;
+    bool monotonic = true;
+    avio::f32 previous = value_min;
 
-    const avio::i64 etendue = static_cast<avio::i64>(raw_max) - static_cast<avio::i64>(raw_min);
+    const avio::i64 span_size = static_cast<avio::i64>(raw_max) - static_cast<avio::i64>(raw_min);
     for (avio::u32 index = 0U; index < samples; ++index) {
         const avio::i64 offset =
-            (etendue * static_cast<avio::i64>(index)) / static_cast<avio::i64>(samples - 1U);
+            (span_size * static_cast<avio::i64>(index)) / static_cast<avio::i64>(samples - 1U);
         const avio::i32 raw = static_cast<avio::i32>(static_cast<avio::i64>(raw_min) + offset);
-        const avio::f32 valeur = sensor.to_engineering(raw);
+        const avio::f32 value = sensor.to_engineering(raw);
 
-        if (!std::isfinite(valeur) || (valeur < (value_min - kTolerance)) ||
-            (valeur > (value_max + kTolerance))) {
-            dans_domaine = false;
+        if (!std::isfinite(value) || (value < (value_min - kTolerance)) ||
+            (value > (value_max + kTolerance))) {
+            in_domain = false;
         }
         if (index > 0U) {
-            if (valeur < (precedent - kTolerance)) {
-                monotone = false;
+            if (value < (previous - kTolerance)) {
+                monotonic = false;
             }
         }
-        precedent = valeur;
+        previous = value;
     }
-    report.c4_result_in_domain = dans_domaine;
-    report.c5_monotonic = monotone;
+    report.c4_result_in_domain = in_domain;
+    report.c5_monotonic = monotonic;
 
     // C6 : correspondance aux extremites
-    const avio::f32 aux_min = sensor.to_engineering(raw_min);
-    const avio::f32 aux_max = sensor.to_engineering(raw_max);
-    report.c6_endpoints_match = (std::fabs(aux_min - value_min) <= kTolerance) &&
-                                (std::fabs(aux_max - value_max) <= kTolerance);
+    const avio::f32 value_at_min = sensor.to_engineering(raw_min);
+    const avio::f32 value_at_max = sensor.to_engineering(raw_max);
+    report.c6_endpoints_match = (std::fabs(value_at_min - value_min) <= kTolerance) &&
+                                (std::fabs(value_at_max - value_max) <= kTolerance);
 
     // C7 : ecretage hors domaine (robustesse)
-    const avio::f32 sous_domaine = sensor.to_engineering(raw_min - 1000);
-    const avio::f32 sur_domaine = sensor.to_engineering(raw_max + 1000);
-    report.c7_clamped_outside = std::isfinite(sous_domaine) && std::isfinite(sur_domaine) &&
-                                (std::fabs(sous_domaine - value_min) <= kTolerance) &&
-                                (std::fabs(sur_domaine - value_max) <= kTolerance);
+    const avio::f32 below_domain = sensor.to_engineering(raw_min - 1000);
+    const avio::f32 above_domain = sensor.to_engineering(raw_max + 1000);
+    report.c7_clamped_outside = std::isfinite(below_domain) && std::isfinite(above_domain) &&
+                                (std::fabs(below_domain - value_min) <= kTolerance) &&
+                                (std::fabs(above_domain - value_max) <= kTolerance);
 
     return report;
 }

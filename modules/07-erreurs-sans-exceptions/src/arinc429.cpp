@@ -31,10 +31,10 @@ bool is_accepted_label(avio::u8 label) noexcept {
 
 bool has_odd_parity(avio::u32 word) noexcept {
     avio::u32 bits = 0U;
-    avio::u32 reste = word;
-    while (reste != 0U) {
-        bits += (reste & 1U);
-        reste >>= 1U;
+    avio::u32 remainder = word;
+    while (remainder != 0U) {
+        bits += (remainder & 1U);
+        remainder >>= 1U;
     }
     return (bits % 2U) == 1U;
 }

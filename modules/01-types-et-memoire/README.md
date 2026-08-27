@@ -170,8 +170,8 @@ c'est la fonction `is_valid()`.
 ### 1.7 Disposition mémoire
 
 ```cpp
-struct TrameNaive     { u8 header; u32 payload; u8 checksum; };  // 12 octets
-struct TrameCompacte  { u32 payload; u8 header; u8 checksum; };  //  8 octets
+struct NaiveFrame     { u8 header; u32 payload; u8 checksum; };  // 12 octets
+struct CompactFrame  { u32 payload; u8 header; u8 checksum; };  //  8 octets
 ```
 
 Le compilateur insère du **bourrage** (*padding*) pour respecter l'alignement
@@ -248,7 +248,7 @@ rend le test possible.
 | LLR-M01-023..024 | `checked_div()` renvoie faux pour un diviseur nul et pour `INT_MIN / −1`. | `Checked.division_*` |
 | LLR-M01-030..034 | `checked_cast()` n'écrit la destination que si la conversion préserve exactement la valeur et le signe. | `Cast.*` |
 | LLR-M01-040..041 | `in_range()` teste un intervalle **fermé** ; `clamp()` ramène aux bornes. | `Range.*` |
-| LLR-M01-050 | Les tailles de `TrameNaive` et `TrameCompacte` sont respectivement de 12 et 8 octets sur la cible de référence. | `Layout.bourrage_observable` |
+| LLR-M01-050 | Les tailles de `NaiveFrame` et `CompactFrame` sont respectivement de 12 et 8 octets sur la cible de référence. | `Layout.bourrage_observable` |
 
 ---
 
@@ -276,7 +276,7 @@ void traiter(const avio::u32* donnees, avio::u32 taille) {
 ```
 
 **6.4 — Sérialisation portable**
-Écrivez `void serialize(const TrameCompacte& t, avio::u8 out[6])` qui produit
+Écrivez `void serialize(const CompactFrame& t, avio::u8 out[6])` qui produit
 une trame **big-endian**, indépendante de l'ABI, et son inverse `deserialize`.
 Testez le couple aller-retour. C'est exactement ce que l'on fait pour un bus
 ARINC 429.

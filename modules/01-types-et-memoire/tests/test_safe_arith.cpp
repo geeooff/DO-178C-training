@@ -193,7 +193,7 @@ TEST_REQ(Range, ecretage, "LLR-M01-041") {
 TEST_REQ(Layout, bourrage_observable, "LLR-M01-050") {
     // Ces tailles dependent de l'ABI. Les figer par un test, c'est detecter
     // immediatement un changement de cible ou d'option de compilation.
-    CHECK_EQ(sizeof(mod01::TrameNaive), static_cast<avio::usize>(12));
-    CHECK_EQ(sizeof(mod01::TrameCompacte), static_cast<avio::usize>(8));
-    CHECK(sizeof(mod01::TrameCompacte) < sizeof(mod01::TrameNaive));
+    CHECK_EQ(sizeof(mod01::NaiveFrame), static_cast<avio::usize>(12));
+    CHECK_EQ(sizeof(mod01::CompactFrame), static_cast<avio::usize>(8));
+    CHECK(sizeof(mod01::CompactFrame) < sizeof(mod01::NaiveFrame));
 }

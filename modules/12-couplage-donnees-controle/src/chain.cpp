@@ -16,8 +16,8 @@ Result<avio::f32> Acquisition::read() noexcept {
     // COUPLAGE DE DONNEES : c'est ICI que l'unite est fixee. Toute erreur
     // d'echelle a cette frontiere se propage silencieusement dans toute la
     // chaine aval -- c'est le scenario Mars Climate Orbiter (module 04).
-    const avio::f32 valeur = static_cast<avio::f32>(raw_) * kScaleUnitsPerCount;
-    return Result<avio::f32>::ok(valeur);
+    const avio::f32 value = static_cast<avio::f32>(raw_) * kScaleUnitsPerCount;
+    return Result<avio::f32>::ok(value);
 }
 
 /// @satisfies LLR-CHAIN-020
@@ -42,11 +42,11 @@ Result<avio::f32> Filter::average() const noexcept {
         return Result<avio::f32>::error(Status::NotReady);
     }
 
-    double somme = 0.0;
+    double sum = 0.0;
     for (avio::usize index = 0U; index < kWindow; ++index) {
-        somme += static_cast<double>(window_[index]);
+        sum += static_cast<double>(window_[index]);
     }
-    return Result<avio::f32>::ok(static_cast<avio::f32>(somme / static_cast<double>(kWindow)));
+    return Result<avio::f32>::ok(static_cast<avio::f32>(sum / static_cast<double>(kWindow)));
 }
 
 /// @satisfies LLR-CHAIN-022

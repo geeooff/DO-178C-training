@@ -88,9 +88,9 @@ void dynamique_contre_statique() {
     const i32 echantillons[4] = {0, 1365, 2730, 4095};
 
     std::printf("  moyenne pression    : %8.2f hPa\n",
-                static_cast<double>(mod06::lire_moyenne(pression, echantillons, 4U)));
+                static_cast<double>(mod06::read_average(pression, echantillons, 4U)));
     std::printf("  moyenne temperature : %8.2f degres C\n",
-                static_cast<double>(mod06::lire_moyenne(temperature, echantillons, 4U)));
+                static_cast<double>(mod06::read_average(temperature, echantillons, 4U)));
 
     std::printf("\n  %-34s %s\n", "", "taille d'un objet");
     std::printf("  %-34s %zu octet(s)\n", "mod06::StaticPressureSensor (CRTP)",

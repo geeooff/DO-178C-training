@@ -34,8 +34,9 @@ bool MajorFrame::add_window(PartitionId partition, avio::u32 offset_us,
     }
     // La fenetre doit tenir ENTIEREMENT dans la periode. Le calcul est fait en
     // 64 bits : offset + duration pourrait deborder sur 32 bits.
-    const avio::u64 fin = static_cast<avio::u64>(offset_us) + static_cast<avio::u64>(duration_us);
-    if (fin > static_cast<avio::u64>(period_us_)) {
+    const avio::u64 new_end =
+        static_cast<avio::u64>(offset_us) + static_cast<avio::u64>(duration_us);
+    if (new_end > static_cast<avio::u64>(period_us_)) {
         return false;
     }
 
@@ -43,11 +44,11 @@ bool MajorFrame::add_window(PartitionId partition, avio::u32 offset_us,
     // temporel. Deux fenetres qui se recouvrent, et la separation entre
     // niveaux DAL disparait.
     for (avio::usize index = 0U; index < count_; ++index) {
-        const avio::u64 debut_existant = static_cast<avio::u64>(windows_[index].offset_us);
-        const avio::u64 fin_existante =
-            debut_existant + static_cast<avio::u64>(windows_[index].duration_us);
-        const avio::u64 debut = static_cast<avio::u64>(offset_us);
-        if ((debut < fin_existante) && (debut_existant < fin)) {
+        const avio::u64 existing_start = static_cast<avio::u64>(windows_[index].offset_us);
+        const avio::u64 existing_end =
+            existing_start + static_cast<avio::u64>(windows_[index].duration_us);
+        const avio::u64 new_start = static_cast<avio::u64>(offset_us);
+        if ((new_start < existing_end) && (existing_start < new_end)) {
             return false;
         }
     }
@@ -81,8 +82,8 @@ avio::u32 MajorFrame::utilisation_percent() const noexcept {
 }
 
 avio::u32 MajorFrame::slack_us() const noexcept {
-    const avio::u32 alloue = allocated_us();
-    return (alloue >= period_us_) ? 0U : (period_us_ - alloue);
+    const avio::u32 allocated = allocated_us();
+    return (allocated >= period_us_) ? 0U : (period_us_ - allocated);
 }
 
 /// @satisfies LLR-SCH-012
@@ -90,40 +91,40 @@ bool MajorFrame::has_margin(avio::u32 minimum_slack_percent) const noexcept {
     if (period_us_ == 0U) {
         return false;
     }
-    const avio::u32 marge_percent = (slack_us() * 100U) / period_us_;
-    return marge_percent >= minimum_slack_percent;
+    const avio::u32 slack_percent = (slack_us() * 100U) / period_us_;
+    return slack_percent >= minimum_slack_percent;
 }
 
 /// @satisfies LLR-SCH-020
 FrameResult run_major_frame(const MajorFrame& frame, const avio::u32* execution_us,
                             avio::usize count) noexcept {
-    FrameResult resultat;
+    FrameResult result;
 
     if (execution_us == nullptr) {
-        return resultat;
+        return result;
     }
 
-    const avio::usize fenetres = (count < frame.window_count()) ? count : frame.window_count();
+    const avio::usize windows = (count < frame.window_count()) ? count : frame.window_count();
 
-    for (avio::usize index = 0U; index < fenetres; ++index) {
-        const Window& fenetre = frame.window(index);
-        const avio::u32 consomme = execution_us[index];
+    for (avio::usize index = 0U; index < windows; ++index) {
+        const Window& window = frame.window(index);
+        const avio::u32 consumed = execution_us[index];
 
-        if (consomme > fenetre.duration_us) {
+        if (consumed > window.duration_us) {
             // La partition est INTERROMPUE a la fin de sa fenetre : elle ne
             // vole pas de temps aux suivantes. C'est tout l'interet du
             // partitionnement temporel.
-            const avio::u32 depassement = consomme - fenetre.duration_us;
-            resultat.overrun_count += 1U;
-            resultat.deadline_met = false;
-            if (depassement > resultat.worst_overrun_us) {
-                resultat.worst_overrun_us = depassement;
-                resultat.worst_partition = fenetre.partition;
+            const avio::u32 overrun = consumed - window.duration_us;
+            result.overrun_count += 1U;
+            result.deadline_met = false;
+            if (overrun > result.worst_overrun_us) {
+                result.worst_overrun_us = overrun;
+                result.worst_partition = window.partition;
             }
         }
     }
 
-    return resultat;
+    return result;
 }
 
 }  // namespace mod15

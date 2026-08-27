@@ -211,7 +211,7 @@ gonflement du code, rendu tangible.
 | LLR-M06-030 | Les capteurs CRTP produisent les mêmes valeurs que leurs équivalents virtuels du module 05. | `CRTP.comportement_identique_au_dynamique` |
 | LLR-M06-031 | Un capteur CRTP sans donnée membre occupe 1 octet (aucun pointeur de vtable). | `CRTP.aucun_cout_memoire` |
 | LLR-M06-032 | `is_in_range()` et `to_engineering_clamped()` sont fournis par la base à tous les dérivés. | `CRTP.comportement_commun_factorise` |
-| LLR-M06-033..034 | `lire_moyenne()` moyenne les valeurs écrêtées ; elle renvoie `value_min()` pour un pointeur nul ou un compte nul. | `CRTP.*` |
+| LLR-M06-033..034 | `read_average()` moyenne les valeurs écrêtées ; elle renvoie `value_min()` pour un pointeur nul ou un compte nul. | `CRTP.*` |
 
 ---
 
@@ -237,7 +237,7 @@ Vecteur de test : CRC-16/CCITT-FALSE de « 123456789 » vaut `0x29B1`.
 **6.4 — Un troisième capteur CRTP**
 Ajoutez `StaticAngleOfAttackSensor` (0..4095 → −20,0..+45,0 degrés). Combien de
 lignes avez-vous écrites ? Combien de nouvelles instanciations de
-`lire_moyenne` cela crée-t-il ? Que faut-il ajouter au document de conception ?
+`read_average` cela crée-t-il ? Que faut-il ajouter au document de conception ?
 
 **6.5 — Analyse de conception**
 Un collègue propose de remplacer toutes les hiérarchies virtuelles du projet

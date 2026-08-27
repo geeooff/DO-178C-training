@@ -79,11 +79,11 @@ public:
 
     Result<avio::f32> read() noexcept {
         CouplingTrace::record_call(Interface::SupervisorReadsAcquisition);
-        const Result<avio::f32> resultat = real_.read();
-        if (resultat.is_ok()) {
-            CouplingTrace::record_data(Interface::SupervisorReadsAcquisition, resultat.value());
+        const Result<avio::f32> result = real_.read();
+        if (result.is_ok()) {
+            CouplingTrace::record_data(Interface::SupervisorReadsAcquisition, result.value());
         }
-        return resultat;
+        return result;
     }
 
 private:
@@ -102,11 +102,11 @@ public:
 
     Result<avio::f32> average() const noexcept {
         CouplingTrace::record_call(Interface::SupervisorReadsAverage);
-        const Result<avio::f32> resultat = real_.average();
-        if (resultat.is_ok()) {
-            CouplingTrace::record_data(Interface::SupervisorReadsAverage, resultat.value());
+        const Result<avio::f32> result = real_.average();
+        if (result.is_ok()) {
+            CouplingTrace::record_data(Interface::SupervisorReadsAverage, result.value());
         }
-        return resultat;
+        return result;
     }
 
     void reset() noexcept {

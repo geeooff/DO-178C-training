@@ -62,20 +62,20 @@ Result<Mass> TankGauge::read() const noexcept {
     // resultat identique sur toute cible, aucune derive, WCET constant
     // (module 15). Le produit maximal vaut 8e6 x 4095 = 3,3e10 : il faut bien
     // 64 bits pendant le calcul.
-    const avio::i64 numerateur =
+    const avio::i64 numerator =
         static_cast<avio::i64>(capacity_.grams()) * static_cast<avio::i64>(raw_ - kRawMin);
-    const avio::i64 denominateur = static_cast<avio::i64>(kRawMax - kRawMin);
-    const avio::i32 grammes = static_cast<avio::i32>(numerateur / denominateur);
+    const avio::i64 denominator = static_cast<avio::i64>(kRawMax - kRawMin);
+    const avio::i32 grams_value = static_cast<avio::i32>(numerator / denominator);
 
-    Mass quantite;
-    if (!Mass::from_grams(grammes, quantite)) {
+    Mass quantity;
+    if (!Mass::from_grams(grams_value, quantity)) {
         // Ne peut pas arriver si la capacite respecte le domaine de Mass ;
         // la branche existe neanmoins car elle est TRACEE a une exigence de
         // robustesse, et elle est exercee par un test (module 07 : pas de
         // code defensif non justifie).
         return Result<Mass>::error(Status::OutOfRange);
     }
-    return Result<Mass>::ok(quantite);
+    return Result<Mass>::ok(quantity);
 }
 
 // -----------------------------------------------------------------------------
@@ -195,36 +195,36 @@ bool FuelSystem::create(const FuelSystemConfig& config, FuelSystem& out) noexcep
 /// @satisfies LLR-FQMS-050
 /// @satisfies LLR-FQMS-052
 CycleReport FuelSystem::update(const avio::i32 raw_values[kTankCount]) noexcept {
-    CycleReport rapport;
+    CycleReport report;
 
     if (raw_values == nullptr) {
         // Robustesse : aucune mesure fournie. On ne fabrique pas de valeur ;
         // on declare la panne totale. Les moniteurs sont geles.
         for (avio::usize index = 0U; index < kTankCount; ++index) {
-            rapport.sensor_fault[index] = true;
+            report.sensor_fault[index] = true;
         }
-        rapport.status = Status::HardwareFault;
+        report.status = Status::HardwareFault;
         (void)low_fuel_monitor_.update(kUnknownSample);
         (void)imbalance_monitor_.update(kUnknownSample);
-        return rapport;
+        return report;
     }
 
     cycle_count_ += 1U;
 
     // --- Etape 1 : lecture des trois jauges ----------------------------------
     // Boucle a bornes CONSTANTES : WCET calculable (module 15).
-    bool valide[kTankCount] = {};
+    bool valid[kTankCount] = {};
     for (avio::usize index = 0U; index < kTankCount; ++index) {
         gauges_[index].set_raw(raw_values[index]);
-        const Result<Mass> mesure = gauges_[index].read();
+        const Result<Mass> measurement = gauges_[index].read();
 
-        if (mesure.is_ok()) {
-            valide[index] = true;
-            rapport.tank_quantity[index] = mesure.value();
-            rapport.valid_tank_count = static_cast<avio::u8>(rapport.valid_tank_count + 1U);
+        if (measurement.is_ok()) {
+            valid[index] = true;
+            report.tank_quantity[index] = measurement.value();
+            report.valid_tank_count = static_cast<avio::u8>(report.valid_tank_count + 1U);
         } else {
-            valide[index] = false;
-            rapport.sensor_fault[index] = true;
+            valid[index] = false;
+            report.sensor_fault[index] = true;
             fault_counts_[index] += 1U;
         }
     }
@@ -232,47 +232,47 @@ CycleReport FuelSystem::update(const avio::i32 raw_values[kTankCount]) noexcept 
     // --- Etape 2 : quantite totale des reservoirs VALIDES ---------------------
     Mass total;
     for (avio::usize index = 0U; index < kTankCount; ++index) {
-        if (valide[index]) {
-            total = total + rapport.tank_quantity[index];
+        if (valid[index]) {
+            total = total + report.tank_quantity[index];
         }
     }
-    rapport.total = total;
-    rapport.status = system_status(rapport.valid_tank_count);
+    report.total = total;
+    report.status = system_status(report.valid_tank_count);
 
     // --- Etape 3 : ecart d'aile ----------------------------------------------
-    const bool ecart_mesurable =
-        imbalance_is_measurable(valide[static_cast<avio::usize>(TankId::Left)],
-                                valide[static_cast<avio::usize>(TankId::Right)]);
+    const bool imbalance_measurable =
+        imbalance_is_measurable(valid[static_cast<avio::usize>(TankId::Left)],
+                                valid[static_cast<avio::usize>(TankId::Right)]);
 
-    if (ecart_mesurable) {
-        rapport.wing_imbalance =
-            absolute_difference(rapport.tank_quantity[static_cast<avio::usize>(TankId::Left)],
-                                rapport.tank_quantity[static_cast<avio::usize>(TankId::Right)]);
+    if (imbalance_measurable) {
+        report.wing_imbalance =
+            absolute_difference(report.tank_quantity[static_cast<avio::usize>(TankId::Left)],
+                                report.tank_quantity[static_cast<avio::usize>(TankId::Right)]);
     }
 
     // --- Etape 4 : moniteur de bas niveau ------------------------------------
-    const bool bas_niveau_mesurable =
-        low_fuel_is_measurable(valide[static_cast<avio::usize>(TankId::Left)],
-                               valide[static_cast<avio::usize>(TankId::Center)],
-                               valide[static_cast<avio::usize>(TankId::Right)]);
+    const bool low_fuel_measurable =
+        low_fuel_is_measurable(valid[static_cast<avio::usize>(TankId::Left)],
+                               valid[static_cast<avio::usize>(TankId::Center)],
+                               valid[static_cast<avio::usize>(TankId::Right)]);
 
     // Grandeur derivee : deficit = seuil - total. L'alerte se leve donc quand
     // le deficit devient positif, c'est-a-dire quand le total passe sous le
     // seuil. L'hysteresis du moniteur (seuil de retombee negatif) impose au
     // total de remonter de `low_fuel_hysteresis` avant d'effacer l'alerte.
     const avio::f32 deficit_kg =
-        bas_niveau_mesurable ? (config_.low_fuel_threshold.kilograms() - rapport.total.kilograms())
-                             : kUnknownSample;
+        low_fuel_measurable ? (config_.low_fuel_threshold.kilograms() - report.total.kilograms())
+                            : kUnknownSample;
     (void)low_fuel_monitor_.update(deficit_kg);
-    rapport.low_fuel_alert = low_fuel_monitor_.is_raised();
+    report.low_fuel_alert = low_fuel_monitor_.is_raised();
 
     // --- Etape 5 : moniteur de desequilibre ----------------------------------
-    const avio::f32 ecart_kg =
-        ecart_mesurable ? rapport.wing_imbalance.kilograms() : kUnknownSample;
-    (void)imbalance_monitor_.update(ecart_kg);
-    rapport.imbalance_alert = imbalance_monitor_.is_raised();
+    const avio::f32 delta_kg =
+        imbalance_measurable ? report.wing_imbalance.kilograms() : kUnknownSample;
+    (void)imbalance_monitor_.update(delta_kg);
+    report.imbalance_alert = imbalance_monitor_.is_raised();
 
-    return rapport;
+    return report;
 }
 
 const TankGauge& FuelSystem::gauge(TankId tank) const noexcept {

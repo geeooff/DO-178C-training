@@ -58,12 +58,12 @@ AlertState AlertMonitor::update(avio::f32 sample) noexcept {
         return state_;
     }
 
-    const bool au_dessus = sample > config_.raise_threshold;
-    const bool au_dessous = sample < config_.clear_threshold;
+    const bool above_raise = sample > config_.raise_threshold;
+    const bool below_clear = sample < config_.clear_threshold;
 
     switch (state_) {
         case AlertState::Inactive:
-            if (au_dessus) {
+            if (above_raise) {
                 progress_ = 1U;
                 if (progress_ >= config_.confirm_cycles) {
                     state_ = AlertState::Active;
@@ -76,7 +76,7 @@ AlertState AlertMonitor::update(avio::f32 sample) noexcept {
             break;
 
         case AlertState::Pending:
-            if (au_dessus) {
+            if (above_raise) {
                 progress_ = static_cast<avio::u16>(progress_ + 1U);
                 if (progress_ >= config_.confirm_cycles) {
                     state_ = AlertState::Active;
@@ -92,7 +92,7 @@ AlertState AlertMonitor::update(avio::f32 sample) noexcept {
             break;
 
         case AlertState::Active:
-            if (au_dessous) {
+            if (below_clear) {
                 progress_ = 1U;
                 if (progress_ >= config_.clear_cycles) {
                     state_ = AlertState::Inactive;
@@ -104,7 +104,7 @@ AlertState AlertMonitor::update(avio::f32 sample) noexcept {
             break;
 
         case AlertState::Clearing:
-            if (au_dessous) {
+            if (below_clear) {
                 progress_ = static_cast<avio::u16>(progress_ + 1U);
                 if (progress_ >= config_.clear_cycles) {
                     state_ = AlertState::Inactive;

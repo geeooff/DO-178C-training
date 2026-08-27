@@ -45,10 +45,10 @@ Result<avio::f32> pressure_altitude_feet(avio::f32 static_pressure_hpa) noexcept
     }
 
     // LLR-ADCALT-020 : forme fermee du modele ISA.
-    const double rapport =
+    const double ratio =
         static_cast<double>(static_pressure_hpa) / static_cast<double>(kIsaSeaLevelPressureHpa);
-    const double facteur = std::pow(rapport, static_cast<double>(kIsaExponent));
-    const double altitude = static_cast<double>(kIsaAltitudeCoefficientFt) * (1.0 - facteur);
+    const double factor = std::pow(ratio, static_cast<double>(kIsaExponent));
+    const double altitude = static_cast<double>(kIsaAltitudeCoefficientFt) * (1.0 - factor);
 
     // Le calcul intermediaire est fait en double : l'erreur d'arrondi reste
     // tres inferieure au budget de 20 ft (HLR-ADCALT-004). Le resultat est
@@ -65,19 +65,19 @@ Result<avio::f32> corrected_altitude_feet(avio::f32 static_pressure_hpa,
     // invalides, c'est le statut de la pression qui remonte. Sans cette
     // specification, le comportement dependrait de l'implementation -- donc
     // ne serait pas verifiable.
-    const Result<avio::f32> altitude_pression = pressure_altitude_feet(static_pressure_hpa);
-    if (altitude_pression.is_error()) {
-        return altitude_pression;
+    const Result<avio::f32> pressure_altitude = pressure_altitude_feet(static_pressure_hpa);
+    if (pressure_altitude.is_error()) {
+        return pressure_altitude;
     }
 
-    const Status validation_qnh = validate_qnh(qnh_hpa);
-    if (validation_qnh != Status::Ok) {
-        return Result<avio::f32>::error(validation_qnh);
+    const Status qnh_validation = validate_qnh(qnh_hpa);
+    if (qnh_validation != Status::Ok) {
+        return Result<avio::f32>::error(qnh_validation);
     }
 
     // LLR-ADCALT-031
     const avio::f32 correction = (qnh_hpa - kIsaSeaLevelPressureHpa) * kFeetPerHpa;
-    return Result<avio::f32>::ok(altitude_pression.value() + correction);
+    return Result<avio::f32>::ok(pressure_altitude.value() + correction);
 }
 
 /// @satisfies LLR-ADCALT-033

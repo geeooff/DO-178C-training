@@ -281,7 +281,7 @@ CriticalSection::~CriticalSection() noexcept {
 //  Demonstrations
 // -----------------------------------------------------------------------------
 
-avio::i32 traitement_multi_sorties(avio::i32 value) noexcept {
+avio::i32 multi_exit_processing(avio::i32 value) noexcept {
     const CriticalSection guard;  // interruptions desactivees ici
 
     if (value < 0) {
@@ -293,13 +293,13 @@ avio::i32 traitement_multi_sorties(avio::i32 value) noexcept {
     return 2;  // sortie 3
 }
 
-void demontrer_ordre_destruction() noexcept {
-    const Traced premier(1);
+void demonstrate_destruction_order() noexcept {
+    const Traced first(1);
     const Traced second(2);
-    const Traced troisieme(3);
+    const Traced third(3);
     // Destruction a la sortie de portee : 3, puis 2, puis 1.
     // Ordre INVERSE de la construction, garanti par la norme.
-    avio::unused(premier, second, troisieme);
+    avio::unused(first, second, third);
 }
 
 }  // namespace mod03

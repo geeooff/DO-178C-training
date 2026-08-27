@@ -68,16 +68,16 @@ McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept {
 
     // --- Critere 2 : chaque condition a-t-elle pris ses deux valeurs ? -------
     for (avio::usize condition = 0U; condition < conditions; ++condition) {
-        bool vrai_vu = false;
-        bool faux_vu = false;
+        bool true_seen = false;
+        bool false_seen = false;
         for (avio::usize index = 0U; index < evaluations; ++index) {
             if (recorder.at(index).conditions[condition]) {
-                vrai_vu = true;
+                true_seen = true;
             } else {
-                faux_vu = true;
+                false_seen = true;
             }
         }
-        report.condition_both_values[condition] = vrai_vu && faux_vu;
+        report.condition_both_values[condition] = true_seen && false_seen;
     }
 
     // --- Critere 4 : paire d'independance ("unique cause") -------------------
@@ -90,10 +90,10 @@ McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept {
     // Une telle paire demontre que C affecte SEULE l'issue : c'est exactement
     // ce que demande la definition.
     for (avio::usize condition = 0U; condition < conditions; ++condition) {
-        for (avio::usize premier = 0U;
-             (premier < evaluations) && !report.condition_covered[condition]; ++premier) {
-            for (avio::usize second = premier + 1U; second < evaluations; ++second) {
-                const Evaluation& a = recorder.at(premier);
+        for (avio::usize first = 0U; (first < evaluations) && !report.condition_covered[condition];
+             ++first) {
+            for (avio::usize second = first + 1U; second < evaluations; ++second) {
+                const Evaluation& a = recorder.at(first);
                 const Evaluation& b = recorder.at(second);
 
                 if (a.outcome == b.outcome) {
@@ -103,20 +103,20 @@ McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept {
                     continue;  // la condition etudiee doit changer
                 }
 
-                bool autres_identiques = true;
-                for (avio::usize autre = 0U; autre < conditions; ++autre) {
-                    if (autre == condition) {
+                bool others_identical = true;
+                for (avio::usize other_index = 0U; other_index < conditions; ++other_index) {
+                    if (other_index == condition) {
                         continue;
                     }
-                    if (a.conditions[autre] != b.conditions[autre]) {
-                        autres_identiques = false;
+                    if (a.conditions[other_index] != b.conditions[other_index]) {
+                        others_identical = false;
                         break;
                     }
                 }
 
-                if (autres_identiques) {
+                if (others_identical) {
                     report.condition_covered[condition] = true;
-                    report.pair_first[condition] = premier;
+                    report.pair_first[condition] = first;
                     report.pair_second[condition] = second;
                     break;
                 }

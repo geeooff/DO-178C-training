@@ -184,14 +184,14 @@ constexpr T clamp(T value, T low, T high) noexcept {
 // -----------------------------------------------------------------------------
 
 /// Disposition naive : le compilateur insere du bourrage (padding).
-struct TrameNaive {
+struct NaiveFrame {
     avio::u8 header;    // 1 octet, puis 3 octets de bourrage
     avio::u32 payload;  // 4 octets
     avio::u8 checksum;  // 1 octet, puis 3 octets de bourrage final
 };
 
 /// Meme information, champs ordonnes du plus large au plus etroit.
-struct TrameCompacte {
+struct CompactFrame {
     avio::u32 payload;
     avio::u8 header;
     avio::u8 checksum;

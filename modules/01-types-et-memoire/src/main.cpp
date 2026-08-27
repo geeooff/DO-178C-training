@@ -132,10 +132,10 @@ void initialisation() {
 void disposition_memoire() {
     titre("Disposition memoire : taille, alignement, bourrage");
 
-    std::printf("  TrameNaive   { u8; u32; u8; }  -> sizeof = %zu, alignof = %zu\n",
-                sizeof(mod01::TrameNaive), alignof(mod01::TrameNaive));
-    std::printf("  TrameCompacte{ u32; u8; u8; }  -> sizeof = %zu, alignof = %zu\n",
-                sizeof(mod01::TrameCompacte), alignof(mod01::TrameCompacte));
+    std::printf("  NaiveFrame   { u8; u32; u8; }  -> sizeof = %zu, alignof = %zu\n",
+                sizeof(mod01::NaiveFrame), alignof(mod01::NaiveFrame));
+    std::printf("  CompactFrame{ u32; u8; u8; }  -> sizeof = %zu, alignof = %zu\n",
+                sizeof(mod01::CompactFrame), alignof(mod01::CompactFrame));
     std::printf("\n  Meme information, 33%% de RAM en moins simplement en reordonnant\n");
     std::printf("  les champs du plus large au plus etroit. Sur un calculateur avec\n");
     std::printf("  2 Mo de RAM et 10000 messages en tampon, cela se voit.\n");

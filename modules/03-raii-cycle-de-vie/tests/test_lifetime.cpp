@@ -28,7 +28,7 @@ void reinitialiser() noexcept {
 // -----------------------------------------------------------------------------
 TEST_REQ(CycleDeVie, destruction_en_ordre_inverse, "LLR-M03-001") {
     reinitialiser();
-    mod03::demontrer_ordre_destruction();
+    mod03::demonstrate_destruction_order();
 
     REQUIRE_EQ(mod03::LifetimeLog::count(), usize{6});
 
@@ -237,13 +237,13 @@ TEST_REQ(SectionCritique, liberation_sur_tous_les_chemins, "LLR-M03-022") {
     // oubli sur une seule branche ne se verrait qu'a l'integration.
     reinitialiser();
 
-    CHECK_EQ(mod03::traitement_multi_sorties(-5), 0);
+    CHECK_EQ(mod03::multi_exit_processing(-5), 0);
     CHECK(mod03::InterruptState::enabled());
 
-    CHECK_EQ(mod03::traitement_multi_sorties(0), 1);
+    CHECK_EQ(mod03::multi_exit_processing(0), 1);
     CHECK(mod03::InterruptState::enabled());
 
-    CHECK_EQ(mod03::traitement_multi_sorties(7), 2);
+    CHECK_EQ(mod03::multi_exit_processing(7), 2);
     CHECK(mod03::InterruptState::enabled());
 
     CHECK_EQ(mod03::InterruptState::max_nesting(), u32{1});

@@ -36,9 +36,9 @@ bool inhibition_decision(bool test_mode, bool approach_config, bool glideslope_c
 /// @satisfies LLR-GPWS-040
 bool effective_alert(const Mode4aInputs& inputs, bool test_mode, bool approach_config,
                      bool glideslope_captured) noexcept {
-    const bool alerte = mode4a_alert(inputs);
-    const bool inhibee = inhibition_decision(test_mode, approach_config, glideslope_captured);
-    return alerte && !inhibee;
+    const bool alert = mode4a_alert(inputs);
+    const bool inhibited = inhibition_decision(test_mode, approach_config, glideslope_captured);
+    return alert && !inhibited;
 }
 
 }  // namespace mod11

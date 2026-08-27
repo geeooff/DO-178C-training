@@ -6,12 +6,12 @@
 namespace mod06 {
 
 avio::u8 crc8(avio::Span<const avio::u8> data, avio::u8 initial) noexcept {
-    avio::u8 reste = initial;
+    avio::u8 remainder = initial;
     for (avio::usize index = 0U; index < data.size(); ++index) {
-        const avio::u8 position = static_cast<avio::u8>(reste ^ data[index]);
-        reste = kCrc8Table.values[position];
+        const avio::u8 position = static_cast<avio::u8>(remainder ^ data[index]);
+        remainder = kCrc8Table.values[position];
     }
-    return reste;
+    return remainder;
 }
 
 // -----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ avio::u8 crc8(avio::Span<const avio::u8> data, avio::u8 initial) noexcept {
 
 namespace {
 
-avio::f32 map_lineaire(avio::i32 raw, avio::f32 value_min, avio::f32 value_max) noexcept {
+avio::f32 linear_map(avio::i32 raw, avio::f32 value_min, avio::f32 value_max) noexcept {
     constexpr avio::f32 kSpan = 4095.0F;
     if (raw <= 0) {
         return value_min;
@@ -35,11 +35,11 @@ avio::f32 map_lineaire(avio::i32 raw, avio::f32 value_min, avio::f32 value_max) 
 }  // namespace
 
 avio::f32 StaticPressureSensor::to_engineering_impl(avio::i32 raw) const noexcept {
-    return map_lineaire(raw, 0.0F, 1200.0F);
+    return linear_map(raw, 0.0F, 1200.0F);
 }
 
 avio::f32 StaticTemperatureSensor::to_engineering_impl(avio::i32 raw) const noexcept {
-    return map_lineaire(raw, -60.0F, 80.0F);
+    return linear_map(raw, -60.0F, 80.0F);
 }
 
 // -----------------------------------------------------------------------------

@@ -188,11 +188,11 @@ public:
 /// Effectue un traitement avec plusieurs sorties possibles, sous section
 /// critique. Sert a prouver que la ressource est liberee sur TOUS les chemins.
 /// @return 0 si `value` est negatif, 1 s'il est nul, 2 s'il est positif.
-avio::i32 traitement_multi_sorties(avio::i32 value) noexcept;
+avio::i32 multi_exit_processing(avio::i32 value) noexcept;
 
 /// Cree deux objets temoins dans une portee : sert a observer que la
 /// destruction se fait dans l'ordre INVERSE de la construction.
-void demontrer_ordre_destruction() noexcept;
+void demonstrate_destruction_order() noexcept;
 
 }  // namespace mod03
 
