@@ -116,12 +116,25 @@ Il lit :
 * les annotations `@satisfies LLR-…` du code de production ;
 * les `TEST_REQ(Suite, cas, "LLR-…")` des fichiers de test.
 
-Il reconstruit la matrice et signale **quatre** défauts :
+Il reconstruit la matrice et signale **cinq** défauts :
 
 1. exigence **sans code** → non implémentée ;
 2. exigence **sans test** → non vérifiée ;
 3. code référençant une exigence **inconnue** ;
-4. test **sans exigence** → orphelin.
+4. test **sans exigence** → orphelin ;
+5. **documentation citant un cas de test inexistant** → référence pourrie.
+
+Le cinquième mérite un mot. Les documents d'exigences citent leurs cas de test
+dans le champ *Vérification*, et les README de module dans leur colonne
+*Vérifiée par*. Ces références croisées sont écrites **à la main**.
+
+> Une référence croisée que personne ne vérifie **pourrit**. Il suffit de
+> renommer un cas de test pour que le document continue à citer un nom qui
+> n'existe plus — sans que rien ne le signale. La matrice a alors l'air
+> complète, mais elle désigne du vide.
+>
+> Ce contrôle a trouvé **huit références périmées** dans ce dépôt le jour où il
+> a été écrit. Elles y étaient depuis le début.
 
 Plus une **observation** utile : une HLR vérifiée seulement *indirectement*, via
 ses LLR. La table A-6 demande aussi des tests fondés sur les HLR.

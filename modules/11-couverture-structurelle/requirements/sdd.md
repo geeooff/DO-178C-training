@@ -66,7 +66,7 @@ décision pour la rendre couvrable »*.
 - **Parent** : HLR-GPWS-002
 - **Énoncé** : `inhibition_decision()` doit renvoyer
   `test_mode OU (approach_config ET glideslope_captured)`.
-- **Vérification** : `Inhibition.*`, `Mcdc.inhibition_couverture_complete`
+- **Vérification** : `Mcdc.table_de_verite_inhibition`, `Mcdc.inhibition_couverture_complete`, `Effective.alerte_emise_si_non_inhibee`
 
 ### LLR-GPWS-040
 

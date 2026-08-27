@@ -19,6 +19,14 @@ Cet outil reconstruit les deux sens et signale quatre defauts :
     2. exigence SANS test   -> exigence non verifiee
     3. code SANS exigence   -> code non justifie (code mort ? exigence oubliee ?)
     4. test SANS exigence   -> test orphelin
+    5. documentation citant un cas de test INEXISTANT -> reference pourrie
+
+Le defaut 5 merite un mot. Les documents d'exigences citent leurs cas de test
+dans le champ "Verification", et les README de module dans leur colonne
+"Verifiee par". Ces references croisees sont ecrites A LA MAIN. Une reference
+croisee que personne ne verifie POURRIT : il suffit de renommer un cas de test
+pour que le document continue a citer un nom qui n'existe plus, sans que rien
+ne le signale. La matrice a alors l'air complete, mais elle designe du vide.
 
 STATUT DE QUALIFICATION (DO-330)
 --------------------------------
@@ -99,6 +107,15 @@ class Findings:
     unknown_in_code: list[tuple[str, str]] = field(default_factory=list)
     unknown_in_tests: list[tuple[str, str]] = field(default_factory=list)
     untraced_tests: list[str] = field(default_factory=list)
+
+    # Noms de cas de test cites dans la documentation mais introuvables dans
+    # le code : (fichier markdown, ligne, nom cite).
+    stale_doc_refs: list[tuple[str, int, str]] = field(default_factory=list)
+
+    # Ensemble des cas de test reellement declares, sous la forme "Suite.nom",
+    # et des suites, pour resoudre les references a motif "Suite.*".
+    known_cases: set[str] = field(default_factory=set)
+    known_suites: set[str] = field(default_factory=set)
 
 
 # --- Lecture des exigences ----------------------------------------------------
@@ -195,6 +212,8 @@ def scan_sources(root: Path, findings: Findings, scope: list[Path] | None) -> No
             for match in RE_TEST_REQ.finditer(raw):
                 suite, name, ids = match.group(1), match.group(2), match.group(3)
                 case_name = f"{suite}.{name}"
+                findings.known_cases.add(case_name)
+                findings.known_suites.add(suite)
                 found = RE_REQ_ID.findall(ids)
                 if not found:
                     findings.untraced_tests.append(f"{case_name} ({site})")
@@ -212,6 +231,71 @@ def scan_sources(root: Path, findings: Findings, scope: list[Path] | None) -> No
                     findings.untraced_tests.append(
                         f"{plain.group(1)}.{plain.group(2)} ({site})"
                     )
+
+
+# --- Verification des references documentaires --------------------------------
+
+# Un nom de cas de test cite dans la documentation : `Suite.nom_du_cas` ou
+# `Suite.*` pour designer toute une suite. La majuscule initiale de la suite et
+# la minuscule initiale du cas distinguent ces citations d'un nom de fichier
+# (`build_info.cpp`) ou d'un identifiant qualifie (`mod07::Result`).
+RE_DOC_TESTREF = re.compile(r"`([A-Z][A-Za-z0-9_]*)\.([a-z_][a-z0-9_]*\*?|\*)`")
+
+# `CMakeLists.txt` ou `SCI.md` ont la meme forme qu un nom de cas de test.
+# On ecarte les extensions de fichier plutot que de compliquer la regex.
+EXTENSIONS_FICHIER = {
+    "txt", "md", "cpp", "hpp", "h", "cc", "py", "sh", "ps1", "json", "yml",
+    "yaml", "cmake", "exe", "info", "html", "csv", "cov", "obj", "lib", "sln",
+}
+
+
+def check_doc_references(root: Path, findings: Findings, scope: list[Path] | None) -> None:
+    """Verifie que les noms de cas de test cites dans la documentation existent.
+
+    POURQUOI CETTE VERIFICATION EXISTE
+    ----------------------------------
+    Les documents d'exigences citent leurs cas de test dans le champ
+    "Verification", et les README de module dans leur colonne "Verifiee par".
+    Ces references croisees sont ecrites A LA MAIN.
+
+    Une reference croisee que personne ne verifie est une reference croisee qui
+    POURRIT. Il suffit de renommer un cas de test pour que le document continue
+    a citer un nom qui n'existe plus -- sans que rien ne le signale, et en
+    donnant l'illusion d'une tracabilite intacte.
+
+    C'est exactement le genre de defaut qu'un auditeur cherche : la matrice de
+    tracabilite a l'air complete, mais elle designe du vide.
+    """
+    for path in sorted(root.glob("modules/*/**/*.md")):
+        if scope is not None and not any(
+            scoped in path.parents for scoped in scope
+        ):
+            continue
+
+        relative = path.relative_to(root).as_posix()
+        for number, raw in enumerate(
+            path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1
+        ):
+            for match in RE_DOC_TESTREF.finditer(raw):
+                suite, cas = match.group(1), match.group(2)
+                if cas in EXTENSIONS_FICHIER:
+                    continue  # nom de fichier, pas un cas de test
+                if cas == "*":
+                    # `Suite.*` : la suite doit exister.
+                    if suite not in findings.known_suites:
+                        findings.stale_doc_refs.append((relative, number, f"{suite}.*"))
+                elif cas.endswith("*"):
+                    # `Suite.prefixe_*` : au moins un cas doit correspondre.
+                    prefixe = f"{suite}.{cas[:-1]}"
+                    if not any(c.startswith(prefixe) for c in findings.known_cases):
+                        findings.stale_doc_refs.append(
+                            (relative, number, f"{suite}.{cas}")
+                        )
+                else:
+                    nom = f"{suite}.{cas}"
+                    if nom not in findings.known_cases:
+                        findings.stale_doc_refs.append((relative, number, nom))
+
 
 
 # --- Rapport ------------------------------------------------------------------
@@ -323,6 +407,19 @@ def print_report(findings: Findings) -> int:
         print("  [4] tous les cas de test sont traces a une exigence existante")
 
     # --- coherence HLR -> LLR --------------------------------------------------
+    # 5. references documentaires perimees
+    if findings.stale_doc_refs:
+        defects += len(findings.stale_doc_refs)
+        print(
+            f"  [5] {len(findings.stale_doc_refs)} reference(s) documentaire(s) vers un "
+            "cas de test INEXISTANT :"
+        )
+        for fichier, ligne, nom in findings.stale_doc_refs:
+            print(f"      {fichier}:{ligne}  cite {nom}")
+        print("      -> la documentation designe du vide : renommage non repercute ?")
+    else:
+        print("  [5] toutes les references documentaires designent un cas de test existant")
+
     print()
     print("-" * 78)
     print("  COUVERTURE DES HLR PAR LES LLR")
@@ -404,6 +501,7 @@ def main() -> int:
         print()
 
     scan_sources(root, findings, scope)
+    check_doc_references(root, findings, scope)
     defects = print_report(findings)
 
     if args.csv:

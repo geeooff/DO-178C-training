@@ -69,7 +69,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Inactive`, un échantillon strictement supérieur au
   seuil de montée doit faire passer l'état à `Pending` avec une progression de
   1, ou directement à `Active` si `confirm_cycles == 1`.
-- **Vérification** : `Montee.*`
+- **Vérification** : `Transitions.inactive_vers_pending`, `Equivalence.classe_au_dessus_du_seuil`, `Limites.seuil_de_montee_exact_ne_declenche_pas`
 
 ### LLR-ALERT-021
 
@@ -78,7 +78,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Pending`, un échantillon strictement supérieur au
   seuil de montée doit incrémenter la progression ; l'état passe à `Active`
   lorsque la progression atteint `confirm_cycles`.
-- **Vérification** : `Montee.*`
+- **Vérification** : `Transitions.pending_vers_pending`, `Transitions.pending_vers_active`
 
 ### LLR-ALERT-022
 
@@ -86,7 +86,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Parent** : HLR-ALERT-003
 - **Énoncé** : Dans l'état `Pending`, un échantillon inférieur ou égal au seuil
   de montée doit ramener l'état à `Inactive` et la progression à 0.
-- **Vérification** : `Montee.annulation_confirmation`
+- **Vérification** : `Transitions.pending_vers_inactive_annulation`
 
 ### LLR-ALERT-030
 
@@ -95,7 +95,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Active`, un échantillon strictement inférieur au
   seuil de retombée doit faire passer l'état à `Clearing` avec une progression
   de 1, ou directement à `Inactive` si `clear_cycles == 1`.
-- **Vérification** : `Retombee.*`
+- **Vérification** : `Transitions.active_vers_clearing`, `Limites.seuil_de_retombee_exact_ne_retombe_pas`
 
 ### LLR-ALERT-031
 
@@ -104,7 +104,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Clearing`, un échantillon strictement inférieur au
   seuil de retombée doit incrémenter la progression ; l'état passe à `Inactive`
   lorsque la progression atteint `clear_cycles`.
-- **Vérification** : `Retombee.*`
+- **Vérification** : `Transitions.clearing_vers_inactive`
 
 ### LLR-ALERT-032
 
@@ -112,7 +112,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Parent** : HLR-ALERT-003
 - **Énoncé** : Dans l'état `Clearing`, un échantillon supérieur ou égal au
   seuil de retombée doit ramener l'état à `Active` et la progression à 0.
-- **Vérification** : `Retombee.annulation_retombee`
+- **Vérification** : `Transitions.clearing_vers_active_annulation`
 
 ### LLR-ALERT-033
 
@@ -136,7 +136,7 @@ configurée — l'invariant est établi par construction (module 04).
   lors d'un retour depuis `Clearing`.
 - **Justification** : Une oscillation autour du seuil de retombée ne doit pas
   gonfler artificiellement le compteur de maintenance.
-- **Vérification** : `Comptage.*`
+- **Vérification** : `Sequences.oscillation_dans_la_zone_morte`, `Sequences.cycle_complet_puis_reactivation`
 
 ### LLR-ALERT-050
 
