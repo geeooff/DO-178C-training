@@ -143,9 +143,8 @@ avio::f32 FuelTank::fill_ratio_percent() const noexcept {
         // tous les calculs en aval.
         return 0.0F;
     }
-    const avio::f32 ratio =
-        (static_cast<avio::f32>(quantity_.grams()) * 100.0F) /
-        static_cast<avio::f32>(capacity_.grams());
+    const avio::f32 ratio = (static_cast<avio::f32>(quantity_.grams()) * 100.0F) /
+                            static_cast<avio::f32>(capacity_.grams());
     return ratio;
 }
 

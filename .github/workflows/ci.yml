@@ -1,0 +1,210 @@
+# =============================================================================
+#  Intégration continue — Linux (GCC et Clang)
+#
+#  Ce workflow n'est pas un gadget : il matérialise plusieurs objectifs
+#  DO-178C que la formation enseigne.
+#
+#    * §7 (gestion de configuration) — le build est REPRODUCTIBLE : une machine
+#      neuve, une commande, le même résultat. Si le build ne passe que sur le
+#      poste de son auteur, il n'est pas sous contrôle.
+#    * A-5.4 (conformité au standard de codage) — clang-tidy s'exécute à
+#      chaque poussée, sans dépendre de la discipline de qui que ce soit.
+#    * A-7.x (couverture) — la couverture est mesurée et publiée.
+#    * A-3.6 / A-4.6 / A-5.5 (traçabilité) — trace_check.py échoue le build si
+#      la matrice se dégrade.
+#
+#  DEUX COMPILATEURS, DÉLIBÉRÉMENT. GCC et Clang ne détectent pas les mêmes
+#  défauts. Les faire tourner tous les deux, c'est deux analyses statiques pour
+#  le prix d'une — et c'est la façon la moins chère d'augmenter la confiance.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Une seule exécution à la fois par branche : les suivantes annulent les
+# précédentes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  #  1. Compilation stricte et campagne de test, sur les deux chaînes
+  # ---------------------------------------------------------------------------
+  build:
+    name: ${{ matrix.compilateur }} — strict
+    runs-on: ubuntu-24.04
+    strategy:
+      # On veut voir TOUS les échecs, pas seulement le premier : un défaut GCC
+      # et un défaut Clang doivent apparaître dans la même exécution.
+      fail-fast: false
+      matrix:
+        include:
+          - compilateur: gcc
+            preset: gcc-strict
+            paquets: g++
+          - compilateur: clang
+            preset: clang-strict
+            paquets: clang clang-tidy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer la chaîne d'outils
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            cmake ninja-build clang-tidy ${{ matrix.paquets }}
+
+      - name: Identifier l'environnement (SECI)
+        run: |
+          echo "=== Environnement de production ==="
+          . /etc/os-release && echo "Système    : $PRETTY_NAME $(uname -m)"
+          echo "cmake      : $(cmake --version | head -1)"
+          echo "ninja      : $(ninja --version)"
+          echo "clang-tidy : $(clang-tidy --version | sed -n 2p | sed 's/^ *//')"
+          if [ "${{ matrix.compilateur }}" = "gcc" ]; then
+            g++ --version | head -1
+          else
+            clang++ --version | head -1
+          fi
+
+      - name: Configurer
+        run: cmake --preset ${{ matrix.preset }}
+
+      # -k 0 : ne pas s'arrêter à la première erreur. Sur un build en
+      # warnings = erreurs, cela donne la liste complète en une seule
+      # exécution plutôt qu'un aller-retour par fichier.
+      - name: Compiler (warnings = erreurs + clang-tidy)
+        run: cmake --build --preset ${{ matrix.preset }} -- -k 0
+
+      - name: Tester
+        run: ctest --preset ${{ matrix.preset }}
+
+      - name: Archiver les résultats de test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultats-test-${{ matrix.compilateur }}
+          path: build/${{ matrix.preset }}/Testing/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  #  2. Comportements indéfinis et fautes mémoire
+  # ---------------------------------------------------------------------------
+  #  Le module 01 explique que le débordement d'un entier signé est un
+  #  comportement INDÉFINI, et le module 08 que les débordements de tampon sont
+  #  silencieux. UBSan et ASan transforment ces explications en échecs de test.
+  #  C'est le seul moyen de vérifier qu'on n'en a pas introduit un par mégarde.
+  # ---------------------------------------------------------------------------
+  sanitizers:
+    name: Sanitizers (ASan + UBSan)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer la chaîne d'outils
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y cmake ninja-build clang
+
+      - name: Configurer et compiler
+        run: |
+          cmake --preset asan -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+          cmake --build --preset asan -- -k 0
+
+      # halt_on_error=1 : le premier comportement indéfini fait échouer le
+      # test. Un UB "qui ne casse rien pour l'instant" reste un UB.
+      - name: Tester sous sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --preset asan
+
+  # ---------------------------------------------------------------------------
+  #  3. Traçabilité — objectifs A-3.6, A-4.6, A-5.5
+  # ---------------------------------------------------------------------------
+  tracabilite:
+    name: Traçabilité et index de configuration
+    runs-on: ubuntu-24.04
+    steps:
+      # fetch-depth: 0 — l'historique complet est nécessaire à `git describe`,
+      # dont config_index.py se sert pour identifier la baseline.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # --strict : le build échoue si la matrice de traçabilité se dégrade.
+      # C'est ce qui empêche une exigence non implémentée ou un test orphelin
+      # de passer inaperçu.
+      - name: Vérifier la traçabilité
+        run: python3 tools/trace_check.py --strict --csv reports/traceabilite.csv
+
+      - name: Produire le SCI et le SECI
+        run: python3 tools/config_index.py
+
+      - name: Archiver les données de vie du logiciel
+        uses: actions/upload-artifact@v4
+        with:
+          name: donnees-de-vie
+          path: reports/
+          retention-days: 90
+
+  # ---------------------------------------------------------------------------
+  #  4. Couverture structurelle — objectifs A-7.6 et A-7.7
+  # ---------------------------------------------------------------------------
+  couverture:
+    name: Couverture (instructions et branches)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer la chaîne d'outils
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y cmake ninja-build g++ gcovr
+
+      - name: Mesurer la couverture
+        run: ./scripts/coverage.sh
+
+      - name: Archiver le rapport
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-couverture
+          path: reports/coverage/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  #  5. Formatage — règle R-15 du standard de codage (module 13)
+  # ---------------------------------------------------------------------------
+  #  Vérification seule, jamais de correction automatique : un outil qui
+  #  modifie le code sous contrôle de configuration sans revue serait un outil
+  #  de développement au sens DO-330 (critère 1).
+  # ---------------------------------------------------------------------------
+  format:
+    name: Formatage (clang-format)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y clang-format
+
+      - name: Vérifier le formatage
+        run: |
+          fichiers=$(git ls-files '*.cpp' '*.hpp' \
+                     | grep -v 'nonconforming\.cpp')
+          echo "$fichiers" | xargs clang-format --dry-run --Werror

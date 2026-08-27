@@ -22,9 +22,9 @@
 #ifndef MOD13_BCD_HPP
 #define MOD13_BCD_HPP
 
-#include "mod07/result.hpp"
-
 #include <avio/types.hpp>
+
+#include "mod07/result.hpp"
 
 namespace mod13 {
 

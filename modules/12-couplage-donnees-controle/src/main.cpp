@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 12 -- demonstration : couplage donnees et couplage controle.
 // =============================================================================
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod12/chain.hpp"
 #include "mod12/coupling_trace.hpp"
-
-#include <avio/types.hpp>
-
-#include <cstdio>
 
 using avio::i32;
 using avio::u32;
@@ -107,8 +106,8 @@ void demonstration_instrumentee() {
 
         std::printf("    %5zu | %5d | %-15s | %7.1f | %-6s | I%s\n", cycle + 1U, profil[cycle],
                     mod07::status_name(resultat.status),
-                    static_cast<double>(resultat.filtered_value),
-                    resultat.alert ? "OUI" : "non", interfaces);
+                    static_cast<double>(resultat.filtered_value), resultat.alert ? "OUI" : "non",
+                    interfaces);
     }
 
     std::printf("\n  Bilan des appels par interface :\n");
@@ -119,9 +118,9 @@ void demonstration_instrumentee() {
                     (CouplingTrace::call_count(interface) == 0U) ? "   <-- NON EXERCEE" : "");
     }
 
-    std::printf("\n  Toutes les interfaces exercees : %s\n",
-                CouplingTrace::all_interfaces_exercised() ? "OUI (objectif A-7.8 demontre)"
-                                                          : "NON");
+    std::printf(
+        "\n  Toutes les interfaces exercees : %s\n",
+        CouplingTrace::all_interfaces_exercised() ? "OUI (objectif A-7.8 demontre)" : "NON");
 
     std::printf("\n  Donnees echangees (couplage de donnees) :\n");
     const usize a_afficher = (CouplingTrace::data_count() < 6U) ? CouplingTrace::data_count() : 6U;

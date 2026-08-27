@@ -1,4 +1,9 @@
 * text=auto eol=lf
+# Les scripts POSIX DOIVENT rester en LF, meme clones depuis Windows : un
+# script en CRLF echoue avec "bad interpreter: ^M".
+*.sh   text eol=lf
+
+# Les scripts Windows, eux, restent en CRLF.
 *.ps1  text eol=crlf
 *.bat  text eol=crlf
 *.cmd  text eol=crlf

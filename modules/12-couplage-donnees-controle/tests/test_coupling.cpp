@@ -10,14 +10,12 @@
 //  instrumentation, que toutes les interfaces declarees dans le SDD ont ete
 //  exercees, et que les donnees echangees sont celles attendues.
 // =============================================================================
+#include <avio/types.hpp>
+#include <limits>
 #include <microtest/microtest.hpp>
 
 #include "mod12/chain.hpp"
 #include "mod12/coupling_trace.hpp"
-
-#include <avio/types.hpp>
-
-#include <limits>
 
 using avio::f32;
 using avio::i32;

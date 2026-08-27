@@ -96,10 +96,10 @@ private:
 
 /// Resultat de l'execution simulee d'une trame majeure.
 struct FrameResult {
-    avio::usize overrun_count = 0U;      ///< nombre de fenetres en depassement
-    avio::u32 worst_overrun_us = 0U;     ///< pire depassement observe
+    avio::usize overrun_count = 0U;   ///< nombre de fenetres en depassement
+    avio::u32 worst_overrun_us = 0U;  ///< pire depassement observe
     PartitionId worst_partition = PartitionId::Count;
-    bool deadline_met = true;            ///< aucune fenetre n'a deborde
+    bool deadline_met = true;  ///< aucune fenetre n'a deborde
 };
 
 /// Simule l'execution d'une trame majeure.

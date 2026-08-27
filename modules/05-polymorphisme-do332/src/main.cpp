@@ -1,11 +1,10 @@
 // =============================================================================
 //  Module 05 -- demonstration : polymorphisme et DO-332.
 // =============================================================================
-#include "mod05/sensors.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod05/sensors.hpp"
 
 using avio::f32;
 using avio::i32;
@@ -22,16 +21,13 @@ void afficher_rapport(const mod05::Sensor& capteur) {
     const mod05::ContractReport rapport = mod05::verify_contract(capteur, 200U);
     const char* const oui_non[2] = {"NON", "oui"};
 
-    std::printf("  %-16s C1:%-3s C2:%-3s C3:%-3s C4:%-3s C5:%-3s C6:%-3s C7:%-3s  -> %s\n",
-                capteur.name(), oui_non[rapport.c1_name_valid ? 1 : 0],
-                oui_non[rapport.c2_raw_domain_valid ? 1 : 0],
-                oui_non[rapport.c3_value_domain_valid ? 1 : 0],
-                oui_non[rapport.c4_result_in_domain ? 1 : 0],
-                oui_non[rapport.c5_monotonic ? 1 : 0],
-                oui_non[rapport.c6_endpoints_match ? 1 : 0],
-                oui_non[rapport.c7_clamped_outside ? 1 : 0],
-                rapport.all_satisfied() ? "CONFORME"
-                                        : "NON CONFORME");
+    std::printf(
+        "  %-16s C1:%-3s C2:%-3s C3:%-3s C4:%-3s C5:%-3s C6:%-3s C7:%-3s  -> %s\n", capteur.name(),
+        oui_non[rapport.c1_name_valid ? 1 : 0], oui_non[rapport.c2_raw_domain_valid ? 1 : 0],
+        oui_non[rapport.c3_value_domain_valid ? 1 : 0],
+        oui_non[rapport.c4_result_in_domain ? 1 : 0], oui_non[rapport.c5_monotonic ? 1 : 0],
+        oui_non[rapport.c6_endpoints_match ? 1 : 0], oui_non[rapport.c7_clamped_outside ? 1 : 0],
+        rapport.all_satisfied() ? "CONFORME" : "NON CONFORME");
     if (!rapport.all_satisfied()) {
         std::printf("                   premiere clause violee : %s\n", rapport.first_violation());
     }

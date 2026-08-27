@@ -1,9 +1,8 @@
+#include <avio/span.hpp>
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod14/identity.hpp"
-
-#include <avio/span.hpp>
-#include <avio/types.hpp>
 
 using avio::u32;
 using avio::u8;
@@ -14,8 +13,7 @@ using mod14::SoftwareIdentity;
 namespace {
 
 /// "123456789" : le vecteur de test standard de tous les CRC.
-constexpr u8 kVecteurStandard[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U,
-                                    0x36U, 0x37U, 0x38U, 0x39U};
+constexpr u8 kVecteurStandard[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U};
 
 }  // namespace
 

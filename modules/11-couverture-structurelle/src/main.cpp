@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 11 -- demonstration : couverture structurelle et MC/DC.
 // =============================================================================
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod11/gpws.hpp"
 #include "mod11/mcdc.hpp"
-
-#include <avio/types.hpp>
-
-#include <cstdio>
 
 using avio::u32;
 using avio::usize;

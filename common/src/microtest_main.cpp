@@ -12,11 +12,10 @@
 //     --csv=<fichier>   exporte la tracabilite au format CSV (preuve archivable)
 //     --verbose         affiche chaque cas meme en cas de succes
 // =============================================================================
-#include <microtest/microtest.hpp>
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <microtest/microtest.hpp>
 
 namespace {
 
@@ -54,8 +53,8 @@ void for_each_requirement(const char* list, Callback callback) {
         }
         if (length > 0U) {
             char identifier[96];
-            const std::size_t copied = (length < sizeof(identifier) - 1U) ? length
-                                                                          : sizeof(identifier) - 1U;
+            const std::size_t copied =
+                (length < sizeof(identifier) - 1U) ? length : sizeof(identifier) - 1U;
             std::memcpy(identifier, start, copied);
             identifier[copied] = '\0';
             callback(static_cast<const char*>(identifier));

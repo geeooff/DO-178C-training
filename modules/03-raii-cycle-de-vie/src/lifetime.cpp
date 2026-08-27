@@ -67,8 +67,8 @@ avio::u32 LifetimeLog::count_of(Event event) noexcept {
 }
 
 bool LifetimeLog::is_balanced() noexcept {
-    const avio::u32 creations = count_of(Event::Construct) + count_of(Event::Copy) +
-                                count_of(Event::Move);
+    const avio::u32 creations =
+        count_of(Event::Construct) + count_of(Event::Copy) + count_of(Event::Move);
     return creations == count_of(Event::Destroy);
 }
 
@@ -290,7 +290,7 @@ avio::i32 traitement_multi_sorties(avio::i32 value) noexcept {
     if (value == 0) {
         return 1;  // sortie 2
     }
-    return 2;      // sortie 3
+    return 2;  // sortie 3
 }
 
 void demontrer_ordre_destruction() noexcept {

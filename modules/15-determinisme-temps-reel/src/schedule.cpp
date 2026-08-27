@@ -44,8 +44,8 @@ bool MajorFrame::add_window(PartitionId partition, avio::u32 offset_us,
     // niveaux DAL disparait.
     for (avio::usize index = 0U; index < count_; ++index) {
         const avio::u64 debut_existant = static_cast<avio::u64>(windows_[index].offset_us);
-        const avio::u64 fin_existante = debut_existant +
-                                        static_cast<avio::u64>(windows_[index].duration_us);
+        const avio::u64 fin_existante =
+            debut_existant + static_cast<avio::u64>(windows_[index].duration_us);
         const avio::u64 debut = static_cast<avio::u64>(offset_us);
         if ((debut < fin_existante) && (debut_existant < fin)) {
             return false;

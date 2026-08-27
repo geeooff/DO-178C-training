@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 04 -- demonstration : classes, invariants, types forts.
 // =============================================================================
-#include "mod04/units.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
 #include <limits>
+
+#include "mod04/units.hpp"
 
 using avio::f32;
 using avio::i32;
@@ -69,10 +68,7 @@ void ce_qui_ne_compile_pas() {
 void validation_aux_frontieres() {
     titre("Validation aux frontieres : NaN et infini s'arretent ici");
 
-    const f32 entrees[5] = {35000.0F,
-                            -5000.0F,
-                            80000.0F,
-                            std::numeric_limits<f32>::quiet_NaN(),
+    const f32 entrees[5] = {35000.0F, -5000.0F, 80000.0F, std::numeric_limits<f32>::quiet_NaN(),
                             std::numeric_limits<f32>::infinity()};
     const char* libelles[5] = {"35000 ft (nominal)", "-5000 ft (sous le domaine)",
                                "80000 ft (au-dessus)", "NaN", "+infini"};
@@ -113,8 +109,7 @@ void invariant_du_reservoir() {
                     reservoir.quantity().grams(), reservoir.invariant_holds() ? "OK" : "VIOLE");
     }
 
-    std::printf("\n  Remplissage : %.1f %%\n",
-                static_cast<double>(reservoir.fill_ratio_percent()));
+    std::printf("\n  Remplissage : %.1f %%\n", static_cast<double>(reservoir.fill_ratio_percent()));
     std::printf("\n  L'appelant ne peut PAS violer l'invariant, meme en demandant\n");
     std::printf("  n'importe quoi. C'est la difference entre une classe et une\n");
     std::printf("  structure de donnees accompagnee d'un mode d'emploi.\n");
@@ -125,8 +120,8 @@ void egalite_flottante() {
     titre("Pourquoi Altitude n'a PAS d'operator==");
 
     const double a = 0.1 + 0.2;
-    std::printf("  0.1 + 0.2 == 0.3 ?  ->  %s   (0.1+0.2 = %.17g)\n",
-                (a == 0.3) ? "true" : "false", a);
+    std::printf("  0.1 + 0.2 == 0.3 ?  ->  %s   (0.1+0.2 = %.17g)\n", (a == 0.3) ? "true" : "false",
+                a);
 
     Altitude x;
     Altitude y;

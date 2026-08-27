@@ -18,7 +18,6 @@
 #define MOD01_SAFE_ARITH_HPP
 
 #include <avio/types.hpp>
-
 #include <limits>
 #include <type_traits>
 

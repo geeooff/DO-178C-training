@@ -51,9 +51,9 @@
 #ifndef MOD12_CHAIN_HPP
 #define MOD12_CHAIN_HPP
 
-#include "mod07/result.hpp"
-
 #include <avio/types.hpp>
+
+#include "mod07/result.hpp"
 
 namespace mod12 {
 

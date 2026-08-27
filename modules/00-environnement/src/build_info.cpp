@@ -19,22 +19,35 @@ namespace {
 // `namespace { ... }` = liaison INTERNE : ce symbole n'existe que dans cette
 // unite de traduction. Equivalent conceptuel de `private` au niveau fichier,
 // et remplacant moderne du `static` global herite du C.
-constexpr avio::u32 kUnknownVersion = 0U;
+//
+// [[maybe_unused]] (C++17) : cette constante n'est utilisee que dans la
+// branche "compilateur inconnu" ci-dessous. Sans cet attribut, GCC et Clang
+// signalent une variable inutilisee (-Wunused-const-variable) des lors qu'ils
+// se reconnaissent eux-memes. C'est le remplacant portable et EXPRESSIF des
+// vieux `(void)x;` et `#pragma unused` : l'intention est dans le code, pas
+// dans un commentaire.
+[[maybe_unused]] constexpr avio::u32 kUnknownVersion = 0U;
 
 }  // namespace
 
 BuildInfo current_build() noexcept {
     BuildInfo info{};
 
-#if defined(_MSC_VER)
+// ATTENTION A L'ORDRE. Clang en mode compatible Visual Studio (clang-cl)
+// definit _MSC_VER *et* __clang__ ; Clang definit aussi __GNUC__ pour se faire
+// passer pour GCC. On teste donc du plus specifique au plus general :
+//     __clang__  ->  _MSC_VER  ->  __GNUC__
+// Se tromper d'ordre, c'est identifier le mauvais compilateur dans le SECI --
+// donc documenter un environnement de production qui n'est pas le bon.
+#if defined(__clang__)
+    info.compiler = "Clang";
+    info.compiler_major = static_cast<avio::u32>(__clang_major__);
+    info.compiler_minor = static_cast<avio::u32>(__clang_minor__);
+#elif defined(_MSC_VER)
     info.compiler = "MSVC";
     // _MSC_VER : 1951 -> Visual Studio 2026 (toolset 14.51)
     info.compiler_major = static_cast<avio::u32>(_MSC_VER / 100);
     info.compiler_minor = static_cast<avio::u32>(_MSC_VER % 100);
-#elif defined(__clang__)
-    info.compiler = "Clang";
-    info.compiler_major = static_cast<avio::u32>(__clang_major__);
-    info.compiler_minor = static_cast<avio::u32>(__clang_minor__);
 #elif defined(__GNUC__)
     info.compiler = "GCC";
     info.compiler_major = static_cast<avio::u32>(__GNUC__);

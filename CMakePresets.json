@@ -1,33 +1,36 @@
 {
   "version": 6,
   "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+
   "configurePresets": [
     {
       "name": "base",
       "hidden": true,
+      "description": "Socle commun a toutes les plateformes. Ninja est le seul generateur retenu : c'est ce qui garantit un comportement IDENTIQUE sous Windows, Linux et macOS.",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
+
     {
       "name": "debug",
-      "displayName": "Debug (Ninja + MSVC)",
-      "description": "Build de travail quotidien pour la formation.",
+      "displayName": "Debug",
+      "description": "Build de travail quotidien. Avertissements affiches, mais non bloquants.",
       "inherits": "base",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "release",
-      "displayName": "Release (Ninja + MSVC)",
+      "displayName": "Release",
       "inherits": "base",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "strict",
       "displayName": "Strict (warnings = erreurs + clang-tidy)",
-      "description": "Configuration proche d'une chaine de production DO-178C.",
+      "description": "Configuration proche d'une chaine de production DO-178C. C'est celle que la CI execute.",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -35,44 +38,149 @@
         "TRAINING_ENABLE_CLANG_TIDY": "ON"
       }
     },
+
+    {
+      "name": "asan",
+      "displayName": "Sanitizers (Address + UndefinedBehavior)",
+      "description": "Detecte a l'EXECUTION les comportements indefinis du module 01 et les fautes memoire des modules 02 et 08. Sur MSVC, AddressSanitizer seulement.",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "TRAINING_ENABLE_SANITIZERS": "ON"
+      }
+    },
+
+    {
+      "name": "gcc-strict",
+      "displayName": "Strict avec GCC",
+      "description": "Force GCC. Utile pour confronter deux analyses statiques sur le meme code.",
+      "inherits": "strict",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "clang-strict",
+      "displayName": "Strict avec Clang",
+      "inherits": "strict",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+
+    {
+      "name": "coverage",
+      "displayName": "Couverture (GCC/Clang uniquement)",
+      "description": "Instrumente le binaire pour gcov / llvm-cov. Voir scripts/coverage.sh.",
+      "inherits": "base",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TRAINING_ENABLE_COVERAGE": "ON"
+      }
+    },
+
     {
       "name": "vs2026",
       "displayName": "Visual Studio 2026 (solution .sln)",
       "description": "Genere une solution VS classique dans build/vs2026.",
       "generator": "Visual Studio 18 2026",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/vs2026"
+      "binaryDir": "${sourceDir}/build/vs2026",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
+
   "buildPresets": [
-    { "name": "debug",   "configurePreset": "debug" },
-    { "name": "release", "configurePreset": "release" },
-    { "name": "strict",  "configurePreset": "strict" },
-    { "name": "vs2026",  "configurePreset": "vs2026", "configuration": "Debug" }
-  ],
-  "testPresets": [
+    { "name": "debug",        "configurePreset": "debug" },
+    { "name": "release",      "configurePreset": "release" },
+    { "name": "strict",       "configurePreset": "strict" },
+    { "name": "asan",         "configurePreset": "asan" },
     {
-      "name": "debug",
-      "configurePreset": "debug",
-      "output": { "outputOnFailure": true, "verbosity": "default" },
-      "execution": { "stopOnFailure": false }
+      "name": "gcc-strict",
+      "configurePreset": "gcc-strict",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     },
     {
-      "name": "strict",
-      "configurePreset": "strict",
-      "output": { "outputOnFailure": true }
+      "name": "clang-strict",
+      "configurePreset": "clang-strict",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     },
     {
       "name": "vs2026",
       "configurePreset": "vs2026",
       "configuration": "Debug",
-      "output": { "outputOnFailure": true }
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     }
   ],
+
+  "testPresets": [
+    {
+      "name": "common",
+      "hidden": true,
+      "output": { "outputOnFailure": true, "verbosity": "default" },
+      "execution": { "stopOnFailure": false }
+    },
+    { "name": "debug",   "configurePreset": "debug",   "inherits": "common" },
+    { "name": "release", "configurePreset": "release", "inherits": "common" },
+    { "name": "strict",  "configurePreset": "strict",  "inherits": "common" },
+    { "name": "asan",    "configurePreset": "asan",    "inherits": "common" },
+    {
+      "name": "gcc-strict",
+      "configurePreset": "gcc-strict",
+      "inherits": "common",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "clang-strict",
+      "configurePreset": "clang-strict",
+      "inherits": "common",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "inherits": "common",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "vs2026",
+      "configurePreset": "vs2026",
+      "configuration": "Debug",
+      "inherits": "common",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    }
+  ],
+
   "workflowPresets": [
     {
       "name": "verification",
-      "displayName": "Chaine complete : configure + build + test",
+      "displayName": "Chaine complete : configure + build + test (strict)",
       "steps": [
         { "type": "configure", "name": "strict" },
         { "type": "build",     "name": "strict" },

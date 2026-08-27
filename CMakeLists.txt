@@ -29,6 +29,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)   # pas d'extensions proprietaires : portabilite
 option(TRAINING_WARNINGS_AS_ERRORS "Traiter les avertissements comme des erreurs" OFF)
 option(TRAINING_BUILD_EXERCISES    "Compiler les squelettes d'exercices"          OFF)
 option(TRAINING_ENABLE_CLANG_TIDY  "Activer l'analyse statique clang-tidy"        OFF)
+option(TRAINING_ENABLE_SANITIZERS  "Activer AddressSanitizer et UBSanitizer"      OFF)
+option(TRAINING_ENABLE_COVERAGE    "Instrumenter pour gcov / llvm-cov"            OFF)
 
 # Sorties regroupees : plus simple a retrouver, et un seul repertoire a archiver
 # dans la baseline de configuration.
@@ -52,11 +54,18 @@ add_subdirectory(modules)
 # Regroupement dans l'explorateur de solutions de Visual Studio.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Ce resume est le point de depart du SECI (module 00 et module 14) : il
+# affiche, a chaque configuration, l'environnement exact de production.
 message(STATUS "")
 message(STATUS "=== DO-178C-training ===")
+message(STATUS "  Systeme hote       : ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 message(STATUS "  Compilateur        : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  Chemin compilateur : ${CMAKE_CXX_COMPILER}")
 message(STATUS "  Standard C++       : ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Type de build      : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Warnings = erreurs : ${TRAINING_WARNINGS_AS_ERRORS}")
 message(STATUS "  clang-tidy         : ${TRAINING_ENABLE_CLANG_TIDY}")
+message(STATUS "  Sanitizers         : ${TRAINING_ENABLE_SANITIZERS}")
+message(STATUS "  Couverture         : ${TRAINING_ENABLE_COVERAGE}")
 message(STATUS "  Exercices compiles : ${TRAINING_BUILD_EXERCISES}")
 message(STATUS "")

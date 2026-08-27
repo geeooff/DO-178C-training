@@ -1,17 +1,16 @@
 // =============================================================================
 //  Module 01 -- demonstration : les pieges des types et de la memoire.
 // =============================================================================
-#include "mod01/safe_arith.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
 #include <limits>
 
+#include "mod01/safe_arith.hpp"
+
 using avio::i16;
 using avio::i32;
-using avio::u8;
 using avio::u32;
+using avio::u8;
 
 namespace {
 
@@ -45,14 +44,35 @@ void comparaison_signee_non_signee() {
     const int moins_un = -1;
     const unsigned int un = 1U;
 
-#if defined(_MSC_VER)
+    // SUPPRESSION PORTABLE D UN AVERTISSEMENT.
+    //
+    // Les trois grands compilateurs signalent cette comparaison, et ils ont
+    // raison. Elle est VOULUE ici : c'est l'objet meme de la demonstration.
+    // Il faut donc la taire sur les trois, et dire pourquoi.
+    //
+    // Notez que chaque compilateur a sa propre syntaxe et qu'il n'existe
+    // aucun mecanisme standard. C'est exactement le genre de detail qui rend
+    // une base de code non portable si l'on ne s'en occupe pas des le premier
+    // jour -- et c'est pourquoi ce depot se compile sur les trois.
+// ORDRE DES TESTS : on interroge __GNUC__ et __clang__ AVANT _MSC_VER.
+// Raison : clang-cl (Clang en mode compatible Visual Studio) definit LES DEUX.
+// Tester _MSC_VER en premier lui ferait prendre la branche MSVC, dont il ne
+// connait pas les numeros d'avertissement -- et la suppression serait sans
+// effet. Piege classique du code portable.
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#elif defined(_MSC_VER)
 #pragma warning(push)
-#pragma warning(disable : 4018 4389)  // comparaison signe/non signe : VOULUE ici
+#pragma warning(disable : 4018 4389)
 #endif
     // Regle des conversions arithmetiques usuelles : `moins_un` est converti
     // en unsigned, donc vaut 4294967295. La comparaison est donc FAUSSE.
     const bool surprise = (moins_un < un);
-#if defined(_MSC_VER)
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
 #pragma warning(pop)
 #endif
 
@@ -78,7 +98,8 @@ void debordement() {
     std::printf("  et de SUPPRIMER votre test `if (x + 1 < x)`. C'est arrive en vrai.\n");
 
     std::printf("\n  Avec les briques du module :\n");
-    std::printf("    saturating_add(32767, 1)   = %d\n", mod01::saturating_add(mod01::kI16Max, i16{1}));
+    std::printf("    saturating_add(32767, 1)   = %d\n",
+                mod01::saturating_add(mod01::kI16Max, i16{1}));
     i32 resultat = 0;
     const bool ok = mod01::checked_add(std::numeric_limits<i32>::max(), 1, resultat);
     std::printf("    checked_add(INT_MAX, 1)    = %s (resultat neutralise a %d)\n",
@@ -92,9 +113,9 @@ void initialisation() {
     // ATTENTION : `int x;` a l'interieur d'une fonction laisse x AVEC UNE
     // VALEUR INDETERMINEE. Le lire est un comportement indefini. On ne le fait
     // donc pas ici -- on montre seulement les formes correctes.
-    int zero_initialise{};       // vaut 0
+    int zero_initialise{};  // vaut 0
     int explicitement_initialise = 42;
-    u32 tableau[4] = {};         // les 4 elements valent 0
+    u32 tableau[4] = {};  // les 4 elements valent 0
 
     std::printf("  int x{};        -> %d   (initialisation de valeur)\n", zero_initialise);
     std::printf("  int y = 42;     -> %d\n", explicitement_initialise);

@@ -1,13 +1,11 @@
+#include <avio/types.hpp>
+#include <limits>
 #include <microtest/microtest.hpp>
 
 #include "mod15/fixed_point.hpp"
 #include "mod15/float_facts.hpp"
 #include "mod15/hw_register.hpp"
 #include "mod15/schedule.hpp"
-
-#include <avio/types.hpp>
-
-#include <limits>
 
 using avio::f32;
 using avio::i32;
@@ -267,10 +265,10 @@ TEST_REQ(Ordonnancement, chevauchement_refuse, "LLR-SCH-010") {
     MajorFrame frame(10000U);
     REQUIRE(frame.add_window(PartitionId::FlightControl, 0U, 3000U));
 
-    CHECK_FALSE(frame.add_window(PartitionId::Display, 2999U, 100U));  // debut dedans
-    CHECK_FALSE(frame.add_window(PartitionId::Display, 0U, 100U));     // meme debut
-    CHECK_FALSE(frame.add_window(PartitionId::Display, 1000U, 500U));  // entierement dedans
-    CHECK_FALSE(frame.add_window(PartitionId::Display, 2000U, 2000U)); // a cheval sur la fin
+    CHECK_FALSE(frame.add_window(PartitionId::Display, 2999U, 100U));   // debut dedans
+    CHECK_FALSE(frame.add_window(PartitionId::Display, 0U, 100U));      // meme debut
+    CHECK_FALSE(frame.add_window(PartitionId::Display, 1000U, 500U));   // entierement dedans
+    CHECK_FALSE(frame.add_window(PartitionId::Display, 2000U, 2000U));  // a cheval sur la fin
 
     // Juste apres la fin : accepte.
     CHECK(frame.add_window(PartitionId::Display, 3000U, 1000U));

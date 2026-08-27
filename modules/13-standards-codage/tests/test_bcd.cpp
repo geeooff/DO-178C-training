@@ -6,11 +6,10 @@
 //  VERIFIABILITE, de LISIBILITE et de PREVISIBILITE -- donc du COUT de la
 //  verification, de la maintenance et de la certification.
 // =============================================================================
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod13/bcd.hpp"
-
-#include <avio/types.hpp>
 
 using avio::u16;
 using avio::u32;
@@ -26,10 +25,9 @@ struct CasBcd {
 };
 
 /// Jeu de test commun aux deux implementations.
-constexpr CasBcd kCas[9] = {
-    {0x0000U, 0U, true},      {0x0001U, 1U, true},    {0x1234U, 1234U, true},
-    {0x9999U, 9999U, true},   {0x0090U, 90U, true},   {0x000AU, 0U, false},
-    {0x00A0U, 0U, false},     {0xA000U, 0U, false},   {0x12F4U, 0U, false}};
+constexpr CasBcd kCas[9] = {{0x0000U, 0U, true},    {0x0001U, 1U, true},  {0x1234U, 1234U, true},
+                            {0x9999U, 9999U, true}, {0x0090U, 90U, true}, {0x000AU, 0U, false},
+                            {0x00A0U, 0U, false},   {0xA000U, 0U, false}, {0x12F4U, 0U, false}};
 
 }  // namespace
 

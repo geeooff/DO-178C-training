@@ -30,12 +30,12 @@
 #ifndef MOD16_FQMS_HPP
 #define MOD16_FQMS_HPP
 
+#include <avio/span.hpp>
+#include <avio/types.hpp>
+
 #include "mod04/units.hpp"
 #include "mod07/result.hpp"
 #include "mod10/alert_monitor.hpp"
-
-#include <avio/span.hpp>
-#include <avio/types.hpp>
 
 namespace mod16 {
 

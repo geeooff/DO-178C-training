@@ -1,16 +1,15 @@
 // =============================================================================
 //  Module 07 -- demonstration : erreurs sans exceptions.
 // =============================================================================
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod07/arinc429.hpp"
 #include "mod07/result.hpp"
 
-#include <avio/types.hpp>
-
-#include <cstdio>
-
 using avio::i32;
-using avio::u8;
 using avio::u32;
+using avio::u8;
 using avio::usize;
 using mod07::Result;
 using mod07::SignStatus;
@@ -53,8 +52,7 @@ void motif_result() {
     const Result<i32> echec = Result<i32>::error(Status::Timeout);
 
     std::printf("  Result<i32>{}                 -> is_ok=%-5s statut=%s\n",
-                par_defaut.is_ok() ? "true" : "false",
-                mod07::status_name(par_defaut.status()));
+                par_defaut.is_ok() ? "true" : "false", mod07::status_name(par_defaut.status()));
     std::printf("  Result<i32>::ok(42)           -> is_ok=%-5s valeur=%d\n",
                 succes.is_ok() ? "true" : "false", succes.value());
     std::printf("  Result<i32>::error(Timeout)   -> is_ok=%-5s statut=%s, value_or(-1)=%d\n",
@@ -81,8 +79,7 @@ void decodage_arinc() {
         u32 mot;
     };
 
-    u32 mot_altere =
-        mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
+    u32 mot_altere = mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
     mot_altere ^= 0x00001000U;
 
     const Scenario scenarios[6] = {
@@ -91,8 +88,7 @@ void decodage_arinc() {
         {"altitude -500 ft, normal",
          mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 500U, SignStatus::NormalOperation)},
         {"bit altere en transmission", mot_altere},
-        {"label non traite (42)",
-         mod07::encode(u8{42U}, 0U, 12000U, SignStatus::NormalOperation)},
+        {"label non traite (42)", mod07::encode(u8{42U}, 0U, 12000U, SignStatus::NormalOperation)},
         {"source en panne",
          mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::FailureWarning)},
         {"altitude 200000 ft (aberrante)",
@@ -108,8 +104,8 @@ void decodage_arinc() {
         compteurs.record(resultat.status());
 
         if (resultat.is_ok()) {
-            std::printf("  %-32s 0x%08X   %d ft\n", scenarios[index].libelle,
-                        scenarios[index].mot, resultat.value());
+            std::printf("  %-32s 0x%08X   %d ft\n", scenarios[index].libelle, scenarios[index].mot,
+                        resultat.value());
         } else {
             std::printf("  %-32s 0x%08X   ERREUR : %s\n", scenarios[index].libelle,
                         scenarios[index].mot, mod07::status_name(resultat.status()));

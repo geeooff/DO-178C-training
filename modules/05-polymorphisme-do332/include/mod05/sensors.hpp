@@ -37,7 +37,6 @@
 #define MOD05_SENSORS_HPP
 
 #include <avio/types.hpp>
-
 #include <type_traits>
 
 namespace mod05 {

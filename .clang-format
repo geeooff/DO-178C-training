@@ -3,18 +3,34 @@
 # automatiquement (objectif A-5.1 : conformite du code source aux standards).
 ---
 Language:        Cpp
-BasedOnStyle:    LLVM
+BasedOnStyle:    Google
 Standard:        c++17
-ColumnLimit:     100
-IndentWidth:     4
+
+# Ecarts assumes par rapport au style Google, et leurs raisons :
+ColumnLimit:     100   # 80 est trop court pour des identifiants explicites
+IndentWidth:     4     # lisibilite : 2 espaces rendent l'imbrication floue
 TabWidth:        4
 UseTab:          Never
 AccessModifierOffset: -4
-AllowShortFunctionsOnASingleLine: Empty
+PointerAlignment: Left        # `int* p`, le type porte l'information
+DerivePointerAlignment: false # sinon clang-format devine, et devine mal
+
+# Inline : un accesseur trivial defini DANS la classe reste sur une ligne.
+# Ce depot en contient des dizaines ; les eclater sur trois lignes noierait la
+# structure des classes sous du bruit.
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
 BreakBeforeBraces: Attach
 NamespaceIndentation: None
-PointerAlignment: Left
 SortIncludes:    true
 FixNamespaceComments: true
+SpacesBeforeTrailingComments: 2
+
+# ReflowComments: false -- CRUCIAL ici.
+# Les commentaires de ce depot contiennent des schemas ASCII, des tableaux et
+# des extraits de code alignes a la main. Les laisser reformater les
+# detruirait. C'est le genre de reglage qu'on decouvre apres coup, une fois la
+# documentation abimee.
+ReflowComments:  false

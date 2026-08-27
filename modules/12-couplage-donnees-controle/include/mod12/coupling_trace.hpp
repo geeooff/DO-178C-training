@@ -18,9 +18,9 @@
 #ifndef MOD12_COUPLING_TRACE_HPP
 #define MOD12_COUPLING_TRACE_HPP
 
-#include "mod12/chain.hpp"
-
 #include <avio/types.hpp>
+
+#include "mod12/chain.hpp"
 
 namespace mod12 {
 
@@ -28,10 +28,10 @@ namespace mod12 {
 /// Cette liste est le RESULTAT de l'analyse de couplage de controle : elle est
 /// etablie a la lecture de la conception, puis confrontee aux tests.
 enum class Interface : avio::u8 {
-    SupervisorReadsAcquisition = 0U,   ///< Supervisor -> Acquisition::read()
-    SupervisorPushesFilter = 1U,       ///< Supervisor -> Filter::push()
-    SupervisorReadsAverage = 2U,       ///< Supervisor -> Filter::average()
-    SupervisorResetsFilter = 3U,       ///< Supervisor -> Filter::reset()  (CONDITIONNEL)
+    SupervisorReadsAcquisition = 0U,  ///< Supervisor -> Acquisition::read()
+    SupervisorPushesFilter = 1U,      ///< Supervisor -> Filter::push()
+    SupervisorReadsAverage = 2U,      ///< Supervisor -> Filter::average()
+    SupervisorResetsFilter = 3U,      ///< Supervisor -> Filter::reset()  (CONDITIONNEL)
     Count = 4U
 };
 
@@ -54,8 +54,7 @@ public:
 
     static avio::u32 call_count(Interface interface) noexcept;
     static avio::usize data_count() noexcept;
-    static bool data_at(avio::usize index, Interface& out_interface,
-                        avio::f32& out_value) noexcept;
+    static bool data_at(avio::usize index, Interface& out_interface, avio::f32& out_value) noexcept;
 
     /// Vrai si TOUTES les interfaces declarees ont ete exercees au moins une
     /// fois : c'est la demonstration attendue par l'objectif A-7.8.

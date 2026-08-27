@@ -5,11 +5,10 @@
 //  la preuve minimale que les macros CHECK_*/REQUIRE_* et Span se comportent
 //  comme specifie dans les "Tool Operational Requirements".
 // =============================================================================
-#include <microtest/microtest.hpp>
-
 #include <avio/assert.hpp>
 #include <avio/span.hpp>
 #include <avio/types.hpp>
+#include <microtest/microtest.hpp>
 
 namespace {
 

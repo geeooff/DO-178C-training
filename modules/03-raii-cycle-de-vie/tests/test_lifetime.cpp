@@ -1,14 +1,12 @@
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
+#include <utility>  // std::move
 
 #include "mod03/lifetime.hpp"
 
-#include <avio/types.hpp>
-
-#include <utility>  // std::move
-
 using avio::i32;
-using avio::u8;
 using avio::u32;
+using avio::u8;
 using avio::usize;
 using Event = mod03::LifetimeLog::Event;
 
@@ -72,8 +70,8 @@ TEST_REQ(CycleDeVie, copie_puis_deplacement, "LLR-M03-003") {
     reinitialiser();
     {
         mod03::Traced original(7);
-        const mod03::Traced copie(original);              // constructeur de copie
-        const mod03::Traced deplace(std::move(original)); // constructeur de deplacement
+        const mod03::Traced copie(original);               // constructeur de copie
+        const mod03::Traced deplace(std::move(original));  // constructeur de deplacement
 
         CHECK_EQ(copie.tag(), 7);
         CHECK_EQ(deplace.tag(), 7);
@@ -164,7 +162,7 @@ TEST_REQ(RAII, deplacement_transfere_la_propriete, "LLR-M03-013") {
         const mod03::ChannelHandle destination(std::move(source));
 
         // NOLINTNEXTLINE(bugprone-use-after-move) -- exige par LLR-M03-013
-        CHECK_FALSE(source.is_valid());        // la source a abandonne
+        CHECK_FALSE(source.is_valid());  // la source a abandonne
         CHECK(destination.is_valid());
         CHECK_EQ(destination.channel(), canal);
         CHECK_EQ(mod03::DeviceBank::acquired_count(), u8{1});

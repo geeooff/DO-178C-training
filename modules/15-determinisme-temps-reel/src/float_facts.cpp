@@ -62,8 +62,7 @@ avio::f32 accumulate_kahan(avio::f32 increment, avio::u32 count) noexcept {
 
 /// @satisfies LLR-DET-020
 bool close_absolute(avio::f32 a, avio::f32 b, avio::f32 tolerance) noexcept {
-    if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(tolerance) ||
-        (tolerance < 0.0F)) {
+    if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(tolerance) || (tolerance < 0.0F)) {
         return false;
     }
     return std::fabs(a - b) <= tolerance;

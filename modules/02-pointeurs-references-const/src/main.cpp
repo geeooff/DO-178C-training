@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 02 -- demonstration : pointeurs, references, const.
 // =============================================================================
-#include "mod02/buffers.hpp"
-
 #include <avio/span.hpp>
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod02/buffers.hpp"
 
 using avio::i32;
 using avio::u8;
@@ -94,8 +93,7 @@ void tampons_bornes() {
     u8 source[6] = {1U, 2U, 3U, 4U, 5U, 6U};
     u8 petit[3] = {0U, 0U, 0U};
 
-    const usize copies =
-        mod02::copy_bounded(avio::make_const_span(source), avio::make_span(petit));
+    const usize copies = mod02::copy_bounded(avio::make_const_span(source), avio::make_span(petit));
 
     std::printf("  source de %zu octets -> destination de %zu octets\n", sizeof(source),
                 sizeof(petit));

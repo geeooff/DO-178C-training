@@ -1,13 +1,12 @@
+#include <avio/span.hpp>
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod02/buffers.hpp"
 
-#include <avio/span.hpp>
-#include <avio/types.hpp>
-
 using avio::i32;
-using avio::u8;
 using avio::u16;
+using avio::u8;
 using avio::usize;
 
 // -----------------------------------------------------------------------------
@@ -108,8 +107,8 @@ TEST_REQ(Copy, destination_plus_grande, "LLR-M02-030") {
     u8 source[3] = {1U, 2U, 3U};
     u8 destination[5] = {9U, 9U, 9U, 9U, 9U};
 
-    const usize copies = mod02::copy_bounded(avio::make_const_span(source),
-                                             avio::make_span(destination));
+    const usize copies =
+        mod02::copy_bounded(avio::make_const_span(source), avio::make_span(destination));
     CHECK_EQ(copies, usize{3});
     CHECK_EQ(destination[0], u8{1U});
     CHECK_EQ(destination[2], u8{3U});
@@ -124,8 +123,8 @@ TEST_REQ(Copy, destination_plus_petite_pas_de_debordement, "LLR-M02-031") {
     u8 destination[3] = {0U, 0U, 0U};
     u8 sentinelle = 0xEEU;
 
-    const usize copies = mod02::copy_bounded(avio::make_const_span(source),
-                                             avio::make_span(destination));
+    const usize copies =
+        mod02::copy_bounded(avio::make_const_span(source), avio::make_span(destination));
     CHECK_EQ(copies, usize{3});
     CHECK_EQ(destination[2], u8{3U});
     CHECK_EQ(sentinelle, u8{0xEEU});  // rien n'a deborde

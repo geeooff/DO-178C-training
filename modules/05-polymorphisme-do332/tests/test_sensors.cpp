@@ -1,8 +1,7 @@
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod05/sensors.hpp"
-
-#include <avio/types.hpp>
 
 using avio::f32;
 using avio::i32;
@@ -56,9 +55,9 @@ TEST_REQ(DO332, le_harnais_detecte_une_violation, "LLR-M05-003,OO.6.7") {
     const mod05::ContractReport rapport = mod05::verify_contract(capteur, 200U);
 
     CHECK_FALSE(rapport.all_satisfied());
-    CHECK_FALSE(rapport.c5_monotonic);       // la courbe redescend
-    CHECK_FALSE(rapport.c6_endpoints_match); // to_engineering(raw_max) != value_max
-    CHECK_FALSE(rapport.c7_clamped_outside); // pas d'ecretage hors domaine
+    CHECK_FALSE(rapport.c5_monotonic);        // la courbe redescend
+    CHECK_FALSE(rapport.c6_endpoints_match);  // to_engineering(raw_max) != value_max
+    CHECK_FALSE(rapport.c7_clamped_outside);  // pas d'ecretage hors domaine
     CHECK_EQ(rapport.first_violation(), "C5");
 }
 
@@ -143,8 +142,8 @@ TEST_REQ(Slicing, passage_par_valeur_perd_le_sous_type, "LLR-M05-030") {
     const u16 par_valeur = mod05::length_by_value(message);
     const u16 par_reference = mod05::length_by_reference(message);
 
-    CHECK_EQ(par_valeur, u16{4U});       // DECOUPE : seule la base a survecu
-    CHECK_EQ(par_reference, u16{24U});   // correct
+    CHECK_EQ(par_valeur, u16{4U});      // DECOUPE : seule la base a survecu
+    CHECK_EQ(par_reference, u16{24U});  // correct
     CHECK(par_valeur != par_reference);
 }
 

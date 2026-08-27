@@ -1,11 +1,10 @@
 // =============================================================================
 //  FQMS -- simulation d'un vol complet.
 // =============================================================================
-#include "mod16/fqms.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod16/fqms.hpp"
 
 using avio::i32;
 using avio::u32;
@@ -32,8 +31,9 @@ struct Phase {
 void afficher_entete() {
     std::printf("  %-30s %8s %8s %8s %9s %8s %-7s %-7s %s\n", "phase", "gauche", "central",
                 "droite", "total", "ecart", "BAS", "DESEQ", "statut");
-    std::printf("  ---------------------------------------------------------"
-                "--------------------------------------\n");
+    std::printf(
+        "  ---------------------------------------------------------"
+        "--------------------------------------\n");
 }
 
 void afficher_ligne(const char* libelle, const CycleReport& rapport) {
@@ -43,8 +43,7 @@ void afficher_ligne(const char* libelle, const CycleReport& rapport) {
                 static_cast<double>(rapport.tank_quantity[2].kilograms()),
                 static_cast<double>(rapport.total.kilograms()),
                 static_cast<double>(rapport.wing_imbalance.kilograms()),
-                rapport.low_fuel_alert ? "ALERTE" : "-",
-                rapport.imbalance_alert ? "ALERTE" : "-",
+                rapport.low_fuel_alert ? "ALERTE" : "-", rapport.imbalance_alert ? "ALERTE" : "-",
                 mod07::status_name(rapport.status));
 }
 
@@ -77,20 +76,18 @@ void profil_de_vol() {
         return;
     }
 
-    const Phase phases[8] = {
-        {"1. Avant vol, pleins faits", 4095, 4095, 4095, 5U},
-        {"2. Montee", 4095, 3276, 4095, 5U},
-        {"3. Croisiere, central se vide", 4095, 819, 4095, 5U},
-        {"4. Central vide", 4095, 0, 4095, 5U},
-        {"5. Transfert dissymetrique", 4095, 0, 3276, 8U},
-        {"6. Equilibrage par l'equipage", 3276, 0, 3276, 8U},
-        {"7. Descente", 819, 0, 819, 5U},
-        {"8. Approche, reserve", 0, 717, 0, 8U}};
+    const Phase phases[8] = {{"1. Avant vol, pleins faits", 4095, 4095, 4095, 5U},
+                             {"2. Montee", 4095, 3276, 4095, 5U},
+                             {"3. Croisiere, central se vide", 4095, 819, 4095, 5U},
+                             {"4. Central vide", 4095, 0, 4095, 5U},
+                             {"5. Transfert dissymetrique", 4095, 0, 3276, 8U},
+                             {"6. Equilibrage par l'equipage", 3276, 0, 3276, 8U},
+                             {"7. Descente", 819, 0, 819, 5U},
+                             {"8. Approche, reserve", 0, 717, 0, 8U}};
 
     afficher_entete();
     for (usize index = 0U; index < 8U; ++index) {
-        const i32 mesures[3] = {phases[index].gauche, phases[index].central,
-                                phases[index].droite};
+        const i32 mesures[3] = {phases[index].gauche, phases[index].central, phases[index].droite};
         CycleReport rapport;
         for (usize cycle = 0U; cycle < phases[index].cycles; ++cycle) {
             rapport = systeme.update(mesures);

@@ -111,9 +111,8 @@ struct LinearisationTable {
             const avio::i32 min_dixiemes = -600;
             const avio::i32 max_dixiemes = 800;
             const avio::i32 etendue = max_dixiemes - min_dixiemes;
-            const avio::i32 valeur =
-                min_dixiemes + ((etendue * static_cast<avio::i32>(index)) /
-                                static_cast<avio::i32>(kPointCount - 1U));
+            const avio::i32 valeur = min_dixiemes + ((etendue * static_cast<avio::i32>(index)) /
+                                                     static_cast<avio::i32>(kPointCount - 1U));
             values[index] = static_cast<avio::i16>(valeur);
         }
     }

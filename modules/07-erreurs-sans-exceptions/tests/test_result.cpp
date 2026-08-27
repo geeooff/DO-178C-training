@@ -1,14 +1,13 @@
+#include <avio/assert.hpp>
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod07/arinc429.hpp"
 #include "mod07/result.hpp"
 
-#include <avio/assert.hpp>
-#include <avio/types.hpp>
-
 using avio::i32;
-using avio::u8;
 using avio::u32;
+using avio::u8;
 using mod07::Arinc429Word;
 using mod07::Result;
 using mod07::SignStatus;
@@ -157,8 +156,7 @@ TEST_REQ(Arinc, parite_impaire, "LLR-M07-030") {
 }
 
 TEST_REQ(Arinc, encodage_puis_decodage, "LLR-M07-031") {
-    const u32 brut = mod07::encode(mod07::kLabelAltitude, 1U, 35000U,
-                                   SignStatus::NormalOperation);
+    const u32 brut = mod07::encode(mod07::kLabelAltitude, 1U, 35000U, SignStatus::NormalOperation);
     CHECK(mod07::has_odd_parity(brut));
 
     const Result<Arinc429Word> resultat = mod07::decode(brut);
@@ -175,8 +173,7 @@ TEST_REQ(Arinc, encodage_puis_decodage, "LLR-M07-031") {
 TEST_REQ(Arinc, valeur_negative_complement_a_deux, "LLR-M07-032") {
     // -500 pieds sur 19 bits : 2^19 - 500 = 523788
     const u32 charge = 524288U - 500U;
-    const u32 brut =
-        mod07::encode(mod07::kLabelAltitude, 0U, charge, SignStatus::NormalOperation);
+    const u32 brut = mod07::encode(mod07::kLabelAltitude, 0U, charge, SignStatus::NormalOperation);
 
     const Result<Arinc429Word> resultat = mod07::decode(brut);
     REQUIRE(resultat.is_ok());
@@ -200,8 +197,7 @@ TEST_REQ(Arinc, robustesse_label_non_traite, "LLR-M07-034") {
 }
 
 TEST_REQ(Arinc, ssm_panne_source, "LLR-M07-035") {
-    const u32 brut =
-        mod07::encode(mod07::kLabelAltitude, 0U, 1000U, SignStatus::FailureWarning);
+    const u32 brut = mod07::encode(mod07::kLabelAltitude, 0U, 1000U, SignStatus::FailureWarning);
     const Result<Arinc429Word> resultat = mod07::decode(brut);
     CHECK(resultat.is_error());
     CHECK_EQ(resultat.status(), Status::HardwareFault);
@@ -222,8 +218,7 @@ TEST_REQ(Arinc, ssm_donnee_indisponible, "LLR-M07-036") {
 //  Chainage : extract_altitude_feet
 // -----------------------------------------------------------------------------
 TEST_REQ(Chainage, altitude_nominale, "LLR-M07-040") {
-    const u32 brut =
-        mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
+    const u32 brut = mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
     const Result<i32> resultat = mod07::extract_altitude_feet(brut);
     REQUIRE(resultat.is_ok());
     CHECK_EQ(resultat.value(), 12000);
@@ -237,8 +232,7 @@ TEST_REQ(Chainage, propagation_de_l_erreur_de_parite, "LLR-M07-041") {
 }
 
 TEST_REQ(Chainage, mauvais_label, "LLR-M07-042") {
-    const u32 brut =
-        mod07::encode(mod07::kLabelAirspeed, 0U, 12000U, SignStatus::NormalOperation);
+    const u32 brut = mod07::encode(mod07::kLabelAirspeed, 0U, 12000U, SignStatus::NormalOperation);
     CHECK_EQ(mod07::extract_altitude_feet(brut).status(), Status::InvalidArgument);
 }
 
@@ -246,8 +240,7 @@ TEST_REQ(Chainage, valeur_hors_domaine_de_vol, "LLR-M07-043") {
     // Parite correcte, label correct, SSM correct... mais 200 000 pieds n'est
     // pas une altitude d'avion de ligne. La validation de DOMAINE reste
     // indispensable meme quand l'integrite du message est bonne.
-    const u32 brut =
-        mod07::encode(mod07::kLabelAltitude, 0U, 200000U, SignStatus::NormalOperation);
+    const u32 brut = mod07::encode(mod07::kLabelAltitude, 0U, 200000U, SignStatus::NormalOperation);
     CHECK_EQ(mod07::extract_altitude_feet(brut).status(), Status::OutOfRange);
 }
 
@@ -260,11 +253,11 @@ TEST_REQ(Chainage, bornes_du_domaine_de_vol, "LLR-M07-044") {
         mod07::encode(mod07::kLabelAltitude, 0U, 60001U, SignStatus::NormalOperation);
     CHECK_EQ(mod07::extract_altitude_feet(au_dessus).status(), Status::OutOfRange);
 
-    const u32 plancher = mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 2000U,
-                                       SignStatus::NormalOperation);
+    const u32 plancher =
+        mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 2000U, SignStatus::NormalOperation);
     CHECK(mod07::extract_altitude_feet(plancher).is_ok());
 
-    const u32 en_dessous = mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 2001U,
-                                         SignStatus::NormalOperation);
+    const u32 en_dessous =
+        mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 2001U, SignStatus::NormalOperation);
     CHECK_EQ(mod07::extract_altitude_feet(en_dessous).status(), Status::OutOfRange);
 }

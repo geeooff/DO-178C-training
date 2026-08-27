@@ -19,9 +19,9 @@
 #ifndef MOD09_ALTITUDE_HPP
 #define MOD09_ALTITUDE_HPP
 
-#include "mod07/result.hpp"
-
 #include <avio/types.hpp>
+
+#include "mod07/result.hpp"
 
 namespace mod09 {
 

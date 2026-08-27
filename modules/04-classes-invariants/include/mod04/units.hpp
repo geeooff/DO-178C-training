@@ -70,9 +70,7 @@ public:
         return lhs.grams_ == rhs.grams_;
     }
     friend constexpr bool operator!=(Mass lhs, Mass rhs) noexcept { return !(lhs == rhs); }
-    friend constexpr bool operator<(Mass lhs, Mass rhs) noexcept {
-        return lhs.grams_ < rhs.grams_;
-    }
+    friend constexpr bool operator<(Mass lhs, Mass rhs) noexcept { return lhs.grams_ < rhs.grams_; }
     friend constexpr bool operator>(Mass lhs, Mass rhs) noexcept { return rhs < lhs; }
     friend constexpr bool operator<=(Mass lhs, Mass rhs) noexcept { return !(rhs < lhs); }
     friend constexpr bool operator>=(Mass lhs, Mass rhs) noexcept { return !(lhs < rhs); }
@@ -100,8 +98,8 @@ private:
 // -----------------------------------------------------------------------------
 class Altitude {
 public:
-    static constexpr avio::f32 kMinFeet = -2000.0F;   // Mer Morte : -1412 ft
-    static constexpr avio::f32 kMaxFeet = 60000.0F;   // au-dela du domaine de vol
+    static constexpr avio::f32 kMinFeet = -2000.0F;  // Mer Morte : -1412 ft
+    static constexpr avio::f32 kMaxFeet = 60000.0F;  // au-dela du domaine de vol
     static constexpr avio::f32 kFeetPerMeter = 3.280839895F;
 
     constexpr Altitude() noexcept : feet_(0.0F) {}

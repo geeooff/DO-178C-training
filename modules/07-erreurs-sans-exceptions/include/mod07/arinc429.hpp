@@ -26,27 +26,27 @@
 #ifndef MOD07_ARINC429_HPP
 #define MOD07_ARINC429_HPP
 
-#include "mod07/result.hpp"
-
 #include <avio/types.hpp>
+
+#include "mod07/result.hpp"
 
 namespace mod07 {
 
 /// Sign/Status Matrix pour une donnee au format BNR.
 enum class SignStatus : avio::u8 {
-    FailureWarning = 0U,   ///< l'equipement source est en panne
-    NoComputedData = 1U,   ///< la source ne peut pas calculer la donnee
-    FunctionalTest = 2U,   ///< donnee produite pendant un test, NON utilisable en vol
-    NormalOperation = 3U   ///< donnee valide
+    FailureWarning = 0U,  ///< l'equipement source est en panne
+    NoComputedData = 1U,  ///< la source ne peut pas calculer la donnee
+    FunctionalTest = 2U,  ///< donnee produite pendant un test, NON utilisable en vol
+    NormalOperation = 3U  ///< donnee valide
 };
 
 /// Mot ARINC 429 decode.
 struct Arinc429Word {
-    avio::u8 label = 0U;        ///< 8 bits
-    avio::u8 sdi = 0U;          ///< 2 bits
-    avio::u32 payload = 0U;     ///< 19 bits bruts
+    avio::u8 label = 0U;     ///< 8 bits
+    avio::u8 sdi = 0U;       ///< 2 bits
+    avio::u32 payload = 0U;  ///< 19 bits bruts
     SignStatus ssm = SignStatus::FailureWarning;
-    avio::i32 signed_value = 0; ///< charge utile interpretee en complement a deux (19 bits)
+    avio::i32 signed_value = 0;  ///< charge utile interpretee en complement a deux (19 bits)
 };
 
 /// Labels acceptes par ce recepteur. En ARINC 429, un equipement ne traite

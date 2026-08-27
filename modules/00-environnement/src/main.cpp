@@ -3,11 +3,10 @@
 //
 //  Lancez-le : build/debug/bin/demo_00-environnement.exe
 // =============================================================================
-#include "mod00/build_info.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod00/build_info.hpp"
 
 namespace {
 
@@ -39,8 +38,8 @@ void print_build_info() {
                 mod00::cpp_standard_name(info.cpp_standard),
                 static_cast<long long>(info.cpp_standard));
     std::printf("  Pointeurs     : %u bits\n", info.pointer_bits);
-    std::printf("  Boutisme      : %s\n", info.little_endian ? "petit (little endian)"
-                                                             : "grand (big endian)");
+    std::printf("  Boutisme      : %s\n",
+                info.little_endian ? "petit (little endian)" : "grand (big endian)");
     std::printf("  Date de build : %s %s\n", __DATE__, __TIME__);
     std::printf("\n  __DATE__/__TIME__ rendent le binaire NON reproductible bit a bit.\n");
     std::printf("  En certification on prefere une empreinte du depot (commit Git).\n");

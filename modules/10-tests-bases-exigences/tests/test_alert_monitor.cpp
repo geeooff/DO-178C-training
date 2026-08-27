@@ -13,13 +13,11 @@
 //    5. sequences realistes
 //    6. robustesse
 // =============================================================================
+#include <avio/types.hpp>
+#include <limits>
 #include <microtest/microtest.hpp>
 
 #include "mod10/alert_monitor.hpp"
-
-#include <avio/types.hpp>
-
-#include <limits>
 
 using avio::f32;
 using avio::u16;
@@ -330,8 +328,8 @@ TEST_REQ(Sequences, bruit_de_capteur_ne_leve_pas_l_alerte, "LLR-ALERT-022") {
     // l'anti-rebond, l'alerte se leverait. C'est LE scenario que
     // confirm_cycles doit filtrer.
     AlertMonitor moniteur = moniteur_reference();
-    const f32 profil[10] = {150.0F, 95.0F, 150.0F, 95.0F, 150.0F,
-                            95.0F,  150.0F, 95.0F, 150.0F, 95.0F};
+    const f32 profil[10] = {150.0F, 95.0F,  150.0F, 95.0F,  150.0F,
+                            95.0F,  150.0F, 95.0F,  150.0F, 95.0F};
     for (usize index = 0U; index < 10U; ++index) {
         (void)moniteur.update(profil[index]);
     }

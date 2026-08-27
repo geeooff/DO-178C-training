@@ -4,11 +4,10 @@
 //  Ils verifient chaque decision de conception prise dans le SDD.
 //  Les tests bases sur les exigences de HAUT niveau sont dans test_fqms_hlr.cpp.
 // =============================================================================
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod16/fqms.hpp"
-
-#include <avio/types.hpp>
 
 using avio::f32;
 using avio::i32;
@@ -136,8 +135,8 @@ TEST_REQ(Jauge, conversion_lineaire, "LLR-FQMS-011") {
         jauge.set_raw(references[index].raw);
         const mod07::Result<Mass> mesure = jauge.read();
         REQUIRE(mesure.is_ok());
-        CHECK_NEAR(static_cast<double>(mesure.value().kilograms()),
-                   references[index].kilogrammes, 0.5);
+        CHECK_NEAR(static_cast<double>(mesure.value().kilograms()), references[index].kilogrammes,
+                   0.5);
     }
 }
 

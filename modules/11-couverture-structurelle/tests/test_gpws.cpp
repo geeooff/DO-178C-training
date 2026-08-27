@@ -1,9 +1,8 @@
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod11/gpws.hpp"
 #include "mod11/mcdc.hpp"
-
-#include <avio/types.hpp>
 
 using avio::usize;
 using mod11::DecisionRecorder;
@@ -105,8 +104,8 @@ TEST_REQ(Mcdc, couverture_de_decision_ne_suffit_pas, "LLR-GPWS-050") {
     // la decision prend ses deux issues. Beaucoup d'equipes s'arretent la...
     // et passent a cote de trois conditions sur quatre.
     DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);    // -> vrai
-    executer_mode4a(enregistreur, false, false, false, false); // -> faux
+    executer_mode4a(enregistreur, true, true, true, true);      // -> vrai
+    executer_mode4a(enregistreur, false, false, false, false);  // -> faux
 
     const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
 
@@ -224,9 +223,9 @@ TEST_REQ(Effective, alerte_emise_si_non_inhibee, "LLR-GPWS-040") {
     entrees.on_ground = false;
 
     CHECK(mod11::effective_alert(entrees, false, false, false));
-    CHECK_FALSE(mod11::effective_alert(entrees, true, false, false));   // mode test
-    CHECK_FALSE(mod11::effective_alert(entrees, false, true, true));    // approche stabilisee
-    CHECK(mod11::effective_alert(entrees, false, true, false));         // config seule : pas inhibe
+    CHECK_FALSE(mod11::effective_alert(entrees, true, false, false));  // mode test
+    CHECK_FALSE(mod11::effective_alert(entrees, false, true, true));   // approche stabilisee
+    CHECK(mod11::effective_alert(entrees, false, true, false));        // config seule : pas inhibe
 }
 
 TEST_REQ(Effective, pas_d_alerte_sans_condition, "LLR-GPWS-040") {

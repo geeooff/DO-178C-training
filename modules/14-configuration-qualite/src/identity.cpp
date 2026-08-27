@@ -31,8 +31,7 @@ constexpr LifeCycleData kLifeCycleData[] = {
     {"SCR", "Problem Reports", 17U, ControlCategory::CC2, ControlCategory::CC2},
     {"SCMR", "Software Configuration Management Records", 18U, ControlCategory::CC2,
      ControlCategory::CC2},
-    {"SQAR", "Software Quality Assurance Records", 19U, ControlCategory::CC2,
-     ControlCategory::CC2},
+    {"SQAR", "Software Quality Assurance Records", 19U, ControlCategory::CC2, ControlCategory::CC2},
     {"SAS", "Software Accomplishment Summary", 20U, ControlCategory::CC1, ControlCategory::CC1}};
 
 constexpr avio::usize kLifeCycleDataCount = sizeof(kLifeCycleData) / sizeof(kLifeCycleData[0]);

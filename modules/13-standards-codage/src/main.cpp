@@ -1,11 +1,10 @@
 // =============================================================================
 //  Module 13 -- demonstration : standards de codage et analyse statique.
 // =============================================================================
-#include "mod13/bcd.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod13/bcd.hpp"
 
 using avio::u16;
 using avio::u32;
@@ -43,8 +42,7 @@ void deux_implementations() {
 
     const u16 mots[6] = {0x0000U, 0x0001U, 0x1234U, 0x9999U, 0x000AU, 0x12F4U};
 
-    std::printf("  %-10s | %-22s | %-22s\n", "mot BCD", "version CONFORME",
-                "version NON CONFORME");
+    std::printf("  %-10s | %-22s | %-22s\n", "mot BCD", "version CONFORME", "version NON CONFORME");
     std::printf("  -----------+------------------------+------------------------\n");
 
     for (usize index = 0U; index < 6U; ++index) {

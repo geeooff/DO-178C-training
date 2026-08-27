@@ -33,7 +33,6 @@
 #define MOD06_RING_BUFFER_HPP
 
 #include <avio/types.hpp>
-
 #include <type_traits>
 
 namespace mod06 {

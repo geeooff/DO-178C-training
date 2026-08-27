@@ -8,18 +8,16 @@
 //  Les tests de robustesse sont ceux que l'on oublie... et ceux qui trouvent
 //  les vrais defauts.
 // =============================================================================
+#include <avio/types.hpp>
+#include <limits>
 #include <microtest/microtest.hpp>
 
 #include "mod01/safe_arith.hpp"
 
-#include <avio/types.hpp>
-
-#include <limits>
-
 using avio::i16;
 using avio::i32;
-using avio::u8;
 using avio::u16;
+using avio::u8;
 
 // -----------------------------------------------------------------------------
 //  Enumerations

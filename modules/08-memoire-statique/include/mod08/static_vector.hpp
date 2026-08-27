@@ -36,7 +36,6 @@
 #include <avio/assert.hpp>
 #include <avio/span.hpp>
 #include <avio/types.hpp>
-
 #include <type_traits>
 
 namespace mod08 {
@@ -138,9 +137,7 @@ public:
     }
 
     /// Vue sur les elements REELLEMENT presents (pas sur toute la capacite).
-    avio::Span<const T> view() const noexcept {
-        return avio::Span<const T>(storage_, size_);
-    }
+    avio::Span<const T> view() const noexcept { return avio::Span<const T>(storage_, size_); }
 
 private:
     T storage_[Capacity];

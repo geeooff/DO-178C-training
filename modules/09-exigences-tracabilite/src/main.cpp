@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 09 -- demonstration : exigences et tracabilite.
 // =============================================================================
-#include "mod09/altitude.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
 #include <limits>
+
+#include "mod09/altitude.hpp"
 
 using avio::f32;
 using avio::usize;
@@ -46,8 +45,7 @@ void hierarchie_des_exigences() {
 void calcul_altitude() {
     titre("ADC-ALT en fonctionnement");
 
-    const f32 pressions[8] = {1013.25F, 1000.0F, 950.0F, 850.0F,
-                              700.0F,   500.0F,  300.0F, 200.0F};
+    const f32 pressions[8] = {1013.25F, 1000.0F, 950.0F, 850.0F, 700.0F, 500.0F, 300.0F, 200.0F};
 
     std::printf("  %-14s %14s\n", "pression (hPa)", "altitude (ft)");
     std::printf("  ------------------------------\n");
@@ -62,8 +60,7 @@ void calcul_altitude() {
     std::printf("\n  Effet du calage altimetrique (QNH) a 850 hPa :\n");
     const f32 calages[3] = {1003.25F, 1013.25F, 1023.25F};
     for (usize index = 0U; index < 3U; ++index) {
-        const mod07::Result<f32> resultat =
-            mod09::corrected_altitude_feet(850.0F, calages[index]);
+        const mod07::Result<f32> resultat = mod09::corrected_altitude_feet(850.0F, calages[index]);
         if (resultat.is_ok()) {
             std::printf("    QNH %7.2f hPa -> %9.1f ft\n", static_cast<double>(calages[index]),
                         static_cast<double>(resultat.value()));
@@ -82,13 +79,12 @@ void robustesse() {
         f32 pression;
         f32 qnh;
     };
-    const Cas cas[6] = {
-        {"nominal", 850.0F, 1013.0F},
-        {"pression trop basse", 50.0F, 1013.0F},
-        {"pression trop haute", 1200.0F, 1013.0F},
-        {"pression NaN", std::numeric_limits<f32>::quiet_NaN(), 1013.0F},
-        {"calage hors domaine", 850.0F, 1200.0F},
-        {"les DEUX invalides", 50.0F, 1200.0F}};
+    const Cas cas[6] = {{"nominal", 850.0F, 1013.0F},
+                        {"pression trop basse", 50.0F, 1013.0F},
+                        {"pression trop haute", 1200.0F, 1013.0F},
+                        {"pression NaN", std::numeric_limits<f32>::quiet_NaN(), 1013.0F},
+                        {"calage hors domaine", 850.0F, 1200.0F},
+                        {"les DEUX invalides", 50.0F, 1200.0F}};
 
     for (usize index = 0U; index < 6U; ++index) {
         const mod07::Result<f32> resultat =

@@ -77,9 +77,7 @@ public:
     avio::f32 to_float() const noexcept;
 
     // --- Comparaisons : EXACTES, contrairement au flottant -------------------
-    friend constexpr bool operator==(Fixed lhs, Fixed rhs) noexcept {
-        return lhs.raw_ == rhs.raw_;
-    }
+    friend constexpr bool operator==(Fixed lhs, Fixed rhs) noexcept { return lhs.raw_ == rhs.raw_; }
     friend constexpr bool operator!=(Fixed lhs, Fixed rhs) noexcept { return !(lhs == rhs); }
     friend constexpr bool operator<(Fixed lhs, Fixed rhs) noexcept { return lhs.raw_ < rhs.raw_; }
     friend constexpr bool operator>(Fixed lhs, Fixed rhs) noexcept { return rhs < lhs; }

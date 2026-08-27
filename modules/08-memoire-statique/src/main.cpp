@@ -1,13 +1,12 @@
 // =============================================================================
 //  Module 08 -- demonstration : memoire statique, reserve de blocs, pile.
 // =============================================================================
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod08/memory_pool.hpp"
 #include "mod08/stack_analysis.hpp"
 #include "mod08/static_vector.hpp"
-
-#include <avio/types.hpp>
-
-#include <cstdio>
 
 using avio::i32;
 using avio::u32;
@@ -79,8 +78,7 @@ void reserve_de_blocs() {
     void* blocs[8] = {};
 
     std::printf("  taille d'un bloc : %zu octets, %zu blocs\n",
-                mod08::MemoryPool<32U, 8U>::kBlockSize,
-                mod08::MemoryPool<32U, 8U>::kBlockCount);
+                mod08::MemoryPool<32U, 8U>::kBlockSize, mod08::MemoryPool<32U, 8U>::kBlockCount);
     std::printf("  occupation RAM totale : %zu octets\n", sizeof(pool));
 
     for (usize index = 0U; index < 8U; ++index) {
@@ -130,10 +128,8 @@ void analyse_de_pile() {
     const u32 profondeur_recursive = mod08::CallDepthMonitor::maximum();
 
     std::printf("  20! = %llu\n\n", static_cast<unsigned long long>(resultat));
-    std::printf("  version iterative : profondeur de pile maximale = %u\n",
-                profondeur_iterative);
-    std::printf("  version recursive : profondeur de pile maximale = %u\n",
-                profondeur_recursive);
+    std::printf("  version iterative : profondeur de pile maximale = %u\n", profondeur_iterative);
+    std::printf("  version recursive : profondeur de pile maximale = %u\n", profondeur_recursive);
     std::printf("\n  Meme resultat, %ux plus de pile. Sur une cible ou chaque trame\n",
                 profondeur_recursive / ((profondeur_iterative == 0U) ? 1U : profondeur_iterative));
     std::printf("  fait 48 octets : 960 octets contre 48.\n");
@@ -157,8 +153,7 @@ void budget_memoire() {
     const usize taille_pool = sizeof(mod08::MemoryPool<32U, 8U>);
     const usize total = taille_vecteur + taille_pool;
 
-    std::printf("  %-40s %8zu octets\n", "StaticVector<i32,100> (journal mesures)",
-                taille_vecteur);
+    std::printf("  %-40s %8zu octets\n", "StaticVector<i32,100> (journal mesures)", taille_vecteur);
     std::printf("  %-40s %8zu octets\n", "MemoryPool<32,8> (tampons messages)", taille_pool);
     std::printf("  %-40s %8zu octets\n", "TOTAL alloue statiquement", total);
     std::printf("\n  Chaque octet de RAM de ce composant est connu AVANT l'execution.\n");

@@ -1,11 +1,10 @@
+#include <avio/assert.hpp>
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod08/memory_pool.hpp"
 #include "mod08/stack_analysis.hpp"
 #include "mod08/static_vector.hpp"
-
-#include <avio/assert.hpp>
-#include <avio/types.hpp>
 
 using avio::i32;
 using avio::i64;
@@ -83,7 +82,7 @@ TEST_REQ(StaticVector, suppression_par_indice, "LLR-M08-005") {
     CHECK_EQ(vecteur[1], 20);
     CHECK_EQ(vecteur[3], 40);
 
-    CHECK_FALSE(vecteur.erase(4U));   // hors domaine
+    CHECK_FALSE(vecteur.erase(4U));  // hors domaine
     CHECK_FALSE(vecteur.erase(100U));
     CHECK_EQ(vecteur.size(), usize{4});
 }

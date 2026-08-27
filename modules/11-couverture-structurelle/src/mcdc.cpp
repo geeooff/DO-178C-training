@@ -90,8 +90,8 @@ McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept {
     // Une telle paire demontre que C affecte SEULE l'issue : c'est exactement
     // ce que demande la definition.
     for (avio::usize condition = 0U; condition < conditions; ++condition) {
-        for (avio::usize premier = 0U; (premier < evaluations) && !report.condition_covered[condition];
-             ++premier) {
+        for (avio::usize premier = 0U;
+             (premier < evaluations) && !report.condition_covered[condition]; ++premier) {
             for (avio::usize second = premier + 1U; second < evaluations; ++second) {
                 const Evaluation& a = recorder.at(premier);
                 const Evaluation& b = recorder.at(second);

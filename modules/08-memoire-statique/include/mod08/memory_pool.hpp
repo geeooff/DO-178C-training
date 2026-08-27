@@ -25,7 +25,6 @@
 #define MOD08_MEMORY_POOL_HPP
 
 #include <avio/types.hpp>
-
 #include <cstddef>
 #include <cstring>
 
@@ -161,7 +160,8 @@ private:
         if (value) {
             used_[index / 8U] = static_cast<avio::u8>(used_[index / 8U] | mask);
         } else {
-            used_[index / 8U] = static_cast<avio::u8>(used_[index / 8U] & static_cast<avio::u8>(~mask));
+            used_[index / 8U] =
+                static_cast<avio::u8>(used_[index / 8U] & static_cast<avio::u8>(~mask));
         }
     }
 

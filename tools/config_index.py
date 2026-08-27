@@ -185,17 +185,56 @@ def build_sci(root: Path, part_number: str, version: str) -> str:
     return "\n".join(sortie)
 
 
-def build_seci(root: Path) -> str:
-    vs_path = ""
-    vswhere = Path(
-        r"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-    )
-    if vswhere.exists():
-        vs_path = tool_version([str(vswhere), "-latest", "-property", "installationPath"])
+def distribution_hote() -> str:
+    """Identifie precisement le systeme hote, quelle que soit la plateforme."""
+    base = f"{platform.system()} {platform.release()} ({platform.machine()})"
 
-    outils = [
-        ("Système hôte", f"{platform.system()} {platform.release()} ({platform.machine()})"),
-        ("Visual Studio", vs_path or "non detecte"),
+    # Sous Linux, la version du noyau ne suffit pas : c est la DISTRIBUTION qui
+    # determine les versions de la chaine d outils.
+    os_release = Path("/etc/os-release")
+    if os_release.is_file():
+        try:
+            for ligne in os_release.read_text(encoding="utf-8").splitlines():
+                if ligne.startswith("PRETTY_NAME="):
+                    nom = ligne.split("=", 1)[1].strip().strip('"')
+                    return f"{nom} ({platform.machine()}), noyau {platform.release()}"
+        except OSError:
+            pass
+
+    # Sous WSL, le noyau porte la marque "microsoft". C est une information qui
+    # compte : l environnement n est pas un Linux natif.
+    if "microsoft" in platform.release().lower():
+        base += " [WSL]"
+    return base
+
+
+def build_seci(root: Path) -> str:
+    """Construit le SECI en s adaptant a la plateforme hote.
+
+    L inventaire n est pas le meme sous Windows et sous Linux ou macOS. Le
+    document doit refleter l environnement REEL, pas un modele suppose : un
+    SECI qui annonce Visual Studio sur une machine Ubuntu est un SECI FAUX, et
+    un SECI faux est pire que pas de SECI du tout.
+    """
+    outils = [("Systeme hote", distribution_hote())]
+
+    if platform.system() == "Windows":
+        vswhere = Path(
+            r"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+        )
+        vs_path = ""
+        if vswhere.exists():
+            vs_path = tool_version([str(vswhere), "-latest", "-property", "installationPath"])
+        outils.append(("Visual Studio", vs_path or "non detecte"))
+        outils.append(("MSVC (cl.exe)", tool_version(["cl"], r"\d+\.\d+\.\d+")))
+    else:
+        outils.append(("GCC (g++)", tool_version(["g++", "--version"], r"\d+\.\d+\.\d+")))
+        outils.append(
+            ("Clang (clang++)", tool_version(["clang++", "--version"], r"\d+\.\d+\.\d+"))
+        )
+        outils.append(("Editeur de liens (ld)", tool_version(["ld", "--version"], r"\d+\.\d[\d.]*")))
+
+    outils += [
         ("CMake", tool_version(["cmake", "--version"], r"\d+\.\d+\.\d+[\w.-]*")),
         ("Ninja", tool_version(["ninja", "--version"], r"\d+\.\d+\.\d+")),
         ("clang-tidy", tool_version(["clang-tidy", "--version"], r"\d+\.\d+\.\d+")),
@@ -203,6 +242,9 @@ def build_seci(root: Path) -> str:
         ("Python", platform.python_version()),
         ("Git", tool_version(["git", "--version"], r"\d+\.\d+\.\d+[\w.-]*")),
     ]
+
+    if platform.system() != "Windows":
+        outils.append(("gcovr", tool_version(["gcovr", "--version"], r"\d+\.\d+")))
 
     sortie: list[str] = []
     sortie.append("# SECI — Software Life Cycle Environment Configuration Index")
@@ -217,6 +259,19 @@ def build_seci(root: Path) -> str:
     for nom, valeur in outils:
         sortie.append(f"| {nom} | `{valeur}` |")
     sortie.append("")
+    # Un SECI genere hors de l environnement de production ne DECRIT PAS cet
+    # environnement. On le dit, plutot que de laisser croire que la chaine
+    # d outils est absente de la machine.
+    if any(valeur == "non detecte" for _, valeur in outils):
+        sortie.append("> ⚠️ Certains outils n'ont pas été détectés.")
+        sortie.append(">")
+        sortie.append("> Sous Windows, la chaîne Visual Studio n'est dans le `PATH` qu'à")
+        sortie.append("> l'intérieur de l'environnement développeur. Régénérez ce document")
+        sortie.append("> depuis une **Developer PowerShell for VS**, ou après avoir lancé")
+        sortie.append(r"> `scripts/build.ps1`, faute de quoi le SECI ne décrit pas")
+        sortie.append("> l'environnement qui a réellement produit le binaire.")
+        sortie.append("")
+
     sortie.append("## 2. Options de compilation")
     sortie.append("")
     sortie.append("Définies dans `cmake/TrainingHelpers.cmake`, fonction")

@@ -47,7 +47,6 @@
 
 #include <avio/assert.hpp>
 #include <avio/types.hpp>
-
 #include <type_traits>
 
 namespace mod07 {
@@ -93,8 +92,7 @@ bool is_fault(Status status) noexcept;
 template <typename T>
 class Result {
 public:
-    static_assert(std::is_trivially_copyable_v<T>,
-                  "Result<T> : T doit etre trivialement copiable");
+    static_assert(std::is_trivially_copyable_v<T>, "Result<T> : T doit etre trivialement copiable");
     static_assert(std::is_default_constructible_v<T>,
                   "Result<T> : T doit etre constructible par defaut");
 
@@ -125,9 +123,7 @@ public:
 
     /// Acces avec valeur de repli : la forme la plus sure, et la plus courante
     /// dans une boucle temps reel ou l'on ne peut pas s'arreter.
-    constexpr T value_or(const T& fallback) const noexcept {
-        return is_ok() ? value_ : fallback;
-    }
+    constexpr T value_or(const T& fallback) const noexcept { return is_ok() ? value_ : fallback; }
 
 private:
     constexpr Result(const T& value, Status status) noexcept : value_(value), status_(status) {}

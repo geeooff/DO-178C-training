@@ -94,7 +94,8 @@ void format_value(char* buffer, std::size_t size, const T& value) noexcept {
     }
 }
 
-inline bool check_bool(bool condition, const char* expression, const char* file, int line) noexcept {
+inline bool check_bool(bool condition, const char* expression, const char* file,
+                       int line) noexcept {
     state().total_checks += 1U;
     if (!condition) {
         char text[256];
@@ -139,8 +140,8 @@ bool check_eq(const A& actual, const B& expected, const char* a_txt, const char*
 /// Surcharge non generique : deux chaines C se comparent par contenu, pas par
 /// adresse. Piege classique pour un developpeur C# ou `==` sur string compare
 /// le contenu.
-inline bool check_eq(const char* actual, const char* expected, const char* a_txt,
-                     const char* b_txt, const char* file, int line) noexcept {
+inline bool check_eq(const char* actual, const char* expected, const char* a_txt, const char* b_txt,
+                     const char* file, int line) noexcept {
     state().total_checks += 1U;
     const bool ok =
         (actual != nullptr) && (expected != nullptr) && (std::strcmp(actual, expected) == 0);
@@ -232,14 +233,14 @@ int run_all(int argc, char** argv) noexcept;
 #define MT_CONCAT_IMPL(a, b) a##b
 #define MT_CONCAT(a, b) MT_CONCAT_IMPL(a, b)
 
-#define MT_TEST_IMPL(suite_id, test_id, reqs)                                                      \
-    static void MT_CONCAT(mt_body_, MT_CONCAT(suite_id, MT_CONCAT(_, test_id)))();                 \
-    namespace {                                                                                    \
-    const ::microtest::detail::Registrar MT_CONCAT(mt_reg_,                                        \
-                                                   MT_CONCAT(suite_id, MT_CONCAT(_, test_id)))(    \
-        #suite_id, #test_id, reqs, __FILE__, __LINE__,                                             \
-        &MT_CONCAT(mt_body_, MT_CONCAT(suite_id, MT_CONCAT(_, test_id))));                         \
-    }                                                                                              \
+#define MT_TEST_IMPL(suite_id, test_id, reqs)                                                   \
+    static void MT_CONCAT(mt_body_, MT_CONCAT(suite_id, MT_CONCAT(_, test_id)))();              \
+    namespace {                                                                                 \
+    const ::microtest::detail::Registrar MT_CONCAT(mt_reg_,                                     \
+                                                   MT_CONCAT(suite_id, MT_CONCAT(_, test_id)))( \
+        #suite_id, #test_id, reqs, __FILE__, __LINE__,                                          \
+        &MT_CONCAT(mt_body_, MT_CONCAT(suite_id, MT_CONCAT(_, test_id))));                      \
+    }                                                                                           \
     static void MT_CONCAT(mt_body_, MT_CONCAT(suite_id, MT_CONCAT(_, test_id)))()
 
 /// Declare un cas de test SANS lien de tracabilite (a proscrire en DO-178C).
@@ -257,21 +258,21 @@ int run_all(int argc, char** argv) noexcept;
 #define CHECK(expr) (void)::microtest::detail::check_bool((expr), #expr, __FILE__, __LINE__)
 #define CHECK_FALSE(expr) (void)::microtest::detail::check_false((expr), #expr, __FILE__, __LINE__)
 #define CHECK_EQ(a, b) (void)::microtest::detail::check_eq((a), (b), #a, #b, __FILE__, __LINE__)
-#define CHECK_NEAR(a, b, tol)                                                                      \
+#define CHECK_NEAR(a, b, tol) \
     (void)::microtest::detail::check_near((a), (b), (tol), #a, #b, __FILE__, __LINE__)
 
-#define REQUIRE(expr)                                                                              \
-    do {                                                                                           \
-        if (!::microtest::detail::check_bool((expr), #expr, __FILE__, __LINE__)) {                 \
-            return;                                                                                \
-        }                                                                                          \
+#define REQUIRE(expr)                                                              \
+    do {                                                                           \
+        if (!::microtest::detail::check_bool((expr), #expr, __FILE__, __LINE__)) { \
+            return;                                                                \
+        }                                                                          \
     } while (false)
 
-#define REQUIRE_EQ(a, b)                                                                           \
-    do {                                                                                           \
-        if (!::microtest::detail::check_eq((a), (b), #a, #b, __FILE__, __LINE__)) {                \
-            return;                                                                                \
-        }                                                                                          \
+#define REQUIRE_EQ(a, b)                                                            \
+    do {                                                                            \
+        if (!::microtest::detail::check_eq((a), (b), #a, #b, __FILE__, __LINE__)) { \
+            return;                                                                 \
+        }                                                                           \
     } while (false)
 
 #define FAIL(message) (void)::microtest::detail::fail_now((message), __FILE__, __LINE__)

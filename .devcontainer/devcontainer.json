@@ -1,0 +1,40 @@
+{
+  "name": "DO-178C training (Ubuntu 24.04, GCC + Clang)",
+
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "remoteUser": "ubuntu",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-python.python"
+      ],
+      "settings": {
+        "cmake.useCMakePresets": "always",
+        "cmake.configureOnOpen": false,
+        "C_Cpp.default.compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "clangd.arguments": [
+          "--compile-commands-dir=${workspaceFolder}/build/debug",
+          "--header-insertion=never"
+        ],
+        "editor.formatOnSave": true,
+        "files.encoding": "utf8",
+        "files.eol": "\n",
+        "[cpp]": { "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd" }
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}

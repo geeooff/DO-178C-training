@@ -1,14 +1,13 @@
 // =============================================================================
 //  Module 15 -- demonstration : determinisme, flottants, temps reel.
 // =============================================================================
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod15/fixed_point.hpp"
 #include "mod15/float_facts.hpp"
 #include "mod15/hw_register.hpp"
 #include "mod15/schedule.hpp"
-
-#include <avio/types.hpp>
-
-#include <cstdio>
 
 using avio::f32;
 using avio::u32;
@@ -55,13 +54,12 @@ void faits_ieee754() {
     const double attendus[3] = {1.0, 10.0, 100.0};
     for (usize index = 0U; index < 3U; ++index) {
         const f32 total = mod15::accumulate_float(0.1F, comptes[index]);
-        std::printf("     N = %-28u %20.9f %14.3g\n", comptes[index],
-                    static_cast<double>(total),
+        std::printf("     N = %-28u %20.9f %14.3g\n", comptes[index], static_cast<double>(total),
                     static_cast<double>(total) - attendus[index]);
     }
     const f32 kahan = mod15::accumulate_kahan(0.1F, 1000U);
-    std::printf("     N = 1000, somme de KAHAN     %20.9f %14.3g\n",
-                static_cast<double>(kahan), static_cast<double>(kahan) - 100.0);
+    std::printf("     N = 1000, somme de KAHAN     %20.9f %14.3g\n", static_cast<double>(kahan),
+                static_cast<double>(kahan) - 100.0);
     std::printf("\n     La somme de Kahan recupere l'erreur d'arrondi a chaque etape.\n");
     std::printf("     Attention : elle EXIGE /fp:precise -- avec /fp:fast, le\n");
     std::printf("     compilateur la simplifie algebriquement et l'annule.\n");

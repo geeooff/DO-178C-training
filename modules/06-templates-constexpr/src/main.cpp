@@ -1,14 +1,13 @@
 // =============================================================================
 //  Module 06 -- demonstration : templates, constexpr, CRTP.
 // =============================================================================
+#include <avio/span.hpp>
+#include <avio/types.hpp>
+#include <cstdio>
+
 #include "mod06/compile_time.hpp"
 #include "mod06/ring_buffer.hpp"
 #include "mod06/static_polymorphism.hpp"
-
-#include <avio/span.hpp>
-#include <avio/types.hpp>
-
-#include <cstdio>
 
 using avio::f32;
 using avio::i32;
@@ -35,8 +34,8 @@ void un_patron_plusieurs_types() {
         (void)flottants.push(static_cast<f32>(index) * 0.5F);
     }
 
-    std::printf("  RingBuffer<i32, 4>  : taille=%zu, ecrasements=%u, moyenne=%d\n",
-                entiers.size(), entiers.overwrite_count(), mod06::average(entiers));
+    std::printf("  RingBuffer<i32, 4>  : taille=%zu, ecrasements=%u, moyenne=%d\n", entiers.size(),
+                entiers.overwrite_count(), mod06::average(entiers));
     std::printf("  RingBuffer<f32, 8>  : taille=%zu, ecrasements=%u, moyenne=%.4f\n",
                 flottants.size(), flottants.overwrite_count(),
                 static_cast<double>(mod06::average(flottants)));
@@ -68,8 +67,7 @@ void calcul_a_la_compilation() {
     std::printf("\n  crc8(\"123456789\") = 0x%02X   (vecteur de test CRC-8/SMBUS)\n",
                 mod06::crc8(avio::make_const_span(message)));
 
-    std::printf("\n  ipow(2, 16)  = %llu\n",
-                static_cast<unsigned long long>(mod06::ipow(2U, 16U)));
+    std::printf("\n  ipow(2, 16)  = %llu\n", static_cast<unsigned long long>(mod06::ipow(2U, 16U)));
     std::printf("  popcount(0xF0F0) = %u\n", mod06::popcount(0xF0F0U));
 
     std::printf("\n  Ce que cela apporte en certification :\n");
@@ -97,8 +95,8 @@ void dynamique_contre_statique() {
     std::printf("\n  %-34s %s\n", "", "taille d'un objet");
     std::printf("  %-34s %zu octet(s)\n", "mod06::StaticPressureSensor (CRTP)",
                 sizeof(mod06::StaticPressureSensor));
-    std::printf("  %-34s %zu octet(s)  <- pointeur de vtable\n",
-                "mod05::PressureSensor (virtuel)", sizeof(void*));
+    std::printf("  %-34s %zu octet(s)  <- pointeur de vtable\n", "mod05::PressureSensor (virtuel)",
+                sizeof(void*));
 
     std::printf("\n  Meme factorisation de code, meme lisibilite, mais :\n");
     std::printf("    * aucune vtable, aucune indirection ;\n");

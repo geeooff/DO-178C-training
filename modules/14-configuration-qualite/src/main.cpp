@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 14 -- demonstration : configuration, qualite, qualification d'outils.
 // =============================================================================
-#include "mod14/identity.hpp"
-
 #include <avio/span.hpp>
 #include <avio/types.hpp>
-
 #include <cstdio>
+
+#include "mod14/identity.hpp"
 
 using avio::u32;
 using avio::u8;
@@ -58,21 +57,20 @@ void integrite_du_chargement() {
     identite.version_minor = 2U;
     identite.version_patch = 3U;
 
-    const u8 image_valide[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U,
-                                0x36U, 0x37U, 0x38U, 0x39U};
+    const u8 image_valide[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U};
     identite.expected_crc = mod14::crc32(avio::make_const_span(image_valide));
 
-    std::printf("  part number      : %s (%s)\n", identite.part_number,
-                mod14::is_valid_part_number(identite.part_number) ? "format valide"
-                                                                  : "FORMAT INVALIDE");
-    std::printf("  version          : %u.%u.%u\n", identite.version_major,
-                identite.version_minor, identite.version_patch);
+    std::printf(
+        "  part number      : %s (%s)\n", identite.part_number,
+        mod14::is_valid_part_number(identite.part_number) ? "format valide" : "FORMAT INVALIDE");
+    std::printf("  version          : %u.%u.%u\n", identite.version_major, identite.version_minor,
+                identite.version_patch);
     std::printf("  CRC-32 attendu   : 0x%08X\n", identite.expected_crc);
     std::printf("\n");
 
-    std::printf("  image conforme                 -> %s\n",
-                mod14::verify_load(identite, avio::make_const_span(image_valide)) ? "ACCEPTEE"
-                                                                                 : "refusee");
+    std::printf(
+        "  image conforme                 -> %s\n",
+        mod14::verify_load(identite, avio::make_const_span(image_valide)) ? "ACCEPTEE" : "refusee");
 
     u8 image_alteree[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x38U};
     std::printf("  image alteree (1 octet)        -> %s\n",

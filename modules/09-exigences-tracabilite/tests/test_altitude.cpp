@@ -5,13 +5,11 @@
 //  test "parce que ca me parait utile" : en DO-178C, un test sans exigence est
 //  un test orphelin, et il apparait comme tel dans le rapport de tracabilite.
 // =============================================================================
+#include <avio/types.hpp>
+#include <limits>
 #include <microtest/microtest.hpp>
 
 #include "mod09/altitude.hpp"
-
-#include <avio/types.hpp>
-
-#include <limits>
 
 using avio::f32;
 using avio::usize;
@@ -82,10 +80,9 @@ TEST_REQ(Altitude, table_de_reference, "LLR-ADCALT-022") {
         f32 pression_hpa;
         double altitude_ft;
     };
-    const Point references[8] = {{1013.25F, 0.0},     {1000.0F, 363.64},
-                                 {950.0F, 1772.03},   {850.0F, 4779.19},
-                                 {700.0F, 9878.39},   {500.0F, 18281.18},
-                                 {300.0F, 30052.74},  {200.0F, 38615.05}};
+    const Point references[8] = {{1013.25F, 0.0},    {1000.0F, 363.64}, {950.0F, 1772.03},
+                                 {850.0F, 4779.19},  {700.0F, 9878.39}, {500.0F, 18281.18},
+                                 {300.0F, 30052.74}, {200.0F, 38615.05}};
 
     for (usize index = 0U; index < 8U; ++index) {
         const mod07::Result<f32> resultat =
@@ -112,8 +109,7 @@ TEST_REQ(Altitude, monotonie, "LLR-ADCALT-023") {
     // l'erreur d'arrondi et le nombre d'iterations dependrait de la cible.
     double precedente = 1.0e9;
     for (avio::u32 pas = 0U; pas <= 100U; ++pas) {
-        const f32 pression =
-            mod09::kStaticPressureMinHpa + (static_cast<f32>(pas) * 10.0F);
+        const f32 pression = mod09::kStaticPressureMinHpa + (static_cast<f32>(pas) * 10.0F);
         const mod07::Result<f32> resultat = mod09::pressure_altitude_feet(pression);
         REQUIRE(resultat.is_ok());
         const double altitude = static_cast<double>(resultat.value());
@@ -213,8 +209,7 @@ TEST_REQ(SystemeADCALT, domaine_de_pression_accepte, "HLR-ADCALT-002") {
 }
 
 TEST_REQ(SystemeADCALT, rejet_hors_domaine, "HLR-ADCALT-003") {
-    const f32 invalides[6] = {0.0F,  -1.0F, 99.99F,
-                              1100.01F, kNaN, kInf};
+    const f32 invalides[6] = {0.0F, -1.0F, 99.99F, 1100.01F, kNaN, kInf};
     for (usize index = 0U; index < 6U; ++index) {
         const mod07::Result<f32> resultat = mod09::pressure_altitude_feet(invalides[index]);
         CHECK(resultat.is_error());
@@ -231,9 +226,8 @@ TEST_REQ(SystemeADCALT, budget_d_erreur_respecte, "HLR-ADCALT-004") {
         f32 pression_hpa;
         double altitude_ft;
     };
-    const Point references[8] = {{1013.25F, 0.0},    {1000.0F, 363.64},
-                                 {950.0F, 1772.03},  {850.0F, 4779.19},
-                                 {700.0F, 9878.39},  {500.0F, 18281.18},
+    const Point references[8] = {{1013.25F, 0.0},    {1000.0F, 363.64}, {950.0F, 1772.03},
+                                 {850.0F, 4779.19},  {700.0F, 9878.39}, {500.0F, 18281.18},
                                  {300.0F, 30052.74}, {200.0F, 38615.05}};
     double erreur_max = 0.0;
     for (usize index = 0U; index < 8U; ++index) {

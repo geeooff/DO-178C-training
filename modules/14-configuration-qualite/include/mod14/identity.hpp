@@ -113,9 +113,9 @@ enum class ControlCategory : avio::u8 { CC1 = 1U, CC2 = 2U };
 
 /// Une donnee de vie du logiciel (DO-178C section 11).
 struct LifeCycleData {
-    const char* acronym;   ///< "PSAC", "SRD", "SDD"...
-    const char* name;      ///< intitule complet
-    avio::u8 section;      ///< paragraphe de la section 11
+    const char* acronym;     ///< "PSAC", "SRD", "SDD"...
+    const char* name;        ///< intitule complet
+    avio::u8 section;        ///< paragraphe de la section 11
     ControlCategory dal_ab;  ///< categorie en DAL A et B
     ControlCategory dal_cd;  ///< categorie en DAL C et D
 };

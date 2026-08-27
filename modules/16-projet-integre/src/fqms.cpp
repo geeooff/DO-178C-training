@@ -62,8 +62,8 @@ Result<Mass> TankGauge::read() const noexcept {
     // resultat identique sur toute cible, aucune derive, WCET constant
     // (module 15). Le produit maximal vaut 8e6 x 4095 = 3,3e10 : il faut bien
     // 64 bits pendant le calcul.
-    const avio::i64 numerateur = static_cast<avio::i64>(capacity_.grams()) *
-                                 static_cast<avio::i64>(raw_ - kRawMin);
+    const avio::i64 numerateur =
+        static_cast<avio::i64>(capacity_.grams()) * static_cast<avio::i64>(raw_ - kRawMin);
     const avio::i64 denominateur = static_cast<avio::i64>(kRawMax - kRawMin);
     const avio::i32 grammes = static_cast<avio::i32>(numerateur / denominateur);
 
@@ -240,9 +240,9 @@ CycleReport FuelSystem::update(const avio::i32 raw_values[kTankCount]) noexcept 
     rapport.status = system_status(rapport.valid_tank_count);
 
     // --- Etape 3 : ecart d'aile ----------------------------------------------
-    const bool ecart_mesurable = imbalance_is_measurable(
-        valide[static_cast<avio::usize>(TankId::Left)],
-        valide[static_cast<avio::usize>(TankId::Right)]);
+    const bool ecart_mesurable =
+        imbalance_is_measurable(valide[static_cast<avio::usize>(TankId::Left)],
+                                valide[static_cast<avio::usize>(TankId::Right)]);
 
     if (ecart_mesurable) {
         rapport.wing_imbalance =
@@ -251,19 +251,18 @@ CycleReport FuelSystem::update(const avio::i32 raw_values[kTankCount]) noexcept 
     }
 
     // --- Etape 4 : moniteur de bas niveau ------------------------------------
-    const bool bas_niveau_mesurable = low_fuel_is_measurable(
-        valide[static_cast<avio::usize>(TankId::Left)],
-        valide[static_cast<avio::usize>(TankId::Center)],
-        valide[static_cast<avio::usize>(TankId::Right)]);
+    const bool bas_niveau_mesurable =
+        low_fuel_is_measurable(valide[static_cast<avio::usize>(TankId::Left)],
+                               valide[static_cast<avio::usize>(TankId::Center)],
+                               valide[static_cast<avio::usize>(TankId::Right)]);
 
     // Grandeur derivee : deficit = seuil - total. L'alerte se leve donc quand
     // le deficit devient positif, c'est-a-dire quand le total passe sous le
     // seuil. L'hysteresis du moniteur (seuil de retombee negatif) impose au
     // total de remonter de `low_fuel_hysteresis` avant d'effacer l'alerte.
     const avio::f32 deficit_kg =
-        bas_niveau_mesurable
-            ? (config_.low_fuel_threshold.kilograms() - rapport.total.kilograms())
-            : kUnknownSample;
+        bas_niveau_mesurable ? (config_.low_fuel_threshold.kilograms() - rapport.total.kilograms())
+                             : kUnknownSample;
     (void)low_fuel_monitor_.update(deficit_kg);
     rapport.low_fuel_alert = low_fuel_monitor_.is_raised();
 

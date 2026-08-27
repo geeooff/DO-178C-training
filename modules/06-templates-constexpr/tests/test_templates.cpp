@@ -1,16 +1,15 @@
+#include <avio/span.hpp>
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod06/compile_time.hpp"
 #include "mod06/ring_buffer.hpp"
 #include "mod06/static_polymorphism.hpp"
 
-#include <avio/span.hpp>
-#include <avio/types.hpp>
-
 using avio::f32;
 using avio::i32;
-using avio::u8;
 using avio::u32;
+using avio::u8;
 using avio::usize;
 
 // =============================================================================

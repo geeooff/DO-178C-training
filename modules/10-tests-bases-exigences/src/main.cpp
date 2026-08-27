@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 10 -- demonstration : conception des tests.
 // =============================================================================
-#include "mod10/alert_monitor.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
 #include <limits>
+
+#include "mod10/alert_monitor.hpp"
 
 using avio::f32;
 using avio::u16;
@@ -53,12 +52,11 @@ void derouler(const char* libelle, const f32* profil, usize count) {
 void machine_a_etats() {
     titre("ALERT-MON : seuil 100, retombee 90, confirmation 3, retombee 2");
 
-    const f32 rampe[10] = {80.0F, 95.0F, 105.0F, 110.0F, 115.0F,
-                           95.0F, 85.0F, 80.0F,  85.0F,  95.0F};
+    const f32 rampe[10] = {80.0F, 95.0F, 105.0F, 110.0F, 115.0F, 95.0F, 85.0F, 80.0F, 85.0F, 95.0F};
     derouler("Rampe de montee puis de descente", rampe, 10U);
 
-    const f32 bruit[10] = {150.0F, 95.0F, 150.0F, 95.0F, 150.0F,
-                           95.0F,  150.0F, 95.0F, 150.0F, 95.0F};
+    const f32 bruit[10] = {150.0F, 95.0F,  150.0F, 95.0F,  150.0F,
+                           95.0F,  150.0F, 95.0F,  150.0F, 95.0F};
     derouler("Bruit de capteur (un cycle sur deux au-dessus du seuil)", bruit, 10U);
 
     const f32 oscillation[10] = {150.0F, 150.0F, 150.0F, 85.0F, 95.0F,

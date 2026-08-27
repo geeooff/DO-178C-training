@@ -5,11 +5,10 @@
 //  "Exigences du module"). C'est la regle d'or DO-178C : pas de test sans
 //  exigence, pas d'exigence sans test.
 // =============================================================================
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod00/build_info.hpp"
-
-#include <avio/types.hpp>
 
 TEST_REQ(BuildInfo, compilateur_identifie, "LLR-M00-001") {
     const mod00::BuildInfo info = mod00::current_build();

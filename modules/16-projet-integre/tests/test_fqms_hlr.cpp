@@ -8,11 +8,10 @@
 //  En projet reel, ces tests seraient ecrits par une personne DIFFERENTE de
 //  l'auteur du code (independance exigee en DAL B, table A-6).
 // =============================================================================
+#include <avio/types.hpp>
 #include <microtest/microtest.hpp>
 
 #include "mod16/fqms.hpp"
-
-#include <avio/types.hpp>
 
 using avio::f32;
 using avio::i32;

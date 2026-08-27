@@ -1,12 +1,11 @@
 // =============================================================================
 //  Module 03 -- demonstration : RAII et cycle de vie.
 // =============================================================================
-#include "mod03/lifetime.hpp"
-
 #include <avio/types.hpp>
-
 #include <cstdio>
 #include <utility>
+
+#include "mod03/lifetime.hpp"
 
 using avio::i32;
 using avio::usize;

@@ -29,26 +29,35 @@ dépôt lui-même.
 
 ## Démarrage immédiat
 
-Depuis n'importe quel PowerShell, à la racine du dépôt :
+**Windows** — depuis n'importe quel PowerShell, à la racine du dépôt :
 
 ```bash
 .\scripts\build.ps1 -Preset debug -Test
 ```
 
-Puis lancez le premier module :
+**Linux, WSL, macOS** :
 
 ```bash
-.\build\debug\bin\demo_00-environnement.exe
+./scripts/build.sh -t
 ```
 
-Et le projet final, pour voir où l'on va :
+**Devcontainer** — ouvrez le dossier dans VS Code, puis *Reopen in Container*.
+
+Lancez ensuite le premier module, puis le projet final pour voir où l'on va :
 
 ```bash
-.\build\debug\bin\demo_16-projet-integre.exe
+./build/debug/bin/demo_00-environnement
 ```
 
-**Rien d'autre à installer** : Visual Studio 2026 Community fournit le
-compilateur, CMake, Ninja, clang-tidy et clang-format. Voir
+```bash
+./build/debug/bin/demo_16-projet-integre
+```
+
+(ajoutez `.exe` sous Windows)
+
+Sous Windows, **rien d'autre à installer** : Visual Studio 2026 Community
+fournit le compilateur, CMake, Ninja, clang-tidy et clang-format. Sous Linux et
+macOS, le script indique la commande d'installation de ce qui manque. Voir
 [docs/03-outils.md](docs/03-outils.md).
 
 ---
@@ -118,10 +127,12 @@ compilateur, CMake, Ninja, clang-tidy et clang-format. Voir
 ├── modules/            17 modules : README, include/, src/, tests/, requirements/
 ├── common/             microtest (harnais sans allocation) + avio (types, Span, assertions)
 ├── tools/              trace_check.py, config_index.py
-├── scripts/            build.ps1, coverage.ps1
+├── scripts/            build.ps1 / build.sh, coverage.ps1 / coverage.sh
 ├── templates/          checklists de revue, fiches de déviation et d'anomalie
 ├── docs/               documentation transverse
-└── cmake/              fonctions du build
+├── cmake/              fonctions du build
+├── .devcontainer/      environnement Ubuntu figé (le SECI, en exécutable)
+└── .github/workflows/  intégration continue Linux (GCC et Clang)
 ```
 
 Chaque module suit la même convention :
@@ -199,10 +210,41 @@ template). Le binaire vérifié reste le binaire embarqué.
 
 ---
 
+## Trois plateformes, trois chaînes, un seul comportement
+
+Le dépôt se compile et se teste à l'identique avec **MSVC**, **GCC** et
+**Clang**, sous Windows, Linux, WSL et macOS. Les presets CMake portent les
+mêmes noms partout ; seul le lanceur change (`build.ps1` ou `build.sh`).
+
+Ce n'est pas du confort : **chaque compilateur détecte ce que les autres
+laissent passer**. MSVC `/W4` ne voit pas ce que GCC `-Wconversion` voit. Faire
+tourner les deux, c'est deux analyses statiques pour le prix d'une.
+
+| Preset | Où | Rôle |
+|---|---|---|
+| `debug` / `release` | partout | travail quotidien |
+| `strict` | partout | **warnings = erreurs + clang-tidy** |
+| `asan` | partout | sanitizers — rend le module 01 **tangible** |
+| `gcc-strict` / `clang-strict` | Linux, macOS | force un compilateur |
+| `coverage` | Linux, macOS | couverture instructions **et branches** |
+| `vs2026` | Windows | solution `.sln` |
+
+> ⚠️ **Ne pas confondre.** Compiler sur trois chaînes ne dispense de rien : le
+> **SECI** (modules 00 et 14) fige **une** chaîne, **une** version, **un** jeu
+> d'options. La portabilité est un outil de qualité pendant le développement,
+> pas une propriété du produit certifié.
+
+Le [devcontainer](.devcontainer/Dockerfile) est l'illustration la plus concrète
+du SECI : un environnement de production figé, versionné et **reconstructible**.
+
 ## Vérifier que tout fonctionne
 
 ```bash
 .\scripts\build.ps1 -Preset strict -Test
+```
+
+```bash
+./scripts/build.sh -p strict -t
 ```
 
 Le preset `strict` active **warnings = erreurs** et **clang-tidy**. Le dépôt
@@ -214,6 +256,10 @@ python tools/trace_check.py
 
 Zéro défaut de traçabilité. Les *observations* restantes sont documentées et
 constituent un exercice (module 16 §7).
+
+L'[intégration continue](.github/workflows/ci.yml) rejoue tout cela sous Linux
+à chaque poussée, avec GCC **et** Clang, plus les sanitizers, la couverture et
+la vérification du formatage.
 
 ---
 

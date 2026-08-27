@@ -48,12 +48,12 @@ void on_assert_failed(const char* condition, const char* file, i32 line) noexcep
 
 /// Assertion TOUJOURS active (Debug comme Release) : le code embarque est
 /// identique au code verifie.
-#define AVIO_ASSERT(condition)                                                                     \
-    do {                                                                                           \
-        if (!(condition)) {                                                                        \
-            ::avio::detail::on_assert_failed(#condition, __FILE__,                                 \
-                                             static_cast<::avio::i32>(__LINE__));                  \
-        }                                                                                          \
+#define AVIO_ASSERT(condition)                                                    \
+    do {                                                                          \
+        if (!(condition)) {                                                       \
+            ::avio::detail::on_assert_failed(#condition, __FILE__,                \
+                                             static_cast<::avio::i32>(__LINE__)); \
+        }                                                                         \
     } while (false)
 
 #endif  // AVIO_ASSERT_HPP

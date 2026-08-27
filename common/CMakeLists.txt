@@ -22,7 +22,12 @@ target_link_libraries(microtest PUBLIC avio_common)
 # et on limite la derogation a cette seule cible, plutot que de l'appliquer a
 # tout le projet. C'est exactement la demarche attendue pour une deviation a
 # un standard de codage : locale, justifiee, tracee.
-target_compile_definitions(microtest PRIVATE _CRT_SECURE_NO_WARNINGS)
+#
+# Et elle est conditionnee au compilateur concerne : une derogation qui
+# s'applique la ou le probleme n'existe pas est une derogation mal ecrite.
+if(MSVC)
+    target_compile_definitions(microtest PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
 set_target_properties(microtest PROPERTIES FOLDER "common")
 
 # Auto-test du harnais lui-meme. En DO-330, un outil de verification doit lui
