@@ -108,15 +108,17 @@ TEST_REQ(Altitude, monotonie, "LLR-ADCALT-023") {
     // Propriete structurelle : la fonction doit etre STRICTEMENT decroissante.
     // Un test de propriete complete utilement les points de reference : il
     // detecterait une inversion de signe qui passerait entre deux points.
-    f32 pression = mod09::kStaticPressureMinHpa;
+    // Compteur ENTIER : une variable de boucle flottante accumulerait
+    // l'erreur d'arrondi et le nombre d'iterations dependrait de la cible.
     double precedente = 1.0e9;
-    while (pression <= mod09::kStaticPressureMaxHpa) {
+    for (avio::u32 pas = 0U; pas <= 100U; ++pas) {
+        const f32 pression =
+            mod09::kStaticPressureMinHpa + (static_cast<f32>(pas) * 10.0F);
         const mod07::Result<f32> resultat = mod09::pressure_altitude_feet(pression);
         REQUIRE(resultat.is_ok());
         const double altitude = static_cast<double>(resultat.value());
         REQUIRE(altitude < precedente);
         precedente = altitude;
-        pression += 10.0F;
     }
 }
 
@@ -204,10 +206,9 @@ TEST_REQ(SystemeADCALT, calcul_isa_conforme, "HLR-ADCALT-001") {
 
 TEST_REQ(SystemeADCALT, domaine_de_pression_accepte, "HLR-ADCALT-002") {
     // Le domaine COMPLET doit etre accepte, pas seulement quelques points.
-    f32 pression = 100.0F;
-    while (pression <= 1100.0F) {
+    for (avio::u32 pas = 0U; pas <= 1000U; ++pas) {
+        const f32 pression = 100.0F + static_cast<f32>(pas);
         REQUIRE(mod09::pressure_altitude_feet(pression).is_ok());
-        pression += 1.0F;
     }
 }
 
@@ -249,10 +250,9 @@ TEST_REQ(SystemeADCALT, budget_d_erreur_respecte, "HLR-ADCALT-004") {
 }
 
 TEST_REQ(SystemeADCALT, calage_altimetrique_disponible, "HLR-ADCALT-005") {
-    f32 calage = 948.0F;
-    while (calage <= 1084.0F) {
+    for (avio::u32 pas = 0U; pas <= 136U; ++pas) {
+        const f32 calage = 948.0F + static_cast<f32>(pas);
         REQUIRE(mod09::corrected_altitude_feet(850.0F, calage).is_ok());
-        calage += 1.0F;
     }
 }
 
