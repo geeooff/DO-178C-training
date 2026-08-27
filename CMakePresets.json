@@ -1,0 +1,83 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug (Ninja + MSVC)",
+      "description": "Build de travail quotidien pour la formation.",
+      "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "release",
+      "displayName": "Release (Ninja + MSVC)",
+      "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "strict",
+      "displayName": "Strict (warnings = erreurs + clang-tidy)",
+      "description": "Configuration proche d'une chaine de production DO-178C.",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TRAINING_WARNINGS_AS_ERRORS": "ON",
+        "TRAINING_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "vs2026",
+      "displayName": "Visual Studio 2026 (solution .sln)",
+      "description": "Genere une solution VS classique dans build/vs2026.",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/vs2026"
+    }
+  ],
+  "buildPresets": [
+    { "name": "debug",   "configurePreset": "debug" },
+    { "name": "release", "configurePreset": "release" },
+    { "name": "strict",  "configurePreset": "strict" },
+    { "name": "vs2026",  "configurePreset": "vs2026", "configuration": "Debug" }
+  ],
+  "testPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "output": { "outputOnFailure": true, "verbosity": "default" },
+      "execution": { "stopOnFailure": false }
+    },
+    {
+      "name": "strict",
+      "configurePreset": "strict",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "vs2026",
+      "configurePreset": "vs2026",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "verification",
+      "displayName": "Chaine complete : configure + build + test",
+      "steps": [
+        { "type": "configure", "name": "strict" },
+        { "type": "build",     "name": "strict" },
+        { "type": "test",      "name": "strict" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+# Build
+build/
+out/
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.idb
+*.lib
+*.dll
+*.exp
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+compile_commands.json
+Testing/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.VC.opendb
+
+# Couverture
+coverage/
+*.cov
+*.coverage
+
+# Rapports générés
+reports/
+
+# Divers
+*.log
+Thumbs.db
+.DS_Store
