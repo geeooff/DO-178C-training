@@ -61,12 +61,12 @@ void drive_to_active(AlertMonitor& monitor) noexcept {
 // =============================================================================
 //  0. Configuration et initialisation
 // =============================================================================
-TEST_REQ(Configuration, configuration_valide_acceptee, "LLR-ALERT-010") {
+TEST_REQ(Configuration, valid_configuration_accepted, "LLR-ALERT-010") {
     AlertMonitor monitor;
     CHECK(AlertMonitor::create(configuration_reference(), monitor));
 }
 
-TEST_REQ(Configuration, hysteresis_obligatoire, "LLR-ALERT-010") {
+TEST_REQ(Configuration, hysteresis_mandatory, "LLR-ALERT-010") {
     AlertMonitor monitor;
 
     // clear == raise : pas d'hysteresis -> battement garanti.
@@ -80,7 +80,7 @@ TEST_REQ(Configuration, hysteresis_obligatoire, "LLR-ALERT-010") {
     CHECK_FALSE(AlertMonitor::create(inverse, monitor));
 }
 
-TEST_REQ(Configuration, compteurs_non_nuls, "LLR-ALERT-010") {
+TEST_REQ(Configuration, non_zero_counters, "LLR-ALERT-010") {
     AlertMonitor monitor;
 
     AlertConfig without_confirmation = configuration_reference();
@@ -92,7 +92,7 @@ TEST_REQ(Configuration, compteurs_non_nuls, "LLR-ALERT-010") {
     CHECK_FALSE(AlertMonitor::create(without_decay, monitor));
 }
 
-TEST_REQ(Configuration, seuils_non_finis_refuses, "LLR-ALERT-010") {
+TEST_REQ(Configuration, non_finite_thresholds_rejected, "LLR-ALERT-010") {
     AlertMonitor monitor;
 
     AlertConfig nan_climb = configuration_reference();
@@ -104,7 +104,7 @@ TEST_REQ(Configuration, seuils_non_finis_refuses, "LLR-ALERT-010") {
     CHECK_FALSE(AlertMonitor::create(inf_decay, monitor));
 }
 
-TEST_REQ(Initialisation, etat_de_depart, "LLR-ALERT-011") {
+TEST_REQ(Initialization, start_state, "LLR-ALERT-011") {
     const AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.state(), AlertState::Inactive);
     CHECK_FALSE(monitor.is_raised());
@@ -113,7 +113,7 @@ TEST_REQ(Initialisation, etat_de_depart, "LLR-ALERT-011") {
     CHECK_EQ(monitor.rejected_samples(), u32{0});
 }
 
-TEST_REQ(Initialisation, premier_echantillon_ne_leve_pas_l_alerte, "LLR-ALERT-011") {
+TEST_REQ(Initialization, first_sample_does_not_raise_alert, "LLR-ALERT-011") {
     // HLR-ALERT-005 : meme un echantillon tres au-dessus du seuil ne doit pas
     // lever l'alerte au premier cycle (confirm_cycles = 3).
     AlertMonitor monitor = reference_monitor();
@@ -132,13 +132,13 @@ TEST_REQ(Initialisation, premier_echantillon_ne_leve_pas_l_alerte, "LLR-ALERT-01
 //    C2 : 90 <= v <= 100   -> zone morte (hysteresis) : ne contribue a rien
 //    C3 : v < 90           -> contribue a la retombee
 // =============================================================================
-TEST_REQ(Equivalence, classe_au_dessus_du_seuil, "LLR-ALERT-020") {
+TEST_REQ(Equivalence, classifies_above_threshold, "LLR-ALERT-020") {
     AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.update(150.0F), AlertState::Pending);
     CHECK_EQ(monitor.confirm_progress(), u16{1});
 }
 
-TEST_REQ(Equivalence, classe_zone_morte, "LLR-ALERT-020") {
+TEST_REQ(Equivalence, classifies_dead_band, "LLR-ALERT-020") {
     // LA classe la plus interessante : entre les deux seuils, RIEN ne doit
     // bouger. C'est exactement ce que l'hysteresis doit produire.
     AlertMonitor monitor = reference_monitor();
@@ -150,7 +150,7 @@ TEST_REQ(Equivalence, classe_zone_morte, "LLR-ALERT-020") {
     CHECK_EQ(monitor.update(95.0F), AlertState::Active);  // toujours active
 }
 
-TEST_REQ(Equivalence, classe_sous_le_seuil_de_retombee, "LLR-ALERT-030") {
+TEST_REQ(Equivalence, classifies_below_clear_threshold, "LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     CHECK_EQ(monitor.update(50.0F), AlertState::Clearing);
@@ -164,32 +164,32 @@ TEST_REQ(Equivalence, classe_sous_le_seuil_de_retombee, "LLR-ALERT-030") {
 //  Un `>` ecrit `>=` par erreur est le defaut le plus frequent du metier, et
 //  il ne se voit QUE sur la valeur exacte du seuil.
 // =============================================================================
-TEST_REQ(Limites, seuil_de_montee_exact_ne_declenche_pas, "LLR-ALERT-020") {
+TEST_REQ(Limits, exact_raise_threshold_does_not_trigger, "LLR-ALERT-020") {
     AlertMonitor monitor = reference_monitor();
     // Exactement 100,0 : la condition est "> 100", donc rien ne se passe.
     CHECK_EQ(monitor.update(100.0F), AlertState::Inactive);
     CHECK_EQ(monitor.confirm_progress(), u16{0});
 }
 
-TEST_REQ(Limites, juste_au_dessus_du_seuil_declenche, "LLR-ALERT-020") {
+TEST_REQ(Limits, just_above_threshold_triggers, "LLR-ALERT-020") {
     AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.update(100.001F), AlertState::Pending);
 }
 
-TEST_REQ(Limites, seuil_de_retombee_exact_ne_retombe_pas, "LLR-ALERT-030") {
+TEST_REQ(Limits, exact_clear_threshold_does_not_clear, "LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     // Exactement 90,0 : la condition est "< 90", donc l'alerte reste active.
     CHECK_EQ(monitor.update(90.0F), AlertState::Active);
 }
 
-TEST_REQ(Limites, juste_sous_le_seuil_retombe, "LLR-ALERT-030") {
+TEST_REQ(Limits, just_below_threshold_clears, "LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     CHECK_EQ(monitor.update(89.999F), AlertState::Clearing);
 }
 
-TEST_REQ(Limites, confirmation_a_un_seul_cycle, "LLR-ALERT-020") {
+TEST_REQ(Limits, single_cycle_confirmation, "LLR-ALERT-020") {
     // Valeur limite sur un PARAMETRE, pas sur une entree : confirm_cycles = 1
     // court-circuite l'etat Pending. C'est un chemin de code distinct.
     AlertConfig config = configuration_reference();
@@ -201,7 +201,7 @@ TEST_REQ(Limites, confirmation_a_un_seul_cycle, "LLR-ALERT-020") {
     CHECK_EQ(monitor.activation_count(), u32{1});
 }
 
-TEST_REQ(Limites, retombee_a_un_seul_cycle, "LLR-ALERT-030") {
+TEST_REQ(Limits, single_cycle_decay, "LLR-ALERT-030") {
     AlertConfig config = configuration_reference();
     config.clear_cycles = 1U;
     AlertMonitor monitor;
@@ -217,7 +217,7 @@ TEST_REQ(Limites, retombee_a_un_seul_cycle, "LLR-ALERT-030") {
 //  Les quatre etats doivent etre atteints. C'est le minimum absolu, et c'est
 //  loin d'etre suffisant : voir la couverture des transitions ci-dessous.
 // =============================================================================
-TEST_REQ(Etats, les_quatre_etats_sont_atteignables, "LLR-ALERT-020,LLR-ALERT-030") {
+TEST_REQ(States, all_four_states_are_reachable, "LLR-ALERT-020,LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.state(), AlertState::Inactive);
 
@@ -228,7 +228,7 @@ TEST_REQ(Etats, les_quatre_etats_sont_atteignables, "LLR-ALERT-020,LLR-ALERT-030
     CHECK_EQ(monitor.update(50.0F), AlertState::Inactive);
 }
 
-TEST_REQ(Etats, libelles, "LLR-ALERT-011") {
+TEST_REQ(States, labels, "LLR-ALERT-011") {
     CHECK_EQ(mod10::state_name(AlertState::Inactive), "Inactive");
     CHECK_EQ(mod10::state_name(AlertState::Pending), "Pending");
     CHECK_EQ(mod10::state_name(AlertState::Active), "Active");
@@ -244,20 +244,20 @@ TEST_REQ(Etats, libelles, "LLR-ALERT-011") {
 //  transitions laisse passer les defauts les plus courants : compteur non
 //  reinitialise, transition inverse manquante.
 // =============================================================================
-TEST_REQ(Transitions, inactive_vers_pending, "LLR-ALERT-020") {
+TEST_REQ(Transitions, inactive_to_pending, "LLR-ALERT-020") {
     AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.update(150.0F), AlertState::Pending);
     CHECK_EQ(monitor.confirm_progress(), u16{1});
 }
 
-TEST_REQ(Transitions, pending_vers_pending, "LLR-ALERT-021") {
+TEST_REQ(Transitions, pending_to_pending, "LLR-ALERT-021") {
     AlertMonitor monitor = reference_monitor();
     (void)monitor.update(150.0F);
     CHECK_EQ(monitor.update(150.0F), AlertState::Pending);
     CHECK_EQ(monitor.confirm_progress(), u16{2});
 }
 
-TEST_REQ(Transitions, pending_vers_active, "LLR-ALERT-021") {
+TEST_REQ(Transitions, pending_to_active, "LLR-ALERT-021") {
     AlertMonitor monitor = reference_monitor();
     (void)monitor.update(150.0F);
     (void)monitor.update(150.0F);
@@ -266,7 +266,7 @@ TEST_REQ(Transitions, pending_vers_active, "LLR-ALERT-021") {
     CHECK_EQ(monitor.activation_count(), u32{1});
 }
 
-TEST_REQ(Transitions, pending_vers_inactive_annulation, "LLR-ALERT-022") {
+TEST_REQ(Transitions, pending_to_inactive_cancellation, "LLR-ALERT-022") {
     // LE test qui compte : la confirmation doit porter sur des cycles
     // CONSECUTIFS. Un compteur qui ne se remettrait pas a zero declencherait
     // l'alerte sur des depassements isoles cumules.
@@ -279,13 +279,13 @@ TEST_REQ(Transitions, pending_vers_inactive_annulation, "LLR-ALERT-022") {
     CHECK_EQ(monitor.confirm_progress(), u16{0});
 }
 
-TEST_REQ(Transitions, active_vers_clearing, "LLR-ALERT-030") {
+TEST_REQ(Transitions, active_to_clearing, "LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     CHECK_EQ(monitor.update(50.0F), AlertState::Clearing);
 }
 
-TEST_REQ(Transitions, clearing_vers_inactive, "LLR-ALERT-031") {
+TEST_REQ(Transitions, clearing_to_inactive, "LLR-ALERT-031") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     (void)monitor.update(50.0F);
@@ -293,7 +293,7 @@ TEST_REQ(Transitions, clearing_vers_inactive, "LLR-ALERT-031") {
     CHECK_EQ(monitor.confirm_progress(), u16{0});
 }
 
-TEST_REQ(Transitions, clearing_vers_active_annulation, "LLR-ALERT-032") {
+TEST_REQ(Transitions, clearing_to_active_cancellation, "LLR-ALERT-032") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     (void)monitor.update(50.0F);
@@ -303,13 +303,13 @@ TEST_REQ(Transitions, clearing_vers_active_annulation, "LLR-ALERT-032") {
     CHECK_EQ(monitor.confirm_progress(), u16{0});
 }
 
-TEST_REQ(Transitions, inactive_reste_inactive, "LLR-ALERT-020") {
+TEST_REQ(Transitions, inactive_stays_inactive, "LLR-ALERT-020") {
     AlertMonitor monitor = reference_monitor();
     CHECK_EQ(monitor.update(50.0F), AlertState::Inactive);
     CHECK_EQ(monitor.update(95.0F), AlertState::Inactive);
 }
 
-TEST_REQ(Transitions, active_reste_active, "LLR-ALERT-030") {
+TEST_REQ(Transitions, active_stays_active, "LLR-ALERT-030") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     CHECK_EQ(monitor.update(150.0F), AlertState::Active);
@@ -323,7 +323,7 @@ TEST_REQ(Transitions, active_reste_active, "LLR-ALERT-030") {
 //  cachent dans les enchainements. Ces sequences reproduisent des profils
 //  physiques plausibles.
 // =============================================================================
-TEST_REQ(Sequences, bruit_de_capteur_ne_leve_pas_l_alerte, "LLR-ALERT-022") {
+TEST_REQ(Sequences, sensor_noise_does_not_raise_alert, "LLR-ALERT-022") {
     // Profil : la valeur depasse le seuil un cycle sur deux (bruit). Sans
     // l'anti-rebond, l'alerte se leverait. C'est LE scenario que
     // confirm_cycles doit filtrer.
@@ -337,7 +337,7 @@ TEST_REQ(Sequences, bruit_de_capteur_ne_leve_pas_l_alerte, "LLR-ALERT-022") {
     CHECK_EQ(monitor.activation_count(), u32{0});
 }
 
-TEST_REQ(Sequences, oscillation_dans_la_zone_morte, "LLR-ALERT-032,LLR-ALERT-040") {
+TEST_REQ(Sequences, oscillation_in_dead_band, "LLR-ALERT-032,LLR-ALERT-040") {
     // Alerte levee, puis la valeur oscille autour du seuil de retombee.
     // L'hysteresis doit maintenir l'alerte, et le compteur d'activations ne
     // doit PAS augmenter : sinon la maintenance verrait des dizaines
@@ -353,7 +353,7 @@ TEST_REQ(Sequences, oscillation_dans_la_zone_morte, "LLR-ALERT-032,LLR-ALERT-040
     CHECK_EQ(monitor.activation_count(), u32{1});
 }
 
-TEST_REQ(Sequences, cycle_complet_puis_reactivation, "LLR-ALERT-040") {
+TEST_REQ(Sequences, full_cycle_then_reactivation, "LLR-ALERT-040") {
     AlertMonitor monitor = reference_monitor();
 
     drive_to_active(monitor);
@@ -367,7 +367,7 @@ TEST_REQ(Sequences, cycle_complet_puis_reactivation, "LLR-ALERT-040") {
     CHECK_EQ(monitor.activation_count(), u32{2});
 }
 
-TEST_REQ(Sequences, montee_lente_puis_descente_lente, "LLR-ALERT-020,LLR-ALERT-030") {
+TEST_REQ(Sequences, slow_climb_then_slow_descent, "LLR-ALERT-020,LLR-ALERT-030") {
     // Profil physique realiste : une rampe. L'alerte doit se lever 3 cycles
     // apres le franchissement du seuil, et retomber 2 cycles apres le
     // franchissement du seuil bas.
@@ -392,7 +392,7 @@ TEST_REQ(Sequences, montee_lente_puis_descente_lente, "LLR-ALERT-020,LLR-ALERT-0
 // =============================================================================
 //  6. ROBUSTESSE
 // =============================================================================
-TEST_REQ(Robustesse, echantillon_non_fini_ignore, "LLR-ALERT-050") {
+TEST_REQ(Robustness, non_finite_sample_ignored, "LLR-ALERT-050") {
     AlertMonitor monitor = reference_monitor();
     (void)monitor.update(150.0F);
     (void)monitor.update(150.0F);
@@ -407,14 +407,14 @@ TEST_REQ(Robustesse, echantillon_non_fini_ignore, "LLR-ALERT-050") {
     CHECK_EQ(monitor.activation_count(), u32{0});
 }
 
-TEST_REQ(Robustesse, non_fini_pendant_alerte_active, "LLR-ALERT-050") {
+TEST_REQ(Robustness, non_finite_during_active_alert, "LLR-ALERT-050") {
     AlertMonitor monitor = reference_monitor();
     drive_to_active(monitor);
     CHECK_EQ(monitor.update(kNaN), AlertState::Active);
     CHECK(monitor.is_raised());
 }
 
-TEST_REQ(Robustesse, compteur_de_rejets, "LLR-ALERT-051") {
+TEST_REQ(Robustness, rejection_counter, "LLR-ALERT-051") {
     // Sans ce compteur, un capteur qui n'emet que des NaN laisserait l'alerte
     // eternellement inactive SANS que personne ne s'en apercoive. Le rejet
     // silencieux devient observable.
@@ -435,7 +435,7 @@ TEST_REQ(Robustesse, compteur_de_rejets, "LLR-ALERT-051") {
 //  Distinction subtile mais essentielle : l'ETAT interne de la machine et ce
 //  qui est PRESENTE a l'equipage ne sont pas la meme chose.
 // =============================================================================
-TEST_REQ(Etats, alerte_presentee_pendant_la_retombee, "LLR-ALERT-033") {
+TEST_REQ(States, alert_presented_during_decay, "LLR-ALERT-033") {
     AlertMonitor monitor = reference_monitor();
 
     // Inactive et Pending : rien n'est presente.
@@ -464,7 +464,7 @@ TEST_REQ(Etats, alerte_presentee_pendant_la_retombee, "LLR-ALERT-033") {
     CHECK_FALSE(monitor.is_raised());
 }
 
-TEST_REQ(Etats, retombee_annulee_maintient_l_alerte, "LLR-ALERT-033,LLR-ALERT-032") {
+TEST_REQ(States, cancelled_decay_holds_alert, "LLR-ALERT-033,LLR-ALERT-032") {
     // Le scenario reel : la valeur passe brievement sous le seuil de retombee
     // puis remonte. L'alerte ne doit jamais avoir clignote.
     AlertMonitor monitor = reference_monitor();

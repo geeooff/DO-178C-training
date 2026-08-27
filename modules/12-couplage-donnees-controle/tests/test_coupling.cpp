@@ -37,7 +37,7 @@ constexpr f32 kNaN = std::numeric_limits<f32>::quiet_NaN();
 // =============================================================================
 //  1. Tests UNITAIRES : chaque composant isolement
 // =============================================================================
-TEST_REQ(Acquisition, conversion_nominale, "LLR-CHAIN-010") {
+TEST_REQ(Acquisition, nominal_conversion, "LLR-CHAIN-010") {
     Acquisition acquisition;
     acquisition.set_raw(2000);
     const mod07::Result<f32> result = acquisition.read();
@@ -47,7 +47,7 @@ TEST_REQ(Acquisition, conversion_nominale, "LLR-CHAIN-010") {
     CHECK_EQ(acquisition.reject_count(), u32{0});
 }
 
-TEST_REQ(Acquisition, bornes_du_convertisseur, "LLR-CHAIN-010") {
+TEST_REQ(Acquisition, converter_bounds, "LLR-CHAIN-010") {
     Acquisition acquisition;
 
     acquisition.set_raw(Acquisition::kRawMin);
@@ -59,7 +59,7 @@ TEST_REQ(Acquisition, bornes_du_convertisseur, "LLR-CHAIN-010") {
     CHECK_NEAR(static_cast<double>(full_scale.value()), 1023.75, 1e-3);
 }
 
-TEST_REQ(Acquisition, robustesse_hors_domaine, "LLR-CHAIN-010") {
+TEST_REQ(Acquisition, robustness_out_of_domain, "LLR-CHAIN-010") {
     Acquisition acquisition;
     acquisition.set_raw(-1);
     CHECK_EQ(acquisition.read().status(), Status::OutOfRange);
@@ -69,7 +69,7 @@ TEST_REQ(Acquisition, robustesse_hors_domaine, "LLR-CHAIN-010") {
     CHECK_EQ(acquisition.read_count(), u32{2});
 }
 
-TEST_REQ(Filtre, fenetre_incomplete_ne_produit_rien, "LLR-CHAIN-021") {
+TEST_REQ(Filter, incomplete_window_produces_nothing, "LLR-CHAIN-021") {
     Filter filter;
     for (usize index = 0U; index < (Filter::kWindow - 1U); ++index) {
         CHECK(filter.push(100.0F));
@@ -79,7 +79,7 @@ TEST_REQ(Filtre, fenetre_incomplete_ne_produit_rien, "LLR-CHAIN-021") {
     CHECK(filter.average().is_ok());
 }
 
-TEST_REQ(Filtre, moyenne_glissante, "LLR-CHAIN-020,LLR-CHAIN-021") {
+TEST_REQ(Filter, sliding_average, "LLR-CHAIN-020,LLR-CHAIN-021") {
     Filter filter;
     CHECK(filter.push(100.0F));
     CHECK(filter.push(200.0F));
@@ -97,13 +97,13 @@ TEST_REQ(Filtre, moyenne_glissante, "LLR-CHAIN-020,LLR-CHAIN-021") {
     CHECK_NEAR(static_cast<double>(shifted.value()), 350.0, 1e-4);
 }
 
-TEST_REQ(Filtre, robustesse_echantillon_non_fini, "LLR-CHAIN-020") {
+TEST_REQ(Filter, robustness_non_finite_sample, "LLR-CHAIN-020") {
     Filter filter;
     CHECK_FALSE(filter.push(kNaN));
     CHECK_EQ(filter.sample_count(), usize{0});
 }
 
-TEST_REQ(Filtre, remise_a_zero, "LLR-CHAIN-022") {
+TEST_REQ(Filter, reset_to_zero, "LLR-CHAIN-022") {
     Filter filter;
     for (usize index = 0U; index < Filter::kWindow; ++index) {
         (void)filter.push(100.0F);
@@ -134,7 +134,7 @@ struct TraceContext {
 
 }  // namespace
 
-TEST_REQ(Couplage, cycle_nominal, "LLR-CHAIN-030") {
+TEST_REQ(Coupling, cycle_nominal, "LLR-CHAIN-030") {
     TraceContext context;
     context.acquisition.set_raw(2000);
 
@@ -150,7 +150,7 @@ TEST_REQ(Couplage, cycle_nominal, "LLR-CHAIN-030") {
     CHECK_EQ(result.status, Status::NotReady);
 }
 
-TEST_REQ(Couplage, donnee_transmise_sans_alteration, "LLR-CHAIN-030") {
+TEST_REQ(Coupling, data_forwarded_without_alteration, "LLR-CHAIN-030") {
     // COUPLAGE DE DONNEES : on verifie que la valeur produite par
     // Acquisition est EXACTEMENT celle recue par Filter. Une conversion
     // d'unite oubliee a cette frontiere serait invisible autrement.
@@ -174,7 +174,7 @@ TEST_REQ(Couplage, donnee_transmise_sans_alteration, "LLR-CHAIN-030") {
     CHECK_NEAR(static_cast<double>(pushed_value), static_cast<double>(value_read), 1e-6);
 }
 
-TEST_REQ(Couplage, lecture_en_erreur, "LLR-CHAIN-030") {
+TEST_REQ(Coupling, read_in_error, "LLR-CHAIN-030") {
     // Lecture en erreur : le filtre ne doit PAS etre sollicite. Ce test
     // verifie une ABSENCE d'appel, ce qu'aucun test unitaire ne peut faire.
     TraceContext context;
@@ -188,7 +188,7 @@ TEST_REQ(Couplage, lecture_en_erreur, "LLR-CHAIN-030") {
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorReadsAverage), u32{0});
 }
 
-TEST_REQ(Couplage, purge_apres_rejets, "LLR-CHAIN-031") {
+TEST_REQ(Coupling, purge_after_rejections, "LLR-CHAIN-031") {
     // LE cas d'integration : couplage de CONTROLE CONDITIONNEL, declenche par
     // une SEQUENCE. Aucun test unitaire de Filter ni d'Acquisition ne peut
     // l'exercer.
@@ -214,7 +214,7 @@ TEST_REQ(Couplage, purge_apres_rejets, "LLR-CHAIN-031") {
     CHECK_EQ(context.supervisor.flush_count(), u32{1});
 }
 
-TEST_REQ(Couplage, compteur_de_rejets_reinitialise, "LLR-CHAIN-031") {
+TEST_REQ(Coupling, rejection_counter_reset, "LLR-CHAIN-031") {
     // Deux rejets, puis une lecture valide : le compteur doit repartir de zero.
     // Sans cette remise a zero, des rejets ISOLES finiraient par declencher la
     // purge -- exactement le defaut que le mot "consecutifs" doit empecher.
@@ -235,7 +235,7 @@ TEST_REQ(Couplage, compteur_de_rejets_reinitialise, "LLR-CHAIN-031") {
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{0});
 }
 
-TEST_REQ(Couplage, toutes_les_interfaces_exercees, "LLR-CHAIN-040") {
+TEST_REQ(Coupling, all_interfaces_exercised, "LLR-CHAIN-040") {
     // LA demonstration de l'objectif A-7.8 : une seule campagne, qui exerce
     // TOUTES les interfaces declarees dans le SDD.
     TraceContext context;
@@ -258,7 +258,7 @@ TEST_REQ(Couplage, toutes_les_interfaces_exercees, "LLR-CHAIN-040") {
     }
 }
 
-TEST_REQ(Couplage, interface_non_exercee_detectee, "LLR-CHAIN-040") {
+TEST_REQ(Coupling, interface_not_exercised_detected, "LLR-CHAIN-040") {
     // L'outil doit VRAIMENT detecter une interface manquante : sans ce test,
     // `all_interfaces_exercised()` pourrait renvoyer vrai en permanence et le
     // test precedent ne prouverait rien (DO-330 : verifier l'outil).
@@ -285,7 +285,7 @@ struct EmbeddedContext {
 
 }  // namespace
 
-TEST_REQ(Supervision, alerte_au_dela_du_seuil, "LLR-CHAIN-032") {
+TEST_REQ(Supervision, alert_beyond_threshold, "LLR-CHAIN-032") {
     EmbeddedContext context;
     // 3600 counts x 0,25 = 900 unites > 800
     context.acquisition.set_raw(3600);
@@ -299,7 +299,7 @@ TEST_REQ(Supervision, alerte_au_dela_du_seuil, "LLR-CHAIN-032") {
     CHECK(result.alert);
 }
 
-TEST_REQ(Supervision, pas_d_alerte_sous_le_seuil, "LLR-CHAIN-032") {
+TEST_REQ(Supervision, no_alert_below_threshold, "LLR-CHAIN-032") {
     EmbeddedContext context;
     context.acquisition.set_raw(2000);  // 500 unites
 
@@ -311,7 +311,7 @@ TEST_REQ(Supervision, pas_d_alerte_sous_le_seuil, "LLR-CHAIN-032") {
     CHECK_FALSE(result.alert);
 }
 
-TEST_REQ(Supervision, seuil_exact_ne_declenche_pas, "LLR-CHAIN-032") {
+TEST_REQ(Supervision, exact_threshold_does_not_trigger, "LLR-CHAIN-032") {
     // 3200 counts x 0,25 = exactement 800,0. La condition est "> 800".
     EmbeddedContext context;
     context.acquisition.set_raw(3200);
@@ -325,7 +325,7 @@ TEST_REQ(Supervision, seuil_exact_ne_declenche_pas, "LLR-CHAIN-032") {
     CHECK_FALSE(result.alert);
 }
 
-TEST_REQ(Supervision, le_filtre_lisse_les_transitoires, "LLR-CHAIN-032") {
+TEST_REQ(Supervision, the_filter_smooths_transients, "LLR-CHAIN-032") {
     // Comportement de l'ASSEMBLAGE : un pic isole ne doit pas declencher
     // l'alerte, parce que la moyenne l'attenue. Ni Acquisition ni Filter ne
     // possedent cette propriete a eux seuls.

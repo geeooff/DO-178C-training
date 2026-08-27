@@ -24,7 +24,7 @@ void silent_handler(const char* condition, const char* file, avio::i32 line) noe
 // =============================================================================
 //  StaticVector
 // =============================================================================
-TEST_REQ(StaticVector, etat_initial, "LLR-M08-001") {
+TEST_REQ(StaticVector, initial_state, "LLR-M08-001") {
     const mod08::StaticVector<i32, 4U> vector;
     CHECK(vector.empty());
     CHECK_FALSE(vector.full());
@@ -33,7 +33,7 @@ TEST_REQ(StaticVector, etat_initial, "LLR-M08-001") {
     CHECK_EQ(vector.rejected_count(), u32{0});
 }
 
-TEST_REQ(StaticVector, ajout_et_retrait, "LLR-M08-002") {
+TEST_REQ(StaticVector, add_and_remove, "LLR-M08-002") {
     mod08::StaticVector<i32, 4U> vector;
     CHECK(vector.push_back(10));
     CHECK(vector.push_back(20));
@@ -47,7 +47,7 @@ TEST_REQ(StaticVector, ajout_et_retrait, "LLR-M08-002") {
     CHECK_EQ(vector.size(), usize{1});
 }
 
-TEST_REQ(StaticVector, capacite_saturee_sans_realloc, "LLR-M08-003") {
+TEST_REQ(StaticVector, saturated_capacity_without_realloc, "LLR-M08-003") {
     // Point cle : contrairement a std::vector, il n'y a AUCUNE reallocation.
     // Le depassement est un evenement observable, pas un appel silencieux
     // a l'allocateur.
@@ -64,14 +64,14 @@ TEST_REQ(StaticVector, capacite_saturee_sans_realloc, "LLR-M08-003") {
     CHECK_EQ(vector[2], 3);  // le contenu n'a pas ete altere
 }
 
-TEST_REQ(StaticVector, robustesse_retrait_sur_vide, "LLR-M08-004") {
+TEST_REQ(StaticVector, robustness_remove_on_empty, "LLR-M08-004") {
     mod08::StaticVector<i32, 4U> vector;
     i32 value = 777;
     CHECK_FALSE(vector.pop_back(value));
     CHECK_EQ(value, 777);
 }
 
-TEST_REQ(StaticVector, suppression_par_indice, "LLR-M08-005") {
+TEST_REQ(StaticVector, removal_by_index, "LLR-M08-005") {
     mod08::StaticVector<i32, 5U> vector;
     for (i32 index = 0; index < 5; ++index) {
         (void)vector.push_back(index * 10);
@@ -87,7 +87,7 @@ TEST_REQ(StaticVector, suppression_par_indice, "LLR-M08-005") {
     CHECK_EQ(vector.size(), usize{4});
 }
 
-TEST_REQ(StaticVector, acces_verifie_et_non_verifie, "LLR-M08-006") {
+TEST_REQ(StaticVector, checked_and_unchecked_access, "LLR-M08-006") {
     mod08::StaticVector<i32, 4U> vector;
     (void)vector.push_back(42);
 
@@ -109,7 +109,7 @@ TEST_REQ(StaticVector, acces_verifie_et_non_verifie, "LLR-M08-006") {
     CHECK_EQ(lu, 42);  // repli sur l'element 0, jamais de lecture sauvage
 }
 
-TEST_REQ(StaticVector, vue_limitee_a_la_taille, "LLR-M08-007") {
+TEST_REQ(StaticVector, view_limited_to_size, "LLR-M08-007") {
     mod08::StaticVector<i32, 8U> vector;
     (void)vector.push_back(1);
     (void)vector.push_back(2);
@@ -119,7 +119,7 @@ TEST_REQ(StaticVector, vue_limitee_a_la_taille, "LLR-M08-007") {
     CHECK_EQ(view[0], 1);
 }
 
-TEST_REQ(StaticVector, occupation_memoire_connue, "LLR-M08-008") {
+TEST_REQ(StaticVector, known_memory_footprint, "LLR-M08-008") {
     // L'occupation RAM est une CONSTANTE, verifiable a la compilation et
     // inscriptible au budget memoire du calculateur.
     CHECK(sizeof(mod08::StaticVector<i32, 100U>) >= (100U * sizeof(i32)));
@@ -131,14 +131,14 @@ TEST_REQ(StaticVector, occupation_memoire_connue, "LLR-M08-008") {
 // =============================================================================
 using Pool = mod08::MemoryPool<32U, 8U>;
 
-TEST_REQ(MemoryPool, etat_initial, "LLR-M08-010") {
+TEST_REQ(MemoryPool, initial_state, "LLR-M08-010") {
     Pool pool;
     CHECK_EQ(pool.in_use(), usize{0});
     CHECK_EQ(pool.available(), usize{8});
     CHECK_EQ(pool.high_water_mark(), usize{0});
 }
 
-TEST_REQ(MemoryPool, allocation_et_liberation, "LLR-M08-011") {
+TEST_REQ(MemoryPool, allocation_and_release, "LLR-M08-011") {
     Pool pool;
     void* block = pool.allocate();
     REQUIRE(block != nullptr);
@@ -150,7 +150,7 @@ TEST_REQ(MemoryPool, allocation_et_liberation, "LLR-M08-011") {
     CHECK_EQ(pool.available(), usize{8});
 }
 
-TEST_REQ(MemoryPool, epuisement_borne_et_detectable, "LLR-M08-012") {
+TEST_REQ(MemoryPool, bounded_and_detectable_exhaustion, "LLR-M08-012") {
     Pool pool;
     void* blocks[8] = {};
     for (usize index = 0U; index < 8U; ++index) {
@@ -171,7 +171,7 @@ TEST_REQ(MemoryPool, epuisement_borne_et_detectable, "LLR-M08-012") {
     CHECK_EQ(pool.high_water_mark(), usize{8});
 }
 
-TEST_REQ(MemoryPool, blocs_distincts_et_alignes, "LLR-M08-013") {
+TEST_REQ(MemoryPool, distinct_and_aligned_blocks, "LLR-M08-013") {
     Pool pool;
     void* a = pool.allocate();
     void* b = pool.allocate();
@@ -185,7 +185,7 @@ TEST_REQ(MemoryPool, blocs_distincts_et_alignes, "LLR-M08-013") {
     CHECK_EQ(delta, Pool::kBlockSize);
 }
 
-TEST_REQ(MemoryPool, double_liberation_detectee, "LLR-M08-014") {
+TEST_REQ(MemoryPool, double_release_detected, "LLR-M08-014") {
     // Sans cette detection, la seconde liberation reinsererait le meme bloc
     // dans la liste des libres : deux allocations futures renverraient LE MEME
     // bloc. C'est l'un des defauts memoire les plus difficiles a diagnostiquer.
@@ -198,7 +198,7 @@ TEST_REQ(MemoryPool, double_liberation_detectee, "LLR-M08-014") {
     CHECK_EQ(pool.available(), usize{8});
 }
 
-TEST_REQ(MemoryPool, pointeur_etranger_refuse, "LLR-M08-015") {
+TEST_REQ(MemoryPool, foreign_pointer_rejected, "LLR-M08-015") {
     Pool pool;
     i32 local_variable = 0;
     CHECK_FALSE(pool.deallocate(&local_variable));
@@ -206,7 +206,7 @@ TEST_REQ(MemoryPool, pointeur_etranger_refuse, "LLR-M08-015") {
     CHECK_FALSE(pool.owns(&local_variable));
 }
 
-TEST_REQ(MemoryPool, pointeur_mal_aligne_refuse, "LLR-M08-016") {
+TEST_REQ(MemoryPool, misaligned_pointer_rejected, "LLR-M08-016") {
     Pool pool;
     u8* block = static_cast<u8*>(pool.allocate());
     REQUIRE(block != nullptr);
@@ -218,7 +218,7 @@ TEST_REQ(MemoryPool, pointeur_mal_aligne_refuse, "LLR-M08-016") {
     CHECK(pool.deallocate(block));
 }
 
-TEST_REQ(MemoryPool, reutilisation_sans_fragmentation, "LLR-M08-017") {
+TEST_REQ(MemoryPool, reuse_without_fragmentation, "LLR-M08-017") {
     // Sequence qui fragmenterait un tas classique : allocations et liberations
     // entrelacees. Ici, tous les blocs ont la meme taille : la fragmentation
     // est IMPOSSIBLE par construction.
@@ -249,7 +249,7 @@ TEST_REQ(MemoryPool, reutilisation_sans_fragmentation, "LLR-M08-017") {
 // =============================================================================
 //  Analyse de pile
 // =============================================================================
-TEST_REQ(Pile, factorielle_iterative_profondeur_constante, "LLR-M08-020") {
+TEST_REQ(Stack, iterative_factorial_constant_depth, "LLR-M08-020") {
     mod08::CallDepthMonitor::reset();
     u64 result = 0U;
 
@@ -263,14 +263,14 @@ TEST_REQ(Pile, factorielle_iterative_profondeur_constante, "LLR-M08-020") {
     CHECK_EQ(mod08::CallDepthMonitor::maximum(), u32{1});
 }
 
-TEST_REQ(Pile, factorielle_robustesse_hors_domaine, "LLR-M08-021") {
+TEST_REQ(Stack, factorial_robustness_out_of_domain, "LLR-M08-021") {
     u64 result = 42U;
     CHECK_FALSE(mod08::factorial(21U, result));
     CHECK_EQ(result, u64{0});
     CHECK_FALSE(mod08::factorial(1000U, result));
 }
 
-TEST_REQ(Pile, recursion_profondeur_proportionnelle, "LLR-M08-022") {
+TEST_REQ(Stack, recursion_depth_proportional, "LLR-M08-022") {
     // Le contre-exemple : meme resultat, mais la profondeur de pile suit n.
     mod08::CallDepthMonitor::reset();
     u64 result = 0U;
@@ -288,7 +288,7 @@ TEST_REQ(Pile, recursion_profondeur_proportionnelle, "LLR-M08-022") {
     // trame fait 48 octets, cela fait 960 octets contre 48.
 }
 
-TEST_REQ(Pile, les_deux_versions_concordent, "LLR-M08-023") {
+TEST_REQ(Stack, both_versions_match, "LLR-M08-023") {
     for (u32 n = 0U; n <= 20U; ++n) {
         u64 iterative = 0U;
         u64 recursive = 0U;
@@ -298,7 +298,7 @@ TEST_REQ(Pile, les_deux_versions_concordent, "LLR-M08-023") {
     }
 }
 
-TEST_REQ(Pile, profondeur_revient_a_zero, "LLR-M08-024") {
+TEST_REQ(Stack, depth_returns_to_zero, "LLR-M08-024") {
     // La garde RAII decremente sur TOUS les chemins, y compris les sorties
     // anticipees pour entree invalide.
     mod08::CallDepthMonitor::reset();
@@ -308,14 +308,14 @@ TEST_REQ(Pile, profondeur_revient_a_zero, "LLR-M08-024") {
     CHECK_EQ(mod08::CallDepthMonitor::current(), u32{0});
 }
 
-TEST_REQ(Pile, somme_iterative, "LLR-M08-025") {
+TEST_REQ(Stack, iterative_sum, "LLR-M08-025") {
     const i32 values[5] = {1, 2, 3, 4, 5};
     CHECK_EQ(mod08::sum_iterative(values, 5U), i64{15});
     CHECK_EQ(mod08::sum_iterative(nullptr, 5U), i64{0});
     CHECK_EQ(mod08::sum_iterative(values, 0U), i64{0});
 }
 
-TEST_REQ(Pile, recherche_dichotomique, "LLR-M08-026") {
+TEST_REQ(Stack, binary_search, "LLR-M08-026") {
     const i32 sorted[7] = {-10, -3, 0, 4, 9, 21, 100};
     usize index = 0U;
 

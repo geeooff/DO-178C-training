@@ -71,15 +71,15 @@ D'où l'objectif **A-7.8**, requis en DAL **A, B et C**.
 | # | Appelant | Appelé | Condition d'appel | Exercé par |
 |---|---|---|---|---|
 | I1 | Supervisor | `Acquisition::read()` | **inconditionnel** | tous les cycles |
-| I2 | Supervisor | `Filter::push()` | lecture réussie | `Couplage.cycle_nominal` |
-| I3 | Supervisor | `Filter::average()` | lecture réussie | `Couplage.cycle_nominal` |
-| I4 | Supervisor | `Filter::reset()` | **3 rejets consécutifs** | `Couplage.purge_apres_rejets` |
+| I2 | Supervisor | `Filter::push()` | lecture réussie | `Coupling.cycle_nominal` |
+| I3 | Supervisor | `Filter::average()` | lecture réussie | `Coupling.cycle_nominal` |
+| I4 | Supervisor | `Filter::reset()` | **3 rejets consécutifs** | `Coupling.purge_after_rejections` |
 
 > **I4 est le cas critique.** Couplage **conditionnel**, déclenché par une
 > **séquence**. Aucun test unitaire de `Filter` ni d'`Acquisition` ne peut
 > l'exercer : il n'existe qu'à l'assemblage. C'est exactement ce que vise A-7.8.
 
-Notez aussi le test `Couplage.lecture_en_erreur` : il vérifie une **absence
+Notez aussi le test `Coupling.read_in_error` : il vérifie une **absence
 d'appel** (le filtre ne doit pas être sollicité si la lecture a échoué).
 Vérifier qu'une interface **n'est pas** exercée dans un cas donné fait partie
 de l'analyse.
@@ -97,7 +97,7 @@ l'échelle est fixée (`kScaleUnitsPerCount = 0,25`). Une erreur d'échelle à c
 endroit se propage silencieusement dans toute la chaîne aval — le scénario
 Mars Climate Orbiter (module 04), à l'échelle d'un sous-système.
 
-Le test `Couplage.donnee_transmise_sans_alteration` vérifie précisément que la
+Le test `Coupling.data_forwarded_without_alteration` vérifie précisément que la
 valeur produite par `Acquisition` est **exactement** celle reçue par `Filter`.
 
 ### 1.6 Démontrer, pas affirmer
@@ -111,7 +111,7 @@ CHECK(CouplingTrace::all_interfaces_exercised());
 ```
 
 Et — point de méthode essentiel — un test vérifie que **l'outil détecte
-vraiment** une interface manquante (`Couplage.interface_non_exercee_detectee`).
+vraiment** une interface manquante (`Coupling.interface_not_exercised_detected`).
 Sans lui, `all_interfaces_exercised()` pourrait renvoyer vrai en permanence et
 la démonstration ne prouverait rien. C'est la DO-330 appliquée à l'outillage.
 
@@ -197,7 +197,7 @@ interface supplémentaire en projet certifié.
 **4.2 — L'erreur d'unité**
 Changez `kScaleUnitsPerCount` de `0,25` à `0,025` dans `Acquisition`. Quels
 tests échouent ? Combien de temps pour identifier la cause ? Puis imaginez le
-même défaut sans le test `Couplage.donnee_transmise_sans_alteration` : comment
+même défaut sans le test `Coupling.data_forwarded_without_alteration` : comment
 l'auriez-vous trouvé ?
 
 **4.3 — La variable globale**

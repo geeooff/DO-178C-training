@@ -83,7 +83,7 @@ Concrètement, une condition pourrait être **inversée dans le code** sans
 qu'aucun de ces deux tests ne le détecte.
 
 C'est exactement ce que démontre le test
-`Mcdc.couverture_de_decision_ne_suffit_pas`.
+`Mcdc.decision_coverage_is_not_enough`.
 
 ### 1.5 Le jeu MC/DC minimal
 

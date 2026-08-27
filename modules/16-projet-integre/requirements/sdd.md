@@ -68,9 +68,9 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 | # | Appelant | Appelé | Condition | Exercé par |
 |---|---|---|---|---|
 | I1 | `FuelSystem::update` | `TankGauge::read()` ×3 | inconditionnel | tous les tests de cycle |
-| I2 | `FuelSystem::update` | `system_status()` | inconditionnel | `Totalisation.*` |
-| I3 | `FuelSystem::update` | `imbalance_is_measurable()` | inconditionnel | `Desequilibre.*` |
-| I4 | `FuelSystem::update` | `low_fuel_is_measurable()` | inconditionnel | `BasNiveau.*` |
+| I2 | `FuelSystem::update` | `system_status()` | inconditionnel | `Totalization.*` |
+| I3 | `FuelSystem::update` | `imbalance_is_measurable()` | inconditionnel | `Imbalance.*` |
+| I4 | `FuelSystem::update` | `low_fuel_is_measurable()` | inconditionnel | `LowFuel.*` |
 | I5 | `FuelSystem::update` | `AlertMonitor::update()` ×2 | inconditionnel | tous |
 | I6 | `FuelSystem::create` | `TankGauge::create()` ×3 | inconditionnel | `Configuration.*` |
 | I7 | `FuelSystem::create` | `AlertMonitor::create()` ×2 | après validation des seuils | `Configuration.*` |
@@ -92,7 +92,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 > ⚠️ **Changement d'unité entre D2 et D3/D4** : gramme → kilogramme. C'est le
 > point le plus dangereux de toute la chaîne (module 04). Il est isolé dans
 > `Mass::kilograms()`, une seule fonction, testée. Le test
-> `Integration.coherence_des_unites` le vérifie de bout en bout.
+> `Integration.unit_consistency` le vérifie de bout en bout.
 
 ### 1.5 Décisions d'architecture complémentaires
 
@@ -116,7 +116,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
   5000 kg, seuil bas niveau 1500 kg, hystérésis bas niveau 200 kg, seuil de
   déséquilibre 500 kg, hystérésis de déséquilibre 100 kg, 5 cycles de
   confirmation et 5 cycles de retombée.
-- **Vérification** : `Configuration.valeurs_de_reference`
+- **Vérification** : `Configuration.reference_values`
 
 ### LLR-FQMS-010
 
@@ -124,7 +124,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-001
 - **Énoncé** : `TankGauge::create()` doit refuser une capacité nulle et
   initialiser la mesure brute à 0.
-- **Vérification** : `Jauge.creation`
+- **Vérification** : `Gauge.creation`
 
 ### LLR-FQMS-011
 
@@ -133,7 +133,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Énoncé** : `TankGauge::read()` doit renvoyer
   `capacité × (raw − 0) / (4095 − 0)`, calculée en arithmétique entière
   64 bits.
-- **Vérification** : `Jauge.conversion_lineaire`
+- **Vérification** : `Gauge.linear_conversion`
 
 ### LLR-FQMS-012
 
@@ -142,7 +142,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Énoncé** : `TankGauge::read()` doit renvoyer `Status::OutOfRange` pour
   toute mesure brute strictement inférieure à 0 ou strictement supérieure à
   4095.
-- **Vérification** : `Jauge.robustesse_hors_domaine`
+- **Vérification** : `Gauge.robustness_out_of_domain`
 
 ### LLR-FQMS-020
 
@@ -170,7 +170,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-011
 - **Énoncé** : `system_status(n)` doit renvoyer `HardwareFault` si `n == 0`,
   `NotReady` si `1 ≤ n ≤ 2`, `Ok` si `n == 3`.
-- **Vérification** : `Statut.*`
+- **Vérification** : `Status.*`
 
 ### LLR-FQMS-031
 
@@ -179,7 +179,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Énoncé** : La quantité totale doit être la somme des quantités des
   réservoirs valides uniquement ; un réservoir en panne contribue pour 0 et
   voit son champ `sensor_fault` positionné.
-- **Vérification** : `Totalisation.*`
+- **Vérification** : `Totalization.*`
 
 ### LLR-FQMS-040
 
@@ -187,7 +187,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-020
 - **Énoncé** : L'écart d'aile doit valoir la valeur absolue de la différence
   entre les quantités des réservoirs gauche et droit.
-- **Vérification** : `Desequilibre.*`
+- **Vérification** : `Imbalance.*`
 
 ### LLR-FQMS-041
 
@@ -195,7 +195,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-022
 - **Énoncé** : `imbalance_is_measurable(g, d)` doit renvoyer vrai si et
   seulement si les deux jauges d'aile sont valides.
-- **Vérification** : `Decisions.desequilibre_mesurable`
+- **Vérification** : `Decisions.imbalance_measurable`
 
 ### LLR-FQMS-042
 
@@ -204,7 +204,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Énoncé** : L'écart d'aile doit être transmis au moniteur de déséquilibre
   en kilogrammes s'il est mesurable, et sous forme d'échantillon non fini
   sinon.
-- **Vérification** : `Desequilibre.*`
+- **Vérification** : `Imbalance.*`
 
 ### LLR-FQMS-050
 
@@ -212,7 +212,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-030, HLR-FQMS-031
 - **Énoncé** : Le déficit transmis au moniteur bas niveau doit valoir
   `seuil_bas_niveau − quantité_totale`, exprimé en kilogrammes.
-- **Vérification** : `BasNiveau.*`
+- **Vérification** : `LowFuel.*`
 
 ### LLR-FQMS-051
 
@@ -220,7 +220,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-032
 - **Énoncé** : `low_fuel_is_measurable(g, c, d)` doit renvoyer vrai si et
   seulement si les **trois** jauges sont valides.
-- **Vérification** : `Decisions.bas_niveau_mesurable`
+- **Vérification** : `Decisions.low_fuel_measurable`
 
 ### LLR-FQMS-052
 
@@ -228,7 +228,7 @@ comportement exigé par HLR-FQMS-022 et HLR-FQMS-032.
 - **Parent** : HLR-FQMS-032
 - **Énoncé** : Si le bas niveau n'est pas mesurable, un échantillon non fini
   doit être transmis au moniteur, dont l'état est alors conservé.
-- **Vérification** : `BasNiveau.alerte_gelee_sur_panne`
+- **Vérification** : `LowFuel.alert_frozen_on_fault`
 
 ### LLR-FQMS-060
 

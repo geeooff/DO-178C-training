@@ -28,25 +28,25 @@ constexpr double kToleranceFeet = 20.0;
 // =============================================================================
 //  Validation des entrees
 // =============================================================================
-TEST_REQ(Validation, pression_domaine_nominal, "LLR-ADCALT-010") {
+TEST_REQ(Validation, pressure_nominal_domain, "LLR-ADCALT-010") {
     CHECK_EQ(mod09::validate_static_pressure(1013.25F), Status::Ok);
     CHECK_EQ(mod09::validate_static_pressure(500.0F), Status::Ok);
 }
 
-TEST_REQ(Validation, pression_bornes_incluses, "LLR-ADCALT-010") {
+TEST_REQ(Validation, pressure_bounds_included, "LLR-ADCALT-010") {
     // Les bornes sont INCLUSES (HLR-ADCALT-002 dit "inclus").
     CHECK_EQ(mod09::validate_static_pressure(mod09::kStaticPressureMinHpa), Status::Ok);
     CHECK_EQ(mod09::validate_static_pressure(mod09::kStaticPressureMaxHpa), Status::Ok);
 }
 
-TEST_REQ(Validation, pression_hors_domaine, "LLR-ADCALT-010") {
+TEST_REQ(Validation, pressure_out_of_domain, "LLR-ADCALT-010") {
     CHECK_EQ(mod09::validate_static_pressure(99.9F), Status::OutOfRange);
     CHECK_EQ(mod09::validate_static_pressure(1100.1F), Status::OutOfRange);
     CHECK_EQ(mod09::validate_static_pressure(0.0F), Status::OutOfRange);
     CHECK_EQ(mod09::validate_static_pressure(-1.0F), Status::OutOfRange);
 }
 
-TEST_REQ(Validation, pression_non_finie, "LLR-ADCALT-010") {
+TEST_REQ(Validation, non_finite_pressure, "LLR-ADCALT-010") {
     // Statut DISTINCT de OutOfRange : c'est l'exigence derivee HLR-ADCALT-007
     // qui l'impose, pour que la maintenance puisse distinguer un capteur
     // deregle d'un capteur en panne.
@@ -55,7 +55,7 @@ TEST_REQ(Validation, pression_non_finie, "LLR-ADCALT-010") {
     CHECK_EQ(mod09::validate_static_pressure(-kInf), Status::InvalidArgument);
 }
 
-TEST_REQ(Validation, qnh_domaine_et_bornes, "LLR-ADCALT-030") {
+TEST_REQ(Validation, qnh_domain_and_bounds, "LLR-ADCALT-030") {
     CHECK_EQ(mod09::validate_qnh(1013.0F), Status::Ok);
     CHECK_EQ(mod09::validate_qnh(mod09::kQnhMinHpa), Status::Ok);
     CHECK_EQ(mod09::validate_qnh(mod09::kQnhMaxHpa), Status::Ok);
@@ -67,13 +67,13 @@ TEST_REQ(Validation, qnh_domaine_et_bornes, "LLR-ADCALT-030") {
 // =============================================================================
 //  Altitude-pression
 // =============================================================================
-TEST_REQ(Altitude, atmosphere_standard_donne_zero, "LLR-ADCALT-020") {
+TEST_REQ(Altitude, standard_atmosphere_gives_zero, "LLR-ADCALT-020") {
     const mod07::Result<f32> result = mod09::pressure_altitude_feet(1013.25F);
     REQUIRE(result.is_ok());
     CHECK_NEAR(static_cast<double>(result.value()), 0.0, kToleranceFeet);
 }
 
-TEST_REQ(Altitude, table_de_reference, "LLR-ADCALT-022") {
+TEST_REQ(Altitude, reference_table, "LLR-ADCALT-022") {
     // Valeurs de reference issues du modele ISA. Ce sont ces huit points qui
     // demontrent l'objectif HLR-ADCALT-004 (erreur <= 20 ft).
     struct Point {
@@ -93,7 +93,7 @@ TEST_REQ(Altitude, table_de_reference, "LLR-ADCALT-022") {
     }
 }
 
-TEST_REQ(Altitude, pression_superieure_donne_altitude_negative, "LLR-ADCALT-020") {
+TEST_REQ(Altitude, higher_pressure_gives_negative_altitude, "LLR-ADCALT-020") {
     // Cas reel : une depression de 1050 hPa au sol donne une altitude-pression
     // negative. Ce n'est pas une anomalie.
     const mod07::Result<f32> result = mod09::pressure_altitude_feet(1050.0F);
@@ -101,7 +101,7 @@ TEST_REQ(Altitude, pression_superieure_donne_altitude_negative, "LLR-ADCALT-020"
     CHECK_NEAR(static_cast<double>(result.value()), -988.83, kToleranceFeet);
 }
 
-TEST_REQ(Altitude, monotonie, "LLR-ADCALT-023") {
+TEST_REQ(Altitude, monotonicity, "LLR-ADCALT-023") {
     // Propriete structurelle : la fonction doit etre STRICTEMENT decroissante.
     // Un test de propriete complete utilement les points de reference : il
     // detecterait une inversion de signe qui passerait entre deux points.
@@ -118,12 +118,12 @@ TEST_REQ(Altitude, monotonie, "LLR-ADCALT-023") {
     }
 }
 
-TEST_REQ(Altitude, robustesse_hors_domaine, "LLR-ADCALT-021") {
+TEST_REQ(Altitude, robustness_out_of_domain, "LLR-ADCALT-021") {
     CHECK_EQ(mod09::pressure_altitude_feet(50.0F).status(), Status::OutOfRange);
     CHECK_EQ(mod09::pressure_altitude_feet(2000.0F).status(), Status::OutOfRange);
 }
 
-TEST_REQ(Altitude, robustesse_non_finie, "LLR-ADCALT-021") {
+TEST_REQ(Altitude, robustness_non_finite, "LLR-ADCALT-021") {
     CHECK_EQ(mod09::pressure_altitude_feet(kNaN).status(), Status::InvalidArgument);
     CHECK_EQ(mod09::pressure_altitude_feet(kInf).status(), Status::InvalidArgument);
 }
@@ -131,7 +131,7 @@ TEST_REQ(Altitude, robustesse_non_finie, "LLR-ADCALT-021") {
 // =============================================================================
 //  Correction du calage altimetrique
 // =============================================================================
-TEST_REQ(Correction, calage_standard_sans_effet, "LLR-ADCALT-031") {
+TEST_REQ(Correction, standard_setting_has_no_effect, "LLR-ADCALT-031") {
     const mod07::Result<f32> with = mod09::corrected_altitude_feet(850.0F, 1013.25F);
     const mod07::Result<f32> without = mod09::pressure_altitude_feet(850.0F);
     REQUIRE(with.is_ok());
@@ -139,26 +139,26 @@ TEST_REQ(Correction, calage_standard_sans_effet, "LLR-ADCALT-031") {
     CHECK_NEAR(static_cast<double>(with.value()), static_cast<double>(without.value()), 0.5);
 }
 
-TEST_REQ(Correction, calage_bas_abaisse_l_altitude, "LLR-ADCALT-031") {
+TEST_REQ(Correction, low_qnh_lowers_altitude, "LLR-ADCALT-031") {
     // QNH 1003,25 hPa = 10 hPa sous le standard -> -270 ft.
     const mod07::Result<f32> result = mod09::corrected_altitude_feet(850.0F, 1003.25F);
     REQUIRE(result.is_ok());
     CHECK_NEAR(static_cast<double>(result.value()), 4779.19 - 270.0, kToleranceFeet);
 }
 
-TEST_REQ(Correction, calage_haut_releve_l_altitude, "LLR-ADCALT-031") {
+TEST_REQ(Correction, high_qnh_raises_altitude, "LLR-ADCALT-031") {
     const mod07::Result<f32> result = mod09::corrected_altitude_feet(850.0F, 1023.25F);
     REQUIRE(result.is_ok());
     CHECK_NEAR(static_cast<double>(result.value()), 4779.19 + 270.0, kToleranceFeet);
 }
 
-TEST_REQ(Correction, robustesse_calage_hors_domaine, "LLR-ADCALT-032") {
+TEST_REQ(Correction, robustness_setting_out_of_domain, "LLR-ADCALT-032") {
     CHECK_EQ(mod09::corrected_altitude_feet(850.0F, 900.0F).status(), Status::OutOfRange);
     CHECK_EQ(mod09::corrected_altitude_feet(850.0F, 1200.0F).status(), Status::OutOfRange);
     CHECK_EQ(mod09::corrected_altitude_feet(850.0F, kNaN).status(), Status::InvalidArgument);
 }
 
-TEST_REQ(Correction, priorite_des_erreurs, "LLR-ADCALT-032") {
+TEST_REQ(Correction, error_priority, "LLR-ADCALT-032") {
     // LES DEUX entrees sont invalides. L'exigence SPECIFIE que c'est le statut
     // de la PRESSION qui remonte. Sans cette specification, le comportement
     // dependrait de l'implementation et ne serait pas verifiable.
@@ -169,7 +169,7 @@ TEST_REQ(Correction, priorite_des_erreurs, "LLR-ADCALT-032") {
     CHECK_EQ(nan_pressure.status(), Status::InvalidArgument);
 }
 
-TEST_REQ(Correction, constante_exposee, "LLR-ADCALT-033") {
+TEST_REQ(Correction, exposed_constant, "LLR-ADCALT-033") {
     CHECK_NEAR(static_cast<double>(mod09::feet_per_hpa()), 27.0, 1e-6);
 }
 
@@ -186,7 +186,7 @@ TEST_REQ(Correction, constante_exposee, "LLR-ADCALT-033") {
 //  "with independence").
 // =============================================================================
 
-TEST_REQ(SystemeADCALT, calcul_isa_conforme, "HLR-ADCALT-001") {
+TEST_REQ(AdcaltSystem, conforming_isa_computation, "HLR-ADCALT-001") {
     // Vue "boite noire" : on ne verifie pas la formule, on verifie que le
     // composant se comporte comme l'atmosphere standard.
     const mod07::Result<f32> sea_level = mod09::pressure_altitude_feet(1013.25F);
@@ -200,7 +200,7 @@ TEST_REQ(SystemeADCALT, calcul_isa_conforme, "HLR-ADCALT-001") {
     CHECK_NEAR(static_cast<double>(cruise_level.value()), 35000.0, 100.0);
 }
 
-TEST_REQ(SystemeADCALT, domaine_de_pression_accepte, "HLR-ADCALT-002") {
+TEST_REQ(AdcaltSystem, accepted_pressure_domain, "HLR-ADCALT-002") {
     // Le domaine COMPLET doit etre accepte, pas seulement quelques points.
     for (avio::u32 pas = 0U; pas <= 1000U; ++pas) {
         const f32 pressure = 100.0F + static_cast<f32>(pas);
@@ -208,7 +208,7 @@ TEST_REQ(SystemeADCALT, domaine_de_pression_accepte, "HLR-ADCALT-002") {
     }
 }
 
-TEST_REQ(SystemeADCALT, rejet_hors_domaine, "HLR-ADCALT-003") {
+TEST_REQ(AdcaltSystem, out_of_domain_rejection, "HLR-ADCALT-003") {
     const f32 invalid[6] = {0.0F, -1.0F, 99.99F, 1100.01F, kNaN, kInf};
     for (usize index = 0U; index < 6U; ++index) {
         const mod07::Result<f32> result = mod09::pressure_altitude_feet(invalid[index]);
@@ -218,7 +218,7 @@ TEST_REQ(SystemeADCALT, rejet_hors_domaine, "HLR-ADCALT-003") {
     }
 }
 
-TEST_REQ(SystemeADCALT, budget_d_erreur_respecte, "HLR-ADCALT-004") {
+TEST_REQ(AdcaltSystem, error_budget_respected, "HLR-ADCALT-004") {
     // Verification du budget de 20 ft sur les huit points de reference du
     // modele ISA. C'est la demonstration de l'exigence, pas un echantillonnage
     // de confort.
@@ -243,20 +243,20 @@ TEST_REQ(SystemeADCALT, budget_d_erreur_respecte, "HLR-ADCALT-004") {
     CHECK(error_max <= kToleranceFeet);
 }
 
-TEST_REQ(SystemeADCALT, calage_altimetrique_disponible, "HLR-ADCALT-005") {
+TEST_REQ(AdcaltSystem, altimeter_setting_available, "HLR-ADCALT-005") {
     for (avio::u32 pas = 0U; pas <= 136U; ++pas) {
         const f32 setting = 948.0F + static_cast<f32>(pas);
         REQUIRE(mod09::corrected_altitude_feet(850.0F, setting).is_ok());
     }
 }
 
-TEST_REQ(SystemeADCALT, calage_hors_domaine_rejete, "HLR-ADCALT-006") {
+TEST_REQ(AdcaltSystem, out_of_domain_setting_rejected, "HLR-ADCALT-006") {
     CHECK(mod09::corrected_altitude_feet(850.0F, 947.99F).is_error());
     CHECK(mod09::corrected_altitude_feet(850.0F, 1084.01F).is_error());
     CHECK(mod09::corrected_altitude_feet(850.0F, 0.0F).is_error());
 }
 
-TEST_REQ(SystemeADCALT, causes_de_rejet_distinctes, "HLR-ADCALT-007") {
+TEST_REQ(AdcaltSystem, distinct_rejection_causes, "HLR-ADCALT-007") {
     // L'exigence DERIVEE : les trois causes doivent etre DISCERNABLES.
     CHECK_EQ(mod09::pressure_altitude_feet(50.0F).status(), Status::OutOfRange);
     CHECK_EQ(mod09::pressure_altitude_feet(kNaN).status(), Status::InvalidArgument);

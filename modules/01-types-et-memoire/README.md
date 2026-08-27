@@ -239,16 +239,16 @@ rend le test possible.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M01-001 | `is_valid()` renvoie vrai pour tout membre déclaré de `SensorId` autre que `Count`. | `Enum.valeurs_nominales_valides` |
-| LLR-M01-002 | `is_valid()` renvoie faux pour toute valeur brute ≥ `Count`. | `Enum.robustesse_valeur_hors_domaine` |
-| LLR-M01-003 | `name_of()` renvoie le libellé du capteur, ou `"Inconnu"` si l'identifiant est hors domaine. Elle ne renvoie jamais `nullptr`. | `Enum.nom_de_chaque_membre` |
-| LLR-M01-004 | `SensorId` occupe exactement 8 bits. | `Enum.type_sous_jacent_est_un_octet` |
+| LLR-M01-001 | `is_valid()` renvoie vrai pour tout membre déclaré de `SensorId` autre que `Count`. | `Enum.valid_nominal_values` |
+| LLR-M01-002 | `is_valid()` renvoie faux pour toute valeur brute ≥ `Count`. | `Enum.robustness_value_out_of_domain` |
+| LLR-M01-003 | `name_of()` renvoie le libellé du capteur, ou `"Inconnu"` si l'identifiant est hors domaine. Elle ne renvoie jamais `nullptr`. | `Enum.name_of_each_member` |
+| LLR-M01-004 | `SensorId` occupe exactement 8 bits. | `Enum.underlying_type_is_a_byte` |
 | LLR-M01-010..014 | Les opérations `saturating_add/sub/mul` renvoient le résultat exact s'il est représentable sur `i16`, sinon la borne la plus proche. Elles sont évaluables à la compilation. | `Saturation.*` |
 | LLR-M01-020..022 | `checked_add()` renvoie faux et met le résultat à 0 si la somme n'est pas représentable sur `i32`. | `Checked.addition_*` |
 | LLR-M01-023..024 | `checked_div()` renvoie faux pour un diviseur nul et pour `INT_MIN / −1`. | `Checked.division_*` |
 | LLR-M01-030..034 | `checked_cast()` n'écrit la destination que si la conversion préserve exactement la valeur et le signe. | `Cast.*` |
 | LLR-M01-040..041 | `in_range()` teste un intervalle **fermé** ; `clamp()` ramène aux bornes. | `Range.*` |
-| LLR-M01-050 | Les tailles de `NaiveFrame` et `CompactFrame` sont respectivement de 12 et 8 octets sur la cible de référence. | `Layout.bourrage_observable` |
+| LLR-M01-050 | Les tailles de `NaiveFrame` et `CompactFrame` sont respectivement de 12 et 8 octets sur la cible de référence. | `Layout.observable_padding` |
 
 ---
 

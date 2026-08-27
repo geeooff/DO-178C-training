@@ -216,7 +216,7 @@ pas une microseconde aux suivantes. Le dépassement est enregistré et remonté 
 *health monitoring*, qui décide : redémarrage de la partition, passivation,
 bascule sur le calculateur redondant.
 
-Le test `Ordonnancement.depassement_detecte_et_localise` le démontre : la
+Le test `Scheduling.overrun_detected_and_localized` le démontre : la
 partition Maintenance (DAL D) déborde de 500 µs, elle est identifiée, et les
 commandes de vol ne sont pas affectées.
 

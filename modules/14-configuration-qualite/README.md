@@ -136,7 +136,7 @@ intégrité. Le chargement logiciel d'un équipement en atelier peut échouer
 partiellement, la Flash peut se dégrader, un technicien peut charger la
 mauvaise version. C'est la dernière barrière.
 
-Le test `Crc32.detecte_toute_alteration_d_un_bit` bascule chacun des 72 bits
+Le test `Crc32.detects_any_single_bit_alteration` bascule chacun des 72 bits
 d'une image, un par un, et vérifie que le CRC change à chaque fois. C'est la
 propriété qui fait d'un CRC un contrôle d'intégrité — et elle se démontre.
 

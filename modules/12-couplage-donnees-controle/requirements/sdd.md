@@ -32,9 +32,9 @@ l'analyse**, à confronter aux tests d'intégration.
 | # | Appelant | Appelé | Condition d'appel | Exercé par |
 |---|---|---|---|---|
 | I1 | Supervisor | `Acquisition::read()` | **inconditionnel**, à chaque cycle | tous les cycles |
-| I2 | Supervisor | `Filter::push()` | lecture réussie | `Couplage.cycle_nominal` |
-| I3 | Supervisor | `Filter::average()` | lecture réussie | `Couplage.cycle_nominal` |
-| I4 | Supervisor | `Filter::reset()` | **3 rejets consécutifs** | `Couplage.purge_apres_rejets` |
+| I2 | Supervisor | `Filter::push()` | lecture réussie | `Coupling.cycle_nominal` |
+| I3 | Supervisor | `Filter::average()` | lecture réussie | `Coupling.cycle_nominal` |
+| I4 | Supervisor | `Filter::reset()` | **3 rejets consécutifs** | `Coupling.purge_after_rejections` |
 
 > **I4 est le cas critique.** C'est un couplage **conditionnel**, déclenché par
 > une séquence. Aucun test unitaire de `Filter` ni de `Acquisition` ne peut
@@ -102,7 +102,7 @@ vérifiable par lecture des signatures**.
 - **Énoncé** : `Filter::push()` doit ajouter l'échantillon à une fenêtre
   glissante de 4 éléments et renvoyer faux sans rien modifier si l'échantillon
   n'est pas fini.
-- **Vérification** : `Filtre.*`
+- **Vérification** : `Filter.*`
 
 ### LLR-CHAIN-021
 
@@ -113,7 +113,7 @@ vérifiable par lecture des signatures**.
 - **Justification** : Produire une moyenne sur une fenêtre incomplète serait
   produire une valeur **biaisée mais plausible** — plus dangereux que pas de
   valeur du tout.
-- **Vérification** : `Filtre.*`
+- **Vérification** : `Filter.*`
 
 ### LLR-CHAIN-022
 
@@ -121,7 +121,7 @@ vérifiable par lecture des signatures**.
 - **Parent** : HLR-CHAIN-002
 - **Énoncé** : `Filter::reset()` doit vider la fenêtre et remettre le compteur
   d'échantillons à zéro.
-- **Vérification** : `Filtre.remise_a_zero`
+- **Vérification** : `Filter.reset_to_zero`
 
 ### LLR-CHAIN-030
 
@@ -129,7 +129,7 @@ vérifiable par lecture des signatures**.
 - **Parent** : HLR-CHAIN-003
 - **Énoncé** : `Supervisor::cycle()` doit appeler `Acquisition::read()` puis,
   en cas de succès seulement, `Filter::push()` et `Filter::average()`.
-- **Vérification** : `Couplage.cycle_nominal`, `Couplage.lecture_en_erreur`
+- **Vérification** : `Coupling.cycle_nominal`, `Coupling.read_in_error`
 
 ### LLR-CHAIN-031
 
@@ -140,8 +140,8 @@ vérifiable par lecture des signatures**.
   de rejets consécutifs à zéro.
 - **Justification** : Une fenêtre contenant des données périmées produirait une
   moyenne trompeuse au retour du capteur. **Défaut d'intégration classique.**
-- **Vérification** : `Couplage.purge_apres_rejets`,
-  `Couplage.compteur_de_rejets_reinitialise`
+- **Vérification** : `Coupling.purge_after_rejections`,
+  `Coupling.rejection_counter_reset`
 
 ### LLR-CHAIN-032
 
@@ -161,7 +161,7 @@ vérifiable par lecture des signatures**.
 - **Justification** : **Exigence dérivée** portant sur l'outillage, non sur le
   produit embarqué. Elle matérialise la démonstration attendue par
   l'objectif A-7.8.
-- **Vérification** : `Couplage.toutes_les_interfaces_exercees`
+- **Vérification** : `Coupling.all_interfaces_exercised`
 
 ---
 

@@ -132,11 +132,11 @@ Mutations à essayer sur `alert_monitor.cpp` :
 
 | # | Mutation | Test censé la détecter |
 |---|---|---|
-| M1 | `sample > raise` → `sample >= raise` | `Limites.seuil_de_montee_exact_ne_declenche_pas` |
-| M2 | supprimer `progress_ = 0U` dans l'annulation `Pending` | `Transitions.pending_vers_inactive_annulation` |
-| M3 | incrémenter `activations_` aussi depuis `Clearing` | `Sequences.oscillation_dans_la_zone_morte` |
-| M4 | `>= confirm_cycles` → `> confirm_cycles` | `Transitions.pending_vers_active` |
-| M5 | traiter un NaN comme une valeur sous le seuil | `Robustesse.non_fini_pendant_alerte_active` |
+| M1 | `sample > raise` → `sample >= raise` | `Limits.exact_raise_threshold_does_not_trigger` |
+| M2 | supprimer `progress_ = 0U` dans l'annulation `Pending` | `Transitions.pending_to_inactive_cancellation` |
+| M3 | incrémenter `activations_` aussi depuis `Clearing` | `Sequences.oscillation_in_dead_band` |
+| M4 | `>= confirm_cycles` → `> confirm_cycles` | `Transitions.pending_to_active` |
+| M5 | traiter un NaN comme une valeur sous le seuil | `Robustness.non_finite_during_active_alert` |
 
 C'est l'exercice 5.1, et c'est la meilleure façon d'apprendre à écrire des
 tests qui servent à quelque chose.

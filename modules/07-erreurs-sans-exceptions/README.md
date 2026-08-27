@@ -210,22 +210,22 @@ module porte un identifiant `LLR-M07-0xx` **et** un test qui l'exerce.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M07-001 | `status_name()` renvoie un libellé unique par valeur de `Status`. | `Status.libelle_de_chaque_valeur` |
-| LLR-M07-002 | `status_name()` renvoie `"StatutInconnu"` pour toute valeur hors énumération, et ne renvoie jamais `nullptr`. | `Status.robustesse_valeur_hors_enumeration` |
-| LLR-M07-003 | `is_fault()` classe comme panne : `ChecksumError`, `HardwareFault`, `Timeout`, `OutOfRange` — et **pas** `NotReady`. | `Status.classification_des_pannes` |
-| LLR-M07-010 | Un `Result<T>` construit par défaut est en erreur, statut `NotReady`. | `Result.defaut_est_une_erreur` |
-| LLR-M07-011..012 | `ok()` / `error()` produisent l'état attendu ; `value_or()` renvoie le repli en cas d'erreur. | `Result.succes`, `Result.erreur` |
-| LLR-M07-013 | `Result::error(Status::Ok)` est neutralisé en `InvalidArgument`. | `Result.erreur_ok_est_neutralisee` |
-| LLR-M07-014 | `value()` appelé sur un résultat en erreur notifie le gestionnaire d'anomalie et renvoie une valeur neutre. | `Result.acces_value_sur_erreur_est_signale` |
-| LLR-M07-020..022 | `StatusCounters` compte par statut, totalise les pannes, désigne la dominante, et ignore les statuts hors énumération. | `Compteurs.*` |
-| LLR-M07-030 | `has_odd_parity()` renvoie vrai si et seulement si le nombre de bits à 1 est impair. | `Arinc.parite_impaire` |
-| LLR-M07-031..032 | `encode()` puis `decode()` restituent label, SDI, charge utile et SSM ; la charge utile est interprétée en complément à deux sur 19 bits. | `Arinc.encodage_puis_decodage`, `Arinc.valeur_negative_complement_a_deux` |
-| LLR-M07-033 | Une parité paire produit `ChecksumError`. | `Arinc.robustesse_parite_alteree` |
-| LLR-M07-034 | Un label hors de la liste acceptée produit `InvalidArgument`. | `Arinc.robustesse_label_non_traite` |
-| LLR-M07-035 | `SSM = FailureWarning` produit `HardwareFault`. | `Arinc.ssm_panne_source` |
-| LLR-M07-036 | `SSM = NoComputedData` ou `FunctionalTest` produit `NotReady`. | `Arinc.ssm_donnee_indisponible` |
-| LLR-M07-040..042 | `extract_altitude_feet()` renvoie l'altitude en pieds, et propage intact le statut de l'étape en erreur. | `Chainage.*` |
-| LLR-M07-043..044 | Toute altitude hors de [−2000 ; +60000] ft produit `OutOfRange`, bornes incluses acceptées. | `Chainage.valeur_hors_domaine_de_vol`, `Chainage.bornes_du_domaine_de_vol` |
+| LLR-M07-001 | `status_name()` renvoie un libellé unique par valeur de `Status`. | `Status.label_for_each_value` |
+| LLR-M07-002 | `status_name()` renvoie `"StatutInconnu"` pour toute valeur hors énumération, et ne renvoie jamais `nullptr`. | `Status.robustness_value_outside_enumeration` |
+| LLR-M07-003 | `is_fault()` classe comme panne : `ChecksumError`, `HardwareFault`, `Timeout`, `OutOfRange` — et **pas** `NotReady`. | `Status.fault_classification` |
+| LLR-M07-010 | Un `Result<T>` construit par défaut est en erreur, statut `NotReady`. | `Result.default_is_an_error` |
+| LLR-M07-011..012 | `ok()` / `error()` produisent l'état attendu ; `value_or()` renvoie le repli en cas d'erreur. | `Result.success`, `Result.error` |
+| LLR-M07-013 | `Result::error(Status::Ok)` est neutralisé en `InvalidArgument`. | `Result.error_ok_is_neutralized` |
+| LLR-M07-014 | `value()` appelé sur un résultat en erreur notifie le gestionnaire d'anomalie et renvoie une valeur neutre. | `Result.access_value_on_error_is_reported` |
+| LLR-M07-020..022 | `StatusCounters` compte par statut, totalise les pannes, désigne la dominante, et ignore les statuts hors énumération. | `Counters.*` |
+| LLR-M07-030 | `has_odd_parity()` renvoie vrai si et seulement si le nombre de bits à 1 est impair. | `Arinc.odd_parity` |
+| LLR-M07-031..032 | `encode()` puis `decode()` restituent label, SDI, charge utile et SSM ; la charge utile est interprétée en complément à deux sur 19 bits. | `Arinc.encoding_then_decoding`, `Arinc.negative_value_twos_complement` |
+| LLR-M07-033 | Une parité paire produit `ChecksumError`. | `Arinc.robustness_altered_parity` |
+| LLR-M07-034 | Un label hors de la liste acceptée produit `InvalidArgument`. | `Arinc.robustness_unhandled_label` |
+| LLR-M07-035 | `SSM = FailureWarning` produit `HardwareFault`. | `Arinc.ssm_source_fault` |
+| LLR-M07-036 | `SSM = NoComputedData` ou `FunctionalTest` produit `NotReady`. | `Arinc.ssm_data_unavailable` |
+| LLR-M07-040..042 | `extract_altitude_feet()` renvoie l'altitude en pieds, et propage intact le statut de l'étape en erreur. | `Chaining.*` |
+| LLR-M07-043..044 | Toute altitude hors de [−2000 ; +60000] ft produit `OutOfRange`, bornes incluses acceptées. | `Chaining.value_out_of_flight_domain`, `Chaining.flight_domain_bounds` |
 
 ---
 

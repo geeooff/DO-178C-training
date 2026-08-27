@@ -177,21 +177,21 @@ compris ce que la norme attend.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M04-001 | Une `Mass` construite par défaut vaut 0 g et respecte son invariant. | `Mass.etat_par_defaut_valide` |
-| LLR-M04-002..004 | Les fabriques `from_grams/kilograms/pounds` convertissent selon les facteurs 1 kg = 1000 g et 1 lb = 453,59237 g. | `Mass.fabrique_*` |
-| LLR-M04-005 | Toute valeur négative est refusée et la sortie reste inchangée. | `Mass.robustesse_valeur_negative` |
-| LLR-M04-006 | Toute valeur supérieure à `kMaxGrams` (200 t) est refusée ; `kMaxGrams` lui-même est accepté. | `Mass.robustesse_hors_domaine_haut` |
-| LLR-M04-007 | NaN et ±∞ sont refusés par toutes les fabriques flottantes. | `Mass.robustesse_nan_et_infini` |
+| LLR-M04-001 | Une `Mass` construite par défaut vaut 0 g et respecte son invariant. | `Mass.valid_default_state` |
+| LLR-M04-002..004 | Les fabriques `from_grams/kilograms/pounds` convertissent selon les facteurs 1 kg = 1000 g et 1 lb = 453,59237 g. | `Mass.from_*` |
+| LLR-M04-005 | Toute valeur négative est refusée et la sortie reste inchangée. | `Mass.robustness_negative_value` |
+| LLR-M04-006 | Toute valeur supérieure à `kMaxGrams` (200 t) est refusée ; `kMaxGrams` lui-même est accepté. | `Mass.robustness_out_of_domain_high` |
+| LLR-M04-007 | NaN et ±∞ sont refusés par toutes les fabriques flottantes. | `Mass.robustness_nan_and_infinity` |
 | LLR-M04-010..012 | Les comparaisons sont exactes ; l'addition sature à `kMaxGrams` ; la soustraction est bornée à 0. | `Mass.*` |
 | LLR-M04-020..022 | `Altitude` accepte le domaine [−2000 ; +60000] ft bornes incluses et convertit à 3,280839895 ft/m. | `Altitude.*` |
-| LLR-M04-023 | NaN et ±∞ sont refusés. | `Altitude.robustesse_nan_et_infini` |
-| LLR-M04-024..025 | `is_close()` compare à une tolérance explicite et renvoie faux pour toute tolérance négative ou NaN. | `Altitude.comparaison_a_tolerance`, `Altitude.robustesse_tolerance_invalide` |
+| LLR-M04-023 | NaN et ±∞ sont refusés. | `Altitude.robustness_nan_and_infinity` |
+| LLR-M04-024..025 | `is_close()` compare à une tolérance explicite et renvoie faux pour toute tolérance négative ou NaN. | `Altitude.comparison_with_tolerance`, `Altitude.robustness_invalid_tolerance` |
 | LLR-M04-026..027 | L'ordre est total sur les altitudes finies ; la conversion aller-retour pieds→mètres→pieds reste dans une tolérance de 0,1 ft. | `Altitude.*` |
-| LLR-M04-030 | `FuelTank::create()` produit un réservoir vide de la capacité demandée. | `FuelTank.creation_nominale` |
-| LLR-M04-031 | Une capacité nulle est refusée ; `fill_ratio_percent()` vaut alors 0 (aucune division par zéro). | `FuelTank.robustesse_capacite_nulle` |
+| LLR-M04-030 | `FuelTank::create()` produit un réservoir vide de la capacité demandée. | `FuelTank.nominal_creation` |
+| LLR-M04-031 | Une capacité nulle est refusée ; `fill_ratio_percent()` vaut alors 0 (aucune division par zéro). | `FuelTank.robustness_zero_capacity` |
 | LLR-M04-032..034 | `add()` et `remove()` renvoient la quantité **effective**, bornée par la place disponible et par le contenu. | `FuelTank.*` |
-| LLR-M04-035 | L'invariant `0 ≤ quantité ≤ capacité` est vrai après toute séquence d'opérations. | `FuelTank.sequence_longue_invariant_toujours_vrai` |
-| LLR-M04-040 | Deux masses issues d'unités différentes sont comparables sans ambiguïté après construction. | `TypeFort.meme_masse_deux_unites` |
+| LLR-M04-035 | L'invariant `0 ≤ quantité ≤ capacité` est vrai après toute séquence d'opérations. | `FuelTank.long_sequence_invariant_always_true` |
+| LLR-M04-040 | Deux masses issues d'unités différentes sont comparables sans ambiguïté après construction. | `StrongType.same_mass_two_units` |
 
 ---
 

@@ -197,19 +197,19 @@ les chemins d'erreur.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M03-001 | Les objets locaux d'une portée sont détruits dans l'ordre inverse de leur construction. | `CycleDeVie.destruction_en_ordre_inverse` |
-| LLR-M03-002 | Le nombre de destructions égale le nombre de créations (construction, copie, déplacement). | `CycleDeVie.equilibre_constructions_destructions` |
-| LLR-M03-003 | Après déplacement, la source de `Traced` porte le tag 0 ; la destination porte le tag d'origine. | `CycleDeVie.copie_puis_deplacement` |
-| LLR-M03-004 | L'affectation d'un objet à lui-même laisse son état inchangé. | `CycleDeVie.auto_affectation_sans_degat` |
-| LLR-M03-010 | `ChannelHandle` réserve un canal à la construction et le libère à la destruction. | `RAII.acquisition_et_liberation_automatiques` |
-| LLR-M03-011 | Lorsque les 4 canaux sont occupés, une nouvelle poignée est invalide (`channel() == 0`). | `RAII.epuisement_des_canaux` |
-| LLR-M03-012 | `release()` est idempotent : un second appel n'a aucun effet. | `RAII.liberation_explicite_idempotente` |
-| LLR-M03-013 | Le déplacement transfère la propriété : la source devient invalide, une seule libération a lieu. | `RAII.deplacement_transfere_la_propriete` |
-| LLR-M03-014 | L'affectation par déplacement libère la ressource détenue avant d'acquérir la nouvelle. | `RAII.affectation_par_deplacement_libere_l_ancienne` |
-| LLR-M03-015 | `DeviceBank::release()` ignore tout identifiant de canal hors domaine. | `RAII.robustesse_liberation_identifiant_invalide` |
-| LLR-M03-020 | `CriticalSection` désactive les interruptions à la construction et les rétablit à la destruction. | `SectionCritique.interruptions_restaurees` |
-| LLR-M03-021 | Les sections critiques imbriquées ne rétablissent les interruptions qu'à la sortie de la plus externe. | `SectionCritique.imbrication` |
-| LLR-M03-022 | Les interruptions sont rétablies sur **tous** les chemins de sortie de `multi_exit_processing()`. | `SectionCritique.liberation_sur_tous_les_chemins` |
+| LLR-M03-001 | Les objets locaux d'une portée sont détruits dans l'ordre inverse de leur construction. | `LifeCycle.destruction_in_reverse_order` |
+| LLR-M03-002 | Le nombre de destructions égale le nombre de créations (construction, copie, déplacement). | `LifeCycle.balanced_constructions_destructions` |
+| LLR-M03-003 | Après déplacement, la source de `Traced` porte le tag 0 ; la destination porte le tag d'origine. | `LifeCycle.copy_then_move` |
+| LLR-M03-004 | L'affectation d'un objet à lui-même laisse son état inchangé. | `LifeCycle.self_assignment_is_harmless` |
+| LLR-M03-010 | `ChannelHandle` réserve un canal à la construction et le libère à la destruction. | `RAII.automatic_acquisition_and_release` |
+| LLR-M03-011 | Lorsque les 4 canaux sont occupés, une nouvelle poignée est invalide (`channel() == 0`). | `RAII.channel_exhaustion` |
+| LLR-M03-012 | `release()` est idempotent : un second appel n'a aucun effet. | `RAII.explicit_release_is_idempotent` |
+| LLR-M03-013 | Le déplacement transfère la propriété : la source devient invalide, une seule libération a lieu. | `RAII.move_transfers_ownership` |
+| LLR-M03-014 | L'affectation par déplacement libère la ressource détenue avant d'acquérir la nouvelle. | `RAII.move_assignment_releases_the_old` |
+| LLR-M03-015 | `DeviceBank::release()` ignore tout identifiant de canal hors domaine. | `RAII.robustness_release_invalid_identifier` |
+| LLR-M03-020 | `CriticalSection` désactive les interruptions à la construction et les rétablit à la destruction. | `CriticalSection.interrupts_restored` |
+| LLR-M03-021 | Les sections critiques imbriquées ne rétablissent les interruptions qu'à la sortie de la plus externe. | `CriticalSection.nesting` |
+| LLR-M03-022 | Les interruptions sont rétablies sur **tous** les chemins de sortie de `multi_exit_processing()`. | `CriticalSection.release_on_all_paths` |
 
 ---
 

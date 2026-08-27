@@ -60,7 +60,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Parent** : HLR-ALERT-005
 - **Énoncé** : Après `create()`, `state()` doit valoir `Inactive`,
   `activation_count()` doit valoir 0 et `confirm_progress()` doit valoir 0.
-- **Vérification** : `Initialisation.*`
+- **Vérification** : `Initialization.*`
 
 ### LLR-ALERT-020
 
@@ -69,7 +69,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Inactive`, un échantillon strictement supérieur au
   seuil de montée doit faire passer l'état à `Pending` avec une progression de
   1, ou directement à `Active` si `confirm_cycles == 1`.
-- **Vérification** : `Transitions.inactive_vers_pending`, `Equivalence.classe_au_dessus_du_seuil`, `Limites.seuil_de_montee_exact_ne_declenche_pas`
+- **Vérification** : `Transitions.inactive_to_pending`, `Equivalence.classifies_above_threshold`, `Limits.exact_raise_threshold_does_not_trigger`
 
 ### LLR-ALERT-021
 
@@ -78,7 +78,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Pending`, un échantillon strictement supérieur au
   seuil de montée doit incrémenter la progression ; l'état passe à `Active`
   lorsque la progression atteint `confirm_cycles`.
-- **Vérification** : `Transitions.pending_vers_pending`, `Transitions.pending_vers_active`
+- **Vérification** : `Transitions.pending_to_pending`, `Transitions.pending_to_active`
 
 ### LLR-ALERT-022
 
@@ -86,7 +86,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Parent** : HLR-ALERT-003
 - **Énoncé** : Dans l'état `Pending`, un échantillon inférieur ou égal au seuil
   de montée doit ramener l'état à `Inactive` et la progression à 0.
-- **Vérification** : `Transitions.pending_vers_inactive_annulation`
+- **Vérification** : `Transitions.pending_to_inactive_cancellation`
 
 ### LLR-ALERT-030
 
@@ -95,7 +95,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Active`, un échantillon strictement inférieur au
   seuil de retombée doit faire passer l'état à `Clearing` avec une progression
   de 1, ou directement à `Inactive` si `clear_cycles == 1`.
-- **Vérification** : `Transitions.active_vers_clearing`, `Limites.seuil_de_retombee_exact_ne_retombe_pas`
+- **Vérification** : `Transitions.active_to_clearing`, `Limits.exact_clear_threshold_does_not_clear`
 
 ### LLR-ALERT-031
 
@@ -104,7 +104,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : Dans l'état `Clearing`, un échantillon strictement inférieur au
   seuil de retombée doit incrémenter la progression ; l'état passe à `Inactive`
   lorsque la progression atteint `clear_cycles`.
-- **Vérification** : `Transitions.clearing_vers_inactive`
+- **Vérification** : `Transitions.clearing_to_inactive`
 
 ### LLR-ALERT-032
 
@@ -112,7 +112,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Parent** : HLR-ALERT-003
 - **Énoncé** : Dans l'état `Clearing`, un échantillon supérieur ou égal au
   seuil de retombée doit ramener l'état à `Active` et la progression à 0.
-- **Vérification** : `Transitions.clearing_vers_active_annulation`
+- **Vérification** : `Transitions.clearing_to_active_cancellation`
 
 ### LLR-ALERT-033
 
@@ -125,7 +125,7 @@ configurée — l'invariant est établi par construction (module 04).
   l'alerte disparaîtrait dès le premier échantillon sous le seuil, et
   l'anti-rebond ne jouerait que dans un sens. C'est exactement le genre de
   détail qu'une exigence explicite empêche d'implémenter de travers.
-- **Vérification** : `Etats.alerte_presentee_pendant_la_retombee`
+- **Vérification** : `States.alert_presented_during_decay`
 
 ### LLR-ALERT-040
 
@@ -136,7 +136,7 @@ configurée — l'invariant est établi par construction (module 04).
   lors d'un retour depuis `Clearing`.
 - **Justification** : Une oscillation autour du seuil de retombée ne doit pas
   gonfler artificiellement le compteur de maintenance.
-- **Vérification** : `Sequences.oscillation_dans_la_zone_morte`, `Sequences.cycle_complet_puis_reactivation`
+- **Vérification** : `Sequences.oscillation_in_dead_band`, `Sequences.full_cycle_then_reactivation`
 
 ### LLR-ALERT-050
 
@@ -145,7 +145,7 @@ configurée — l'invariant est établi par construction (module 04).
 - **Énoncé** : `update(v)` avec `v` non fini doit laisser l'état, la
   progression et le compteur d'activations inchangés, et incrémenter
   `rejected_samples()`.
-- **Vérification** : `Robustesse.*`
+- **Vérification** : `Robustness.*`
 
 ### LLR-ALERT-051
 
@@ -159,7 +159,7 @@ configurée — l'invariant est établi par construction (module 04).
   le sache. Cette exigence transforme un comportement silencieux en un
   comportement observable — c'est une exigence de **sécurité**, à remonter au
   système.
-- **Vérification** : `Robustesse.compteur_de_rejets`
+- **Vérification** : `Robustness.rejection_counter`
 
 ---
 

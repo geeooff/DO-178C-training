@@ -20,16 +20,16 @@ constexpr u8 kStandardVector[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x3
 // =============================================================================
 //  CRC-32
 // =============================================================================
-TEST_REQ(Crc32, vecteur_de_reference, "LLR-CM-010") {
+TEST_REQ(Crc32, reference_vector, "LLR-CM-010") {
     CHECK_EQ(mod14::crc32(avio::make_const_span(kStandardVector)), u32{0xCBF43926U});
 }
 
-TEST_REQ(Crc32, tampon_vide, "LLR-CM-010") {
+TEST_REQ(Crc32, empty_buffer, "LLR-CM-010") {
     const avio::Span<const u8> empty;
     CHECK_EQ(mod14::crc32(empty), u32{0x00000000U});
 }
 
-TEST_REQ(Crc32, detecte_toute_alteration_d_un_bit, "LLR-CM-010") {
+TEST_REQ(Crc32, detects_any_single_bit_alteration, "LLR-CM-010") {
     u8 image[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U};
     const u32 reference = mod14::crc32(avio::make_const_span(image));
 
@@ -45,7 +45,7 @@ TEST_REQ(Crc32, detecte_toute_alteration_d_un_bit, "LLR-CM-010") {
     CHECK_EQ(mod14::crc32(avio::make_const_span(image)), reference);
 }
 
-TEST_REQ(Crc32, table_en_memoire_morte, "LLR-CM-010") {
+TEST_REQ(Crc32, table_in_rom, "LLR-CM-010") {
     // Deja verifie par static_assert a la compilation ; le retester ici
     // demontre que la table EMBARQUEE est bien celle qui a ete calculee.
     CHECK_EQ(mod14::kCrc32Table.values[0], u32{0x00000000U});
@@ -56,13 +56,13 @@ TEST_REQ(Crc32, table_en_memoire_morte, "LLR-CM-010") {
 // =============================================================================
 //  Part number
 // =============================================================================
-TEST_REQ(PartNumber, format_valide, "LLR-CM-020") {
+TEST_REQ(PartNumber, valid_format, "LLR-CM-020") {
     CHECK(mod14::is_valid_part_number("PN-1234567-001"));
     CHECK(mod14::is_valid_part_number("PN-0000000-000"));
     CHECK(mod14::is_valid_part_number("PN-9999999-999"));
 }
 
-TEST_REQ(PartNumber, format_invalide, "LLR-CM-020") {
+TEST_REQ(PartNumber, invalid_format, "LLR-CM-020") {
     CHECK_FALSE(mod14::is_valid_part_number(nullptr));
     CHECK_FALSE(mod14::is_valid_part_number(""));
     CHECK_FALSE(mod14::is_valid_part_number("PN-1234567-01"));    // trop court
@@ -77,7 +77,7 @@ TEST_REQ(PartNumber, format_invalide, "LLR-CM-020") {
 // =============================================================================
 //  Verification du chargement
 // =============================================================================
-TEST_REQ(Chargement, image_conforme, "LLR-CM-030") {
+TEST_REQ(Loading, conforming_image, "LLR-CM-030") {
     SoftwareIdentity identity;
     identity.part_number = "PN-7654321-002";
     identity.version_major = 1U;
@@ -88,7 +88,7 @@ TEST_REQ(Chargement, image_conforme, "LLR-CM-030") {
     CHECK(mod14::verify_load(identity, avio::make_const_span(kStandardVector)));
 }
 
-TEST_REQ(Chargement, image_alteree_refusee, "LLR-CM-030") {
+TEST_REQ(Loading, altered_image_rejected, "LLR-CM-030") {
     SoftwareIdentity identity;
     identity.part_number = "PN-7654321-002";
     identity.expected_crc = 0xCBF43926U;
@@ -97,14 +97,14 @@ TEST_REQ(Chargement, image_alteree_refusee, "LLR-CM-030") {
     CHECK_FALSE(mod14::verify_load(identity, avio::make_const_span(altered)));
 }
 
-TEST_REQ(Chargement, part_number_invalide_refuse, "LLR-CM-030") {
+TEST_REQ(Loading, invalid_part_number_rejected, "LLR-CM-030") {
     SoftwareIdentity identity;
     identity.part_number = "MAUVAIS";
     identity.expected_crc = 0xCBF43926U;
     CHECK_FALSE(mod14::verify_load(identity, avio::make_const_span(kStandardVector)));
 }
 
-TEST_REQ(Chargement, image_vide_refusee, "LLR-CM-030") {
+TEST_REQ(Loading, empty_image_rejected, "LLR-CM-030") {
     SoftwareIdentity identity;
     identity.part_number = "PN-7654321-002";
     identity.expected_crc = 0x00000000U;  // CRC d'un tampon vide
@@ -118,7 +118,7 @@ TEST_REQ(Chargement, image_vide_refusee, "LLR-CM-030") {
 // =============================================================================
 //  Donnees de vie du logiciel et categories de controle
 // =============================================================================
-TEST_REQ(DonneesDeVie, table_complete, "LLR-CM-040") {
+TEST_REQ(LifeCycleData, table_complete, "LLR-CM-040") {
     const avio::Span<const mod14::LifeCycleData> table = mod14::life_cycle_data();
     CHECK_EQ(table.size(), usize{20});
 
@@ -132,7 +132,7 @@ TEST_REQ(DonneesDeVie, table_complete, "LLR-CM-040") {
     }
 }
 
-TEST_REQ(DonneesDeVie, recherche_par_acronyme, "LLR-CM-041") {
+TEST_REQ(LifeCycleData, search_by_acronym, "LLR-CM-041") {
     const mod14::LifeCycleData* psac = mod14::find_life_cycle_data("PSAC");
     REQUIRE(psac != nullptr);
     CHECK_EQ(psac->acronym, "PSAC");
@@ -143,7 +143,7 @@ TEST_REQ(DonneesDeVie, recherche_par_acronyme, "LLR-CM-041") {
     CHECK(mod14::find_life_cycle_data(nullptr) == nullptr);
 }
 
-TEST_REQ(DonneesDeVie, categorie_selon_le_niveau, "LLR-CM-042") {
+TEST_REQ(LifeCycleData, category_by_level, "LLR-CM-042") {
     ControlCategory category = ControlCategory::CC2;
 
     // Le SDD est CC1 en DAL A/B, mais CC2 en DAL C/D : la rigueur exigee
@@ -158,7 +158,7 @@ TEST_REQ(DonneesDeVie, categorie_selon_le_niveau, "LLR-CM-042") {
     CHECK_EQ(category, ControlCategory::CC2);
 }
 
-TEST_REQ(DonneesDeVie, donnees_toujours_cc1, "LLR-CM-042") {
+TEST_REQ(LifeCycleData, data_always_cc1, "LLR-CM-042") {
     // Certaines donnees restent CC1 quel que soit le niveau : le code source,
     // l'executable, les exigences, et les index de configuration. Ce sont
     // celles sans lesquelles on ne peut pas reconstruire ni identifier le
@@ -174,7 +174,7 @@ TEST_REQ(DonneesDeVie, donnees_toujours_cc1, "LLR-CM-042") {
     }
 }
 
-TEST_REQ(DonneesDeVie, robustesse_niveau_invalide, "LLR-CM-042") {
+TEST_REQ(LifeCycleData, robustness_invalid_level, "LLR-CM-042") {
     ControlCategory category = ControlCategory::CC2;
     // DAL E : aucun objectif DO-178C, donc aucune categorie de controle.
     CHECK_FALSE(mod14::control_category_for("SDD", 'E', category));
@@ -182,7 +182,7 @@ TEST_REQ(DonneesDeVie, robustesse_niveau_invalide, "LLR-CM-042") {
     CHECK_FALSE(mod14::control_category_for("INEXISTANT", 'A', category));
 }
 
-TEST_REQ(DonneesDeVie, libelles_de_categorie, "LLR-CM-042") {
+TEST_REQ(LifeCycleData, category_labels, "LLR-CM-042") {
     CHECK_EQ(mod14::category_name(ControlCategory::CC1), "CC1");
     CHECK_EQ(mod14::category_name(ControlCategory::CC2), "CC2");
     CHECK_EQ(mod14::category_name(static_cast<ControlCategory>(u8{9U})), "inconnue");

@@ -37,17 +37,17 @@ void check_conforming_subtype(const mod05::Sensor& sensor) {
 // -----------------------------------------------------------------------------
 //  Substituabilite : chaque sous-type rejoue la campagne de la base
 // -----------------------------------------------------------------------------
-TEST_REQ(DO332, capteur_pression_est_substituable, "LLR-M05-001,OO.6.7") {
+TEST_REQ(DO332, pressure_sensor_is_substitutable, "LLR-M05-001,OO.6.7") {
     const mod05::PressureSensor sensor;
     check_conforming_subtype(sensor);
 }
 
-TEST_REQ(DO332, capteur_temperature_est_substituable, "LLR-M05-002,OO.6.7") {
+TEST_REQ(DO332, temperature_sensor_is_substitutable, "LLR-M05-002,OO.6.7") {
     const mod05::TemperatureSensor sensor;
     check_conforming_subtype(sensor);
 }
 
-TEST_REQ(DO332, le_harnais_detecte_une_violation, "LLR-M05-003,OO.6.7") {
+TEST_REQ(DO332, the_harness_detects_a_violation, "LLR-M05-003,OO.6.7") {
     // Test de l'OUTIL, pas du capteur : si le harnais ne detectait pas ce
     // capteur fautif, les deux tests precedents ne prouveraient rien.
     // C'est le principe du "test du test" (DO-330 applique au harnais).
@@ -61,7 +61,7 @@ TEST_REQ(DO332, le_harnais_detecte_une_violation, "LLR-M05-003,OO.6.7") {
     CHECK_EQ(report.first_violation(), "C5");
 }
 
-TEST_REQ(DO332, robustesse_echantillonnage_degenere, "LLR-M05-004") {
+TEST_REQ(DO332, robustness_degenerate_sampling, "LLR-M05-004") {
     // sample_count < 2 : le harnais doit rester utilisable et deterministe.
     const mod05::PressureSensor sensor;
     const mod05::ContractReport report = mod05::verify_contract(sensor, 0U);
@@ -72,21 +72,21 @@ TEST_REQ(DO332, robustesse_echantillonnage_degenere, "LLR-M05-004") {
 // -----------------------------------------------------------------------------
 //  Comportement propre a chaque sous-type
 // -----------------------------------------------------------------------------
-TEST_REQ(Pression, conversion_lineaire, "LLR-M05-010") {
+TEST_REQ(Pressure, linear_conversion, "LLR-M05-010") {
     const mod05::PressureSensor sensor;
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(0)), 0.0, 1e-3);
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(4095)), 1200.0, 1e-3);
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(2047)), 599.85, 0.5);
 }
 
-TEST_REQ(Pression, ecretage_hors_domaine, "LLR-M05-011") {
+TEST_REQ(Pressure, clamping_out_of_domain, "LLR-M05-011") {
     const mod05::PressureSensor sensor;
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(-1)), 0.0, 1e-3);
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(-100000)), 0.0, 1e-3);
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(100000)), 1200.0, 1e-3);
 }
 
-TEST_REQ(Temperature, conversion_avec_decalage, "LLR-M05-012") {
+TEST_REQ(Temperature, conversion_with_shift, "LLR-M05-012") {
     const mod05::TemperatureSensor sensor;
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(0)), -60.0, 1e-3);
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(4095)), 80.0, 1e-3);
@@ -94,7 +94,7 @@ TEST_REQ(Temperature, conversion_avec_decalage, "LLR-M05-012") {
     CHECK_NEAR(static_cast<double>(sensor.to_engineering(2047)), 10.0, 0.1);
 }
 
-TEST_REQ(Sensor, methode_non_virtuelle_commune, "LLR-M05-013") {
+TEST_REQ(Sensor, common_non_virtual_method, "LLR-M05-013") {
     const mod05::PressureSensor sensor;
     CHECK(sensor.is_in_range(0));
     CHECK(sensor.is_in_range(4095));
@@ -105,7 +105,7 @@ TEST_REQ(Sensor, methode_non_virtuelle_commune, "LLR-M05-013") {
 // -----------------------------------------------------------------------------
 //  Resolution dynamique a travers une reference de base
 // -----------------------------------------------------------------------------
-TEST_REQ(Polymorphisme, resolution_dynamique, "LLR-M05-020") {
+TEST_REQ(Polymorphism, dynamic_resolution, "LLR-M05-020") {
     const mod05::PressureSensor pressure;
     const mod05::TemperatureSensor temperature;
 
@@ -119,7 +119,7 @@ TEST_REQ(Polymorphisme, resolution_dynamique, "LLR-M05-020") {
     CHECK_NEAR(static_cast<double>(sensors[1]->to_engineering(0)), -60.0, 1e-3);
 }
 
-TEST_REQ(Polymorphisme, cout_memoire_du_pointeur_de_vtable, "LLR-M05-021") {
+TEST_REQ(Polymorphism, vtable_pointer_memory_cost, "LLR-M05-021") {
     // Une classe polymorphe contient un pointeur cache vers sa table de
     // fonctions virtuelles. C'est 8 octets par OBJET sur une cible 64 bits,
     // 4 octets sur une cible 32 bits. Sur 10 000 objets, cela compte.
@@ -130,7 +130,7 @@ TEST_REQ(Polymorphisme, cout_memoire_du_pointeur_de_vtable, "LLR-M05-021") {
 // -----------------------------------------------------------------------------
 //  Decoupage (slicing)
 // -----------------------------------------------------------------------------
-TEST_REQ(Slicing, passage_par_valeur_perd_le_sous_type, "LLR-M05-030") {
+TEST_REQ(Slicing, pass_by_value_loses_the_subtype, "LLR-M05-030") {
     const mod05::ExtendedMessage message(0x101U, 20U);
 
     CHECK_EQ(message.length(), u16{24U});
@@ -147,7 +147,7 @@ TEST_REQ(Slicing, passage_par_valeur_perd_le_sous_type, "LLR-M05-030") {
     CHECK(by_value != by_reference);
 }
 
-TEST_REQ(Slicing, la_base_reste_correcte, "LLR-M05-031") {
+TEST_REQ(Slicing, the_base_stays_correct, "LLR-M05-031") {
     const mod05::Message base(0x200U);
     CHECK_EQ(mod05::length_by_value(base), u16{4U});
     CHECK_EQ(mod05::length_by_reference(base), u16{4U});

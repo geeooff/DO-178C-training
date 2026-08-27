@@ -274,11 +274,11 @@ Format volontairement identique à celui d'un vrai document de conception.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M00-001 | `current_build()` doit renvoyer un identifiant de compilateur non vide. | `BuildInfo.compilateur_identifie` |
-| LLR-M00-002 | Le code doit être compilé selon la norme C++17 au minimum. | `BuildInfo.norme_cpp17_minimum` |
-| LLR-M00-003 | `cpp_standard_name()` doit renvoyer le nom de norme correspondant à la valeur `__cplusplus` fournie, et une chaîne par défaut pour toute valeur antérieure à C++11. | `BuildInfo.nom_de_norme_par_intervalle`, `BuildInfo.robustesse_valeur_hors_domaine` |
-| LLR-M00-004 | `current_build().pointer_bits` doit valoir 32 ou 64 et être cohérent avec `sizeof(void*)`. | `BuildInfo.largeur_pointeur_coherente` |
-| LLR-M00-005 | `current_build().little_endian` doit refléter le boutisme réel de la machine. | `BuildInfo.boutisme_coherent` |
+| LLR-M00-001 | `current_build()` doit renvoyer un identifiant de compilateur non vide. | `BuildInfo.compiler_identifies_it` |
+| LLR-M00-002 | Le code doit être compilé selon la norme C++17 au minimum. | `BuildInfo.cpp17_standard_minimum` |
+| LLR-M00-003 | `cpp_standard_name()` doit renvoyer le nom de norme correspondant à la valeur `__cplusplus` fournie, et une chaîne par défaut pour toute valeur antérieure à C++11. | `BuildInfo.standard_name_by_range`, `BuildInfo.robustness_value_out_of_domain` |
+| LLR-M00-004 | `current_build().pointer_bits` doit valoir 32 ou 64 et être cohérent avec `sizeof(void*)`. | `BuildInfo.consistent_pointer_width` |
+| LLR-M00-005 | `current_build().little_endian` doit refléter le boutisme réel de la machine. | `BuildInfo.consistent_endianness` |
 
 ---
 

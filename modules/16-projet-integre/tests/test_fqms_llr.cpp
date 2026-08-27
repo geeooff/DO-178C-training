@@ -49,7 +49,7 @@ FuelSystem reference_system() noexcept {
 // =============================================================================
 //  Configuration
 // =============================================================================
-TEST_REQ(Configuration, valeurs_de_reference, "LLR-FQMS-001") {
+TEST_REQ(Configuration, reference_values, "LLR-FQMS-001") {
     const FuelSystemConfig config = mod16::default_config();
 
     CHECK_NEAR(static_cast<double>(config.tank_capacity[0].kilograms()), 5000.0, 0.001);
@@ -63,7 +63,7 @@ TEST_REQ(Configuration, valeurs_de_reference, "LLR-FQMS-001") {
     CHECK_EQ(config.clear_cycles, avio::u16{5});
 }
 
-TEST_REQ(Configuration, creation_nominale, "LLR-FQMS-020") {
+TEST_REQ(Configuration, nominal_creation, "LLR-FQMS-020") {
     FuelSystem system;
     REQUIRE(FuelSystem::create(mod16::default_config(), system));
     CHECK_EQ(system.cycle_count(), u32{0});
@@ -72,14 +72,14 @@ TEST_REQ(Configuration, creation_nominale, "LLR-FQMS-020") {
     CHECK_EQ(system.fault_count(TankId::Right), u32{0});
 }
 
-TEST_REQ(Configuration, capacite_nulle_refusee, "LLR-FQMS-020") {
+TEST_REQ(Configuration, zero_capacity_rejected, "LLR-FQMS-020") {
     FuelSystemConfig config = mod16::default_config();
     config.tank_capacity[1] = Mass();
     FuelSystem system;
     CHECK_FALSE(FuelSystem::create(config, system));
 }
 
-TEST_REQ(Configuration, seuils_nuls_refuses, "LLR-FQMS-020") {
+TEST_REQ(Configuration, zero_thresholds_rejected, "LLR-FQMS-020") {
     FuelSystem system;
 
     FuelSystemConfig without_low_fuel = mod16::default_config();
@@ -91,7 +91,7 @@ TEST_REQ(Configuration, seuils_nuls_refuses, "LLR-FQMS-020") {
     CHECK_FALSE(FuelSystem::create(without_imbalance, system));
 }
 
-TEST_REQ(Configuration, hysteresis_incoherente_refusee, "LLR-FQMS-020") {
+TEST_REQ(Configuration, inconsistent_hysteresis_rejected, "LLR-FQMS-020") {
     FuelSystem system;
 
     // Une hysteresis superieure ou egale au seuil rendrait l'alerte
@@ -108,7 +108,7 @@ TEST_REQ(Configuration, hysteresis_incoherente_refusee, "LLR-FQMS-020") {
 // =============================================================================
 //  Jauge
 // =============================================================================
-TEST_REQ(Jauge, creation, "LLR-FQMS-010") {
+TEST_REQ(Gauge, creation, "LLR-FQMS-010") {
     TankGauge gauge;
     CHECK_FALSE(TankGauge::create(Mass(), gauge));  // capacite nulle
 
@@ -117,7 +117,7 @@ TEST_REQ(Jauge, creation, "LLR-FQMS-010") {
     CHECK_EQ(gauge.raw(), mod16::kRawMin);
 }
 
-TEST_REQ(Jauge, conversion_lineaire, "LLR-FQMS-011") {
+TEST_REQ(Gauge, linear_conversion, "LLR-FQMS-011") {
     TankGauge gauge;
     REQUIRE(TankGauge::create(kilograms(5000.0F), gauge));
 
@@ -140,7 +140,7 @@ TEST_REQ(Jauge, conversion_lineaire, "LLR-FQMS-011") {
     }
 }
 
-TEST_REQ(Jauge, bornes_du_convertisseur, "LLR-FQMS-011") {
+TEST_REQ(Gauge, converter_bounds, "LLR-FQMS-011") {
     TankGauge gauge;
     REQUIRE(TankGauge::create(kilograms(8000.0F), gauge));
 
@@ -155,7 +155,7 @@ TEST_REQ(Jauge, bornes_du_convertisseur, "LLR-FQMS-011") {
     CHECK_EQ(full.value().grams(), 8000000);
 }
 
-TEST_REQ(Jauge, robustesse_hors_domaine, "LLR-FQMS-012") {
+TEST_REQ(Gauge, robustness_out_of_domain, "LLR-FQMS-012") {
     TankGauge gauge;
     REQUIRE(TankGauge::create(kilograms(5000.0F), gauge));
 
@@ -177,21 +177,21 @@ TEST_REQ(Jauge, robustesse_hors_domaine, "LLR-FQMS-012") {
 // =============================================================================
 //  Decisions extraites (couvrables individuellement -- module 11)
 // =============================================================================
-TEST_REQ(Statut, correspondance_complete, "LLR-FQMS-030") {
+TEST_REQ(Status, complete_mapping, "LLR-FQMS-030") {
     CHECK_EQ(mod16::system_status(0U), Status::HardwareFault);
     CHECK_EQ(mod16::system_status(1U), Status::NotReady);
     CHECK_EQ(mod16::system_status(2U), Status::NotReady);
     CHECK_EQ(mod16::system_status(3U), Status::Ok);
 }
 
-TEST_REQ(Statut, robustesse_valeur_impossible, "LLR-FQMS-030") {
+TEST_REQ(Status, robustness_impossible_value, "LLR-FQMS-030") {
     // Un nombre de jauges valides superieur a 3 est impossible par
     // construction. La fonction reste neanmoins deterministe.
     CHECK_EQ(mod16::system_status(4U), Status::Ok);
     CHECK_EQ(mod16::system_status(255U), Status::Ok);
 }
 
-TEST_REQ(Decisions, desequilibre_mesurable, "LLR-FQMS-041") {
+TEST_REQ(Decisions, imbalance_measurable, "LLR-FQMS-041") {
     // Table de verite complete : 2 conditions, 4 combinaisons.
     CHECK(mod16::imbalance_is_measurable(true, true));
     CHECK_FALSE(mod16::imbalance_is_measurable(true, false));
@@ -199,7 +199,7 @@ TEST_REQ(Decisions, desequilibre_mesurable, "LLR-FQMS-041") {
     CHECK_FALSE(mod16::imbalance_is_measurable(false, false));
 }
 
-TEST_REQ(Decisions, bas_niveau_mesurable, "LLR-FQMS-051") {
+TEST_REQ(Decisions, low_fuel_measurable, "LLR-FQMS-051") {
     // Jeu MC/DC minimal pour une conjonction de 3 conditions : N + 1 = 4 cas
     // (module 11). On donne ici la table complete, plus lisible pour 3
     // conditions, et qui contient le jeu minimal.
@@ -213,7 +213,7 @@ TEST_REQ(Decisions, bas_niveau_mesurable, "LLR-FQMS-051") {
 // =============================================================================
 //  Totalisation
 // =============================================================================
-TEST_REQ(Totalisation, somme_des_reservoirs_valides, "LLR-FQMS-031") {
+TEST_REQ(Totalization, sum_of_valid_tanks, "LLR-FQMS-031") {
     FuelSystem system = reference_system();
     const i32 measurements[3] = {kRawFifth, kRawFifth, kRawFifth};
 
@@ -225,7 +225,7 @@ TEST_REQ(Totalisation, somme_des_reservoirs_valides, "LLR-FQMS-031") {
     CHECK_EQ(system.cycle_count(), u32{1});
 }
 
-TEST_REQ(Totalisation, reservoir_en_panne_exclu, "LLR-FQMS-031") {
+TEST_REQ(Totalization, faulty_tank_excluded, "LLR-FQMS-031") {
     FuelSystem system = reference_system();
     // Le reservoir central est en panne.
     const i32 measurements[3] = {kRawFifth, -1, kRawFifth};
@@ -241,7 +241,7 @@ TEST_REQ(Totalisation, reservoir_en_panne_exclu, "LLR-FQMS-031") {
     CHECK_EQ(report.status, Status::NotReady);
 }
 
-TEST_REQ(Totalisation, panne_totale, "LLR-FQMS-030,LLR-FQMS-031") {
+TEST_REQ(Totalization, total_fault, "LLR-FQMS-030,LLR-FQMS-031") {
     FuelSystem system = reference_system();
     const i32 measurements[3] = {-1, -1, -1};
 
@@ -251,7 +251,7 @@ TEST_REQ(Totalisation, panne_totale, "LLR-FQMS-030,LLR-FQMS-031") {
     CHECK_EQ(report.status, Status::HardwareFault);
 }
 
-TEST_REQ(Totalisation, pleins_reservoirs, "LLR-FQMS-031") {
+TEST_REQ(Totalization, full_tanks, "LLR-FQMS-031") {
     FuelSystem system = reference_system();
     const i32 measurements[3] = {kRawFull, kRawFull, kRawFull};
 
@@ -260,7 +260,7 @@ TEST_REQ(Totalisation, pleins_reservoirs, "LLR-FQMS-031") {
     CHECK_EQ(report.status, Status::Ok);
 }
 
-TEST_REQ(Totalisation, robustesse_pointeur_nul, "LLR-FQMS-031") {
+TEST_REQ(Totalization, robustness_null_pointer, "LLR-FQMS-031") {
     FuelSystem system = reference_system();
     const CycleReport report = system.update(nullptr);
 
@@ -276,7 +276,7 @@ TEST_REQ(Totalisation, robustesse_pointeur_nul, "LLR-FQMS-031") {
 // =============================================================================
 //  Ecart d'aile
 // =============================================================================
-TEST_REQ(Desequilibre, calcul_de_l_ecart, "LLR-FQMS-040") {
+TEST_REQ(Imbalance, delta_computation, "LLR-FQMS-040") {
     FuelSystem system = reference_system();
     // gauche 5000 kg, droite 4000 kg -> ecart 1000 kg
     const i32 measurements[3] = {kRawFull, kRawFifth, kRawFourFifths};
@@ -285,7 +285,7 @@ TEST_REQ(Desequilibre, calcul_de_l_ecart, "LLR-FQMS-040") {
     CHECK_NEAR(static_cast<double>(report.wing_imbalance.kilograms()), 1000.0, 1.0);
 }
 
-TEST_REQ(Desequilibre, ecart_symetrique, "LLR-FQMS-040") {
+TEST_REQ(Imbalance, symmetric_delta, "LLR-FQMS-040") {
     FuelSystem system = reference_system();
     // L'ecart est une VALEUR ABSOLUE : peu importe quelle aile est la plus
     // pleine.
@@ -299,7 +299,7 @@ TEST_REQ(Desequilibre, ecart_symetrique, "LLR-FQMS-040") {
     CHECK_EQ(first.wing_imbalance.grams(), second.wing_imbalance.grams());
 }
 
-TEST_REQ(Desequilibre, ecart_nul_si_jauge_d_aile_en_panne, "LLR-FQMS-041,LLR-FQMS-042") {
+TEST_REQ(Imbalance, zero_delta_if_wing_gauge_faulty, "LLR-FQMS-041,LLR-FQMS-042") {
     FuelSystem system = reference_system();
     const i32 measurements[3] = {kRawFull, kRawFifth, -1};
 
@@ -311,7 +311,7 @@ TEST_REQ(Desequilibre, ecart_nul_si_jauge_d_aile_en_panne, "LLR-FQMS-041,LLR-FQM
 // =============================================================================
 //  Maintenance
 // =============================================================================
-TEST_REQ(Maintenance, comptage_des_pannes_par_reservoir, "LLR-FQMS-060") {
+TEST_REQ(Maintenance, fault_counting_per_tank, "LLR-FQMS-060") {
     FuelSystem system = reference_system();
 
     const i32 left_faulty[3] = {-1, kRawFifth, kRawFifth};
@@ -327,13 +327,13 @@ TEST_REQ(Maintenance, comptage_des_pannes_par_reservoir, "LLR-FQMS-060") {
     CHECK_EQ(system.cycle_count(), u32{3});
 }
 
-TEST_REQ(Maintenance, robustesse_identifiant_hors_domaine, "LLR-FQMS-060") {
+TEST_REQ(Maintenance, robustness_identifier_out_of_domain, "LLR-FQMS-060") {
     const FuelSystem system = reference_system();
     CHECK_EQ(system.fault_count(TankId::Count), u32{0});
     CHECK_EQ(system.fault_count(static_cast<TankId>(u8{99U})), u32{0});
 }
 
-TEST_REQ(Maintenance, libelles_des_reservoirs, "LLR-FQMS-060") {
+TEST_REQ(Maintenance, tank_labels, "LLR-FQMS-060") {
     CHECK_EQ(mod16::tank_name(TankId::Left), "AileGauche");
     CHECK_EQ(mod16::tank_name(TankId::Center), "Central");
     CHECK_EQ(mod16::tank_name(TankId::Right), "AileDroite");
@@ -343,7 +343,7 @@ TEST_REQ(Maintenance, libelles_des_reservoirs, "LLR-FQMS-060") {
 // =============================================================================
 //  Sequence de traitement et grandeurs derivees
 // =============================================================================
-TEST_REQ(Sequence, cinq_etapes_quelles_que_soient_les_entrees, "LLR-FQMS-021") {
+TEST_REQ(Sequence, five_steps_whatever_the_inputs, "LLR-FQMS-021") {
     // LLR-FQMS-021 exige une sequence FIXE, sans branchement sur le nombre
     // d'iterations : c'est ce qui rend le WCET constant (HLR-FQMS-041).
     //
@@ -371,7 +371,7 @@ TEST_REQ(Sequence, cinq_etapes_quelles_que_soient_les_entrees, "LLR-FQMS-021") {
     CHECK_EQ(other.fault_count(TankId::Left), u32{0});
 }
 
-TEST_REQ(BasNiveauLlr, deficit_transmis_au_moniteur, "LLR-FQMS-050") {
+TEST_REQ(LowFuelLlr, deficit_forwarded_to_monitor, "LLR-FQMS-050") {
     // Le moniteur recoit `seuil - total`, en kilogrammes. On le verifie par
     // son EFFET observable : l'alerte se leve exactement quand le total passe
     // sous 1500 kg, et pas avant.
@@ -395,7 +395,7 @@ TEST_REQ(BasNiveauLlr, deficit_transmis_au_moniteur, "LLR-FQMS-050") {
     CHECK_NEAR(static_cast<double>(report.total.kilograms()), 1400.0, 2.0);
 }
 
-TEST_REQ(BasNiveauLlr, echantillon_non_fini_si_non_mesurable, "LLR-FQMS-052") {
+TEST_REQ(LowFuelLlr, non_finite_sample_if_not_measurable, "LLR-FQMS-052") {
     // Quand le bas niveau n'est pas mesurable, un echantillon NON FINI est
     // transmis au moniteur, qui l'ignore (LLR-ALERT-050 du module 10) et gele
     // son etat.

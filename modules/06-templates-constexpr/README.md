@@ -198,19 +198,19 @@ gonflement du code, rendu tangible.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M06-001 | `RingBuffer<T,N>` mémorise au plus N éléments, écrase le plus ancien au-delà et compte les écrasements. | `RingBuffer_i32_4.cycle_de_vie_complet` |
-| LLR-M06-002 | `pop()` et `peek()` renvoient faux sans modifier la sortie sur un tampon vide. | `RingBuffer_i32_4.robustesse_tampon_vide` |
-| LLR-M06-003 | `clear()` remet taille et compteur d'écrasements à zéro. | `RingBuffer_i32_4.remise_a_zero` |
-| LLR-M06-004 | L'instanciation `RingBuffer<f32,8>` respecte le même contrat. | `RingBuffer_f32_8.instanciation_flottante` |
-| LLR-M06-005 | L'instanciation `RingBuffer<u8,16>` respecte le même contrat. | `RingBuffer_u8_16.instanciation_octet` |
-| LLR-M06-006 | L'occupation mémoire d'une instanciation est au moins celle de son stockage. | `RingBuffer.taille_memoire_par_instanciation` |
+| LLR-M06-001 | `RingBuffer<T,N>` mémorise au plus N éléments, écrase le plus ancien au-delà et compte les écrasements. | `RingBuffer_i32_4.complete_life_cycle` |
+| LLR-M06-002 | `pop()` et `peek()` renvoient faux sans modifier la sortie sur un tampon vide. | `RingBuffer_i32_4.robustness_empty_buffer` |
+| LLR-M06-003 | `clear()` remet taille et compteur d'écrasements à zéro. | `RingBuffer_i32_4.reset_to_zero` |
+| LLR-M06-004 | L'instanciation `RingBuffer<f32,8>` respecte le même contrat. | `RingBuffer_f32_8.float_instantiation` |
+| LLR-M06-005 | L'instanciation `RingBuffer<u8,16>` respecte le même contrat. | `RingBuffer_u8_16.byte_instantiation` |
+| LLR-M06-006 | L'occupation mémoire d'une instanciation est au moins celle de son stockage. | `RingBuffer.memory_size_per_instantiation` |
 | LLR-M06-010..012 | `average()` calcule la moyenne entière (troncature) ou flottante selon `T`, et renvoie `T{}` sur un tampon vide. | `Average.*` |
 | LLR-M06-020..023 | La table CRC-8 est calculée à la compilation ; `crc8()` produit 0xF4 sur le vecteur « 123456789 », détecte toute altération, et renvoie la valeur initiale sur un tampon vide. | `Constexpr.*` |
-| LLR-M06-024 | `ipow`, `popcount` et `even_parity` sont utilisables à la compilation comme à l'exécution. | `Constexpr.fonctions_utilisables_aux_deux_moments` |
-| LLR-M06-025 | La table de linéarisation couvre −60,0 à +80,0 °C en 16 points strictement croissants. | `Constexpr.table_de_linearisation` |
-| LLR-M06-030 | Les capteurs CRTP produisent les mêmes valeurs que leurs équivalents virtuels du module 05. | `CRTP.comportement_identique_au_dynamique` |
-| LLR-M06-031 | Un capteur CRTP sans donnée membre occupe 1 octet (aucun pointeur de vtable). | `CRTP.aucun_cout_memoire` |
-| LLR-M06-032 | `is_in_range()` et `to_engineering_clamped()` sont fournis par la base à tous les dérivés. | `CRTP.comportement_commun_factorise` |
+| LLR-M06-024 | `ipow`, `popcount` et `even_parity` sont utilisables à la compilation comme à l'exécution. | `Constexpr.functions_usable_at_both_times` |
+| LLR-M06-025 | La table de linéarisation couvre −60,0 à +80,0 °C en 16 points strictement croissants. | `Constexpr.linearization_table` |
+| LLR-M06-030 | Les capteurs CRTP produisent les mêmes valeurs que leurs équivalents virtuels du module 05. | `CRTP.behavior_identical_to_dynamic` |
+| LLR-M06-031 | Un capteur CRTP sans donnée membre occupe 1 octet (aucun pointeur de vtable). | `CRTP.no_memory_cost` |
+| LLR-M06-032 | `is_in_range()` et `to_engineering_clamped()` sont fournis par la base à tous les dérivés. | `CRTP.factored_common_behavior` |
 | LLR-M06-033..034 | `read_average()` moyenne les valeurs écrêtées ; elle renvoie `value_min()` pour un pointeur nul ou un compte nul. | `CRTP.*` |
 
 ---

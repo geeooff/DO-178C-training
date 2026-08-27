@@ -125,7 +125,7 @@ lettres** dans l'en-tête, en sept clauses C1 à C7, et
 instance.
 
 ```cpp
-TEST_REQ(DO332, capteur_pression_est_substituable, "LLR-M05-001,OO.6.7") {
+TEST_REQ(DO332, pressure_sensor_is_substitutable, "LLR-M05-001,OO.6.7") {
     const mod05::PressureSensor sensor;
     check_conforming_subtype(sensor);   // la campagne de la BASE
 }
@@ -237,15 +237,15 @@ la DO-332 se tracent comme n'importe quelle exigence.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M05-001 | `PressureSensor` satisfait les sept clauses du contrat de `Sensor`. | `DO332.capteur_pression_est_substituable` |
-| LLR-M05-002 | `TemperatureSensor` satisfait les sept clauses du contrat de `Sensor`. | `DO332.capteur_temperature_est_substituable` |
-| LLR-M05-003 | `verify_contract()` détecte les violations des clauses C5, C6 et C7 et désigne la première clause violée. | `DO332.le_harnais_detecte_une_violation` |
-| LLR-M05-004 | `verify_contract()` ramène tout `sample_count` inférieur à 2 à la valeur 2. | `DO332.robustesse_echantillonnage_degenere` |
-| LLR-M05-010..011 | `PressureSensor` convertit linéairement 0..4095 vers 0..1200 hPa et écrête hors domaine. | `Pression.*` |
-| LLR-M05-012 | `TemperatureSensor` convertit linéairement 0..4095 vers −60..+80 °C. | `Temperature.conversion_avec_decalage` |
-| LLR-M05-013 | `Sensor::is_in_range()` renvoie vrai si et seulement si `raw ∈ [raw_min ; raw_max]`. | `Sensor.methode_non_virtuelle_commune` |
-| LLR-M05-020 | L'appel via une référence vers `Sensor` sélectionne la redéfinition du type dynamique. | `Polymorphisme.resolution_dynamique` |
-| LLR-M05-021 | Une classe polymorphe sans donnée membre occupe la taille d'un pointeur. | `Polymorphisme.cout_memoire_du_pointeur_de_vtable` |
+| LLR-M05-001 | `PressureSensor` satisfait les sept clauses du contrat de `Sensor`. | `DO332.pressure_sensor_is_substitutable` |
+| LLR-M05-002 | `TemperatureSensor` satisfait les sept clauses du contrat de `Sensor`. | `DO332.temperature_sensor_is_substitutable` |
+| LLR-M05-003 | `verify_contract()` détecte les violations des clauses C5, C6 et C7 et désigne la première clause violée. | `DO332.the_harness_detects_a_violation` |
+| LLR-M05-004 | `verify_contract()` ramène tout `sample_count` inférieur à 2 à la valeur 2. | `DO332.robustness_degenerate_sampling` |
+| LLR-M05-010..011 | `PressureSensor` convertit linéairement 0..4095 vers 0..1200 hPa et écrête hors domaine. | `Pressure.*` |
+| LLR-M05-012 | `TemperatureSensor` convertit linéairement 0..4095 vers −60..+80 °C. | `Temperature.conversion_with_shift` |
+| LLR-M05-013 | `Sensor::is_in_range()` renvoie vrai si et seulement si `raw ∈ [raw_min ; raw_max]`. | `Sensor.common_non_virtual_method` |
+| LLR-M05-020 | L'appel via une référence vers `Sensor` sélectionne la redéfinition du type dynamique. | `Polymorphism.dynamic_resolution` |
+| LLR-M05-021 | Une classe polymorphe sans donnée membre occupe la taille d'un pointeur. | `Polymorphism.vtable_pointer_memory_cost` |
 | LLR-M05-030..031 | Le passage par valeur découpe le sous-type ; le passage par référence le préserve. | `Slicing.*` |
 
 ---

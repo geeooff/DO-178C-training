@@ -83,7 +83,7 @@ Format d'un identifiant : `LLR-ADCALT-nnn`.
 - **Énoncé** : `pressure_altitude_feet(p)` doit appeler
   `validate_static_pressure(p)` et propager son statut sans le modifier avant
   tout calcul.
-- **Vérification** : `Altitude.robustesse_*`
+- **Vérification** : `Altitude.robustness_*`
 
 ### LLR-ADCALT-022
 
@@ -93,7 +93,7 @@ Format d'un identifiant : `LLR-ADCALT-nnn`.
   700 / 500 / 300 / 200 hPa, `pressure_altitude_feet` doit produire
   respectivement 0 / 363,6 / 1772,0 / 4779,2 / 9878,4 / 18281,2 / 30052,7 /
   38615,1 ft, à ±20 ft près.
-- **Vérification** : `Altitude.table_de_reference`
+- **Vérification** : `Altitude.reference_table`
 
 ### LLR-ADCALT-023
 
@@ -102,7 +102,7 @@ Format d'un identifiant : `LLR-ADCALT-nnn`.
 - **Énoncé** : `pressure_altitude_feet` doit être strictement décroissante sur
   le domaine de validité : une pression plus élevée produit une altitude plus
   basse.
-- **Vérification** : `Altitude.monotonie`
+- **Vérification** : `Altitude.monotonicity`
 
 ### LLR-ADCALT-030
 
@@ -132,7 +132,7 @@ Format d'un identifiant : `LLR-ADCALT-nnn`.
 - **Justification** : L'ordre de validation est **spécifié** : deux entrées
   invalides simultanément doivent produire un résultat déterministe et
   reproductible.
-- **Vérification** : `Correction.priorite_des_erreurs`
+- **Vérification** : `Correction.error_priority`
 
 ### LLR-ADCALT-033
 
@@ -143,7 +143,7 @@ Format d'un identifiant : `LLR-ADCALT-nnn`.
 - **Justification** : **Exigence dérivée**. Exposer la constante permet aux
   tests de vérifier la valeur sans la dupliquer, et à la maintenance de la
   retrouver. Aucun impact sur la sécurité : la fonction est en lecture seule.
-- **Vérification** : `Correction.constante_exposee`
+- **Vérification** : `Correction.exposed_constant`
 
 ---
 

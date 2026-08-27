@@ -160,7 +160,7 @@ artefacts réels.
 ~300 lignes auditables.** Chaque cas de test porte sa traçabilité :
 
 ```cpp
-TEST_REQ(Limites, seuil_exact_ne_declenche_pas, "LLR-ALERT-020") { … }
+TEST_REQ(Limits, exact_threshold_does_not_trigger, "LLR-ALERT-020") { … }
 ```
 
 ```bash

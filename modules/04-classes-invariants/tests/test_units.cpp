@@ -26,27 +26,27 @@ Mass grams(i32 value) noexcept {
 // -----------------------------------------------------------------------------
 //  Mass : fabriques et domaine
 // -----------------------------------------------------------------------------
-TEST_REQ(Mass, etat_par_defaut_valide, "LLR-M04-001") {
+TEST_REQ(Mass, valid_default_state, "LLR-M04-001") {
     const Mass mass;
     CHECK_EQ(mass.grams(), 0);
     // Un objet par defaut doit deja respecter son invariant : pas d'etat
     // "non initialise" observable de l'exterieur.
 }
 
-TEST_REQ(Mass, fabrique_grammes_nominale, "LLR-M04-002") {
+TEST_REQ(Mass, from_grams_nominal, "LLR-M04-002") {
     Mass mass;
     REQUIRE(Mass::from_grams(1500, mass));
     CHECK_EQ(mass.grams(), 1500);
     CHECK_NEAR(static_cast<double>(mass.kilograms()), 1.5, 1e-6);
 }
 
-TEST_REQ(Mass, fabrique_kilogrammes_nominale, "LLR-M04-003") {
+TEST_REQ(Mass, from_kilograms_nominal, "LLR-M04-003") {
     Mass mass;
     REQUIRE(Mass::from_kilograms(2.5F, mass));
     CHECK_EQ(mass.grams(), 2500);
 }
 
-TEST_REQ(Mass, fabrique_livres_nominale, "LLR-M04-004") {
+TEST_REQ(Mass, from_pounds_nominal, "LLR-M04-004") {
     Mass mass;
     REQUIRE(Mass::from_pounds(10.0F, mass));
     // 10 lb = 4535,9237 g -> tronque a 4535 g
@@ -54,7 +54,7 @@ TEST_REQ(Mass, fabrique_livres_nominale, "LLR-M04-004") {
     CHECK_NEAR(static_cast<double>(mass.pounds()), 10.0, 1e-2);
 }
 
-TEST_REQ(Mass, robustesse_valeur_negative, "LLR-M04-005") {
+TEST_REQ(Mass, robustness_negative_value, "LLR-M04-005") {
     Mass mass;
     CHECK_FALSE(Mass::from_grams(-1, mass));
     CHECK_FALSE(Mass::from_kilograms(-0.001F, mass));
@@ -62,14 +62,14 @@ TEST_REQ(Mass, robustesse_valeur_negative, "LLR-M04-005") {
     CHECK_EQ(mass.grams(), 0);  // la sortie n'a pas ete polluee
 }
 
-TEST_REQ(Mass, robustesse_hors_domaine_haut, "LLR-M04-006") {
+TEST_REQ(Mass, robustness_out_of_domain_high, "LLR-M04-006") {
     Mass mass;
     CHECK(Mass::from_grams(Mass::kMaxGrams, mass));
     CHECK_FALSE(Mass::from_grams(Mass::kMaxGrams + 1, mass));
     CHECK_FALSE(Mass::from_kilograms(1.0e9F, mass));
 }
 
-TEST_REQ(Mass, robustesse_nan_et_infini, "LLR-M04-007") {
+TEST_REQ(Mass, robustness_nan_and_infinity, "LLR-M04-007") {
     // NaN et l'infini traversent silencieusement toute arithmetique flottante.
     // Les arreter A L'ENTREE est la seule strategie tenable : c'est le principe
     // de la "validation aux frontieres" (module 15).
@@ -83,7 +83,7 @@ TEST_REQ(Mass, robustesse_nan_et_infini, "LLR-M04-007") {
 // -----------------------------------------------------------------------------
 //  Mass : operateurs
 // -----------------------------------------------------------------------------
-TEST_REQ(Mass, comparaisons, "LLR-M04-010") {
+TEST_REQ(Mass, comparisons, "LLR-M04-010") {
     const Mass small = grams(100);
     const Mass large = grams(200);
     const Mass identical = grams(100);
@@ -96,13 +96,13 @@ TEST_REQ(Mass, comparaisons, "LLR-M04-010") {
     CHECK(large >= small);
 }
 
-TEST_REQ(Mass, addition_saturante, "LLR-M04-011") {
+TEST_REQ(Mass, addition_saturating, "LLR-M04-011") {
     CHECK_EQ((grams(100) + grams(50)).grams(), 150);
     const Mass maximum = grams(Mass::kMaxGrams);
     CHECK_EQ((maximum + grams(1000)).grams(), Mass::kMaxGrams);
 }
 
-TEST_REQ(Mass, soustraction_bornee_a_zero, "LLR-M04-012") {
+TEST_REQ(Mass, subtraction_clamped_at_zero, "LLR-M04-012") {
     CHECK_EQ((grams(200) - grams(50)).grams(), 150);
     // Une masse ne peut pas devenir negative : c'est un invariant du TYPE,
     // pas une convention laissee a l'appelant.
@@ -112,20 +112,20 @@ TEST_REQ(Mass, soustraction_bornee_a_zero, "LLR-M04-012") {
 // -----------------------------------------------------------------------------
 //  Altitude
 // -----------------------------------------------------------------------------
-TEST_REQ(Altitude, fabrique_pieds_nominale, "LLR-M04-020") {
+TEST_REQ(Altitude, from_feet_nominal, "LLR-M04-020") {
     Altitude altitude;
     REQUIRE(Altitude::from_feet(35000.0F, altitude));
     CHECK_NEAR(static_cast<double>(altitude.feet()), 35000.0, 1e-3);
     CHECK_NEAR(static_cast<double>(altitude.meters()), 10668.0, 1.0);
 }
 
-TEST_REQ(Altitude, fabrique_metres_nominale, "LLR-M04-021") {
+TEST_REQ(Altitude, from_meters_nominal, "LLR-M04-021") {
     Altitude altitude;
     REQUIRE(Altitude::from_meters(1000.0F, altitude));
     CHECK_NEAR(static_cast<double>(altitude.feet()), 3280.84, 0.1);
 }
 
-TEST_REQ(Altitude, bornes_du_domaine, "LLR-M04-022") {
+TEST_REQ(Altitude, domain_bounds, "LLR-M04-022") {
     Altitude altitude;
     CHECK(Altitude::from_feet(Altitude::kMinFeet, altitude));
     CHECK(Altitude::from_feet(Altitude::kMaxFeet, altitude));
@@ -133,7 +133,7 @@ TEST_REQ(Altitude, bornes_du_domaine, "LLR-M04-022") {
     CHECK_FALSE(Altitude::from_feet(Altitude::kMaxFeet + 1.0F, altitude));
 }
 
-TEST_REQ(Altitude, robustesse_nan_et_infini, "LLR-M04-023") {
+TEST_REQ(Altitude, robustness_nan_and_infinity, "LLR-M04-023") {
     Altitude altitude;
     CHECK_FALSE(Altitude::from_feet(kNaN, altitude));
     CHECK_FALSE(Altitude::from_feet(kInf, altitude));
@@ -141,7 +141,7 @@ TEST_REQ(Altitude, robustesse_nan_et_infini, "LLR-M04-023") {
     CHECK_FALSE(Altitude::from_meters(kInf, altitude));
 }
 
-TEST_REQ(Altitude, comparaison_a_tolerance, "LLR-M04-024") {
+TEST_REQ(Altitude, comparison_with_tolerance, "LLR-M04-024") {
     Altitude a;
     Altitude b;
     REQUIRE(Altitude::from_feet(10000.0F, a));
@@ -154,14 +154,14 @@ TEST_REQ(Altitude, comparaison_a_tolerance, "LLR-M04-024") {
     CHECK(a.is_close(a, 0.0F));
 }
 
-TEST_REQ(Altitude, robustesse_tolerance_invalide, "LLR-M04-025") {
+TEST_REQ(Altitude, robustness_invalid_tolerance, "LLR-M04-025") {
     Altitude a;
     REQUIRE(Altitude::from_feet(10000.0F, a));
     CHECK_FALSE(a.is_close(a, -1.0F));
     CHECK_FALSE(a.is_close(a, kNaN));
 }
 
-TEST_REQ(Altitude, ordre_total, "LLR-M04-026") {
+TEST_REQ(Altitude, total_order, "LLR-M04-026") {
     Altitude low;
     Altitude high;
     REQUIRE(Altitude::from_feet(1000.0F, low));
@@ -175,7 +175,7 @@ TEST_REQ(Altitude, ordre_total, "LLR-M04-026") {
     CHECK_NEAR(static_cast<double>(low.difference_feet(high)), -29000.0, 1e-2);
 }
 
-TEST_REQ(Altitude, aller_retour_pieds_metres, "LLR-M04-027") {
+TEST_REQ(Altitude, round_trip_feet_meters, "LLR-M04-027") {
     Altitude start;
     REQUIRE(Altitude::from_feet(25000.0F, start));
 
@@ -190,7 +190,7 @@ TEST_REQ(Altitude, aller_retour_pieds_metres, "LLR-M04-027") {
 // -----------------------------------------------------------------------------
 //  FuelTank : maintien de l'invariant
 // -----------------------------------------------------------------------------
-TEST_REQ(FuelTank, creation_nominale, "LLR-M04-030") {
+TEST_REQ(FuelTank, nominal_creation, "LLR-M04-030") {
     FuelTank tank;
     REQUIRE(FuelTank::create(grams(10000), tank));
     CHECK_EQ(tank.capacity().grams(), 10000);
@@ -200,7 +200,7 @@ TEST_REQ(FuelTank, creation_nominale, "LLR-M04-030") {
     CHECK(tank.invariant_holds());
 }
 
-TEST_REQ(FuelTank, robustesse_capacite_nulle, "LLR-M04-031") {
+TEST_REQ(FuelTank, robustness_zero_capacity, "LLR-M04-031") {
     FuelTank tank;
     CHECK_FALSE(FuelTank::create(Mass(), tank));
     // Le reservoir degenere reste neanmoins dans un etat coherent.
@@ -208,7 +208,7 @@ TEST_REQ(FuelTank, robustesse_capacite_nulle, "LLR-M04-031") {
     CHECK_NEAR(static_cast<double>(tank.fill_ratio_percent()), 0.0, 1e-6);
 }
 
-TEST_REQ(FuelTank, remplissage_partiel, "LLR-M04-032") {
+TEST_REQ(FuelTank, partial_filling, "LLR-M04-032") {
     FuelTank tank;
     REQUIRE(FuelTank::create(grams(10000), tank));
 
@@ -219,7 +219,7 @@ TEST_REQ(FuelTank, remplissage_partiel, "LLR-M04-032") {
     CHECK(tank.invariant_holds());
 }
 
-TEST_REQ(FuelTank, debordement_a_l_ajout, "LLR-M04-033") {
+TEST_REQ(FuelTank, overflow_on_add, "LLR-M04-033") {
     FuelTank tank;
     REQUIRE(FuelTank::create(grams(1000), tank));
 
@@ -231,7 +231,7 @@ TEST_REQ(FuelTank, debordement_a_l_ajout, "LLR-M04-033") {
     CHECK(tank.invariant_holds());
 }
 
-TEST_REQ(FuelTank, prelevement_superieur_au_contenu, "LLR-M04-034") {
+TEST_REQ(FuelTank, withdrawal_greater_than_content, "LLR-M04-034") {
     FuelTank tank;
     REQUIRE(FuelTank::create(grams(1000), tank));
     (void)tank.add(grams(300));
@@ -242,7 +242,7 @@ TEST_REQ(FuelTank, prelevement_superieur_au_contenu, "LLR-M04-034") {
     CHECK(tank.invariant_holds());
 }
 
-TEST_REQ(FuelTank, sequence_longue_invariant_toujours_vrai, "LLR-M04-035") {
+TEST_REQ(FuelTank, long_sequence_invariant_always_true, "LLR-M04-035") {
     // Test de propriete : quelle que soit la sequence d'operations, y compris
     // absurde, l'invariant doit tenir. C'est ce type de test qui donne
     // confiance dans une classe a etat.
@@ -264,7 +264,7 @@ TEST_REQ(FuelTank, sequence_longue_invariant_toujours_vrai, "LLR-M04-035") {
 // -----------------------------------------------------------------------------
 //  Le type fort empeche la confusion d'unites
 // -----------------------------------------------------------------------------
-TEST_REQ(TypeFort, meme_masse_deux_unites, "LLR-M04-040") {
+TEST_REQ(StrongType, same_mass_two_units, "LLR-M04-040") {
     // Le scenario du "Gimli Glider" : 22 300 unites de carburant.
     // Interpretees en livres au lieu de kilogrammes, cela fait moins de la
     // moitie de la masse attendue.

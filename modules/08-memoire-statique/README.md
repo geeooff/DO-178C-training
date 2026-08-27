@@ -172,26 +172,26 @@ budget alloué : 2 ko, marge : 65 % »* — et le **démontrer** par un simple
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M08-001 | Un `StaticVector` neuf est vide, de capacité `N`, sans rejet. | `StaticVector.etat_initial` |
-| LLR-M08-002 | `push_back()` / `pop_back()` respectent l'ordre LIFO. | `StaticVector.ajout_et_retrait` |
-| LLR-M08-003 | À capacité atteinte, `push_back()` renvoie faux, n'altère pas le contenu et incrémente le compteur de rejets. | `StaticVector.capacite_saturee_sans_realloc` |
-| LLR-M08-004 | `pop_back()` sur un conteneur vide renvoie faux sans modifier la sortie. | `StaticVector.robustesse_retrait_sur_vide` |
-| LLR-M08-005 | `erase(i)` décale les éléments suivants ; tout indice ≥ taille est refusé. | `StaticVector.suppression_par_indice` |
-| LLR-M08-006 | `at()` est vérifié ; `operator[]` hors domaine notifie le gestionnaire d'anomalie et renvoie l'élément 0. | `StaticVector.acces_verifie_et_non_verifie` |
-| LLR-M08-007 | `view()` expose exactement `size()` éléments, pas la capacité. | `StaticVector.vue_limitee_a_la_taille` |
-| LLR-M08-008 | L'occupation mémoire est bornée par `N × sizeof(T) + 64` octets. | `StaticVector.occupation_memoire_connue` |
+| LLR-M08-001 | Un `StaticVector` neuf est vide, de capacité `N`, sans rejet. | `StaticVector.initial_state` |
+| LLR-M08-002 | `push_back()` / `pop_back()` respectent l'ordre LIFO. | `StaticVector.add_and_remove` |
+| LLR-M08-003 | À capacité atteinte, `push_back()` renvoie faux, n'altère pas le contenu et incrémente le compteur de rejets. | `StaticVector.saturated_capacity_without_realloc` |
+| LLR-M08-004 | `pop_back()` sur un conteneur vide renvoie faux sans modifier la sortie. | `StaticVector.robustness_remove_on_empty` |
+| LLR-M08-005 | `erase(i)` décale les éléments suivants ; tout indice ≥ taille est refusé. | `StaticVector.removal_by_index` |
+| LLR-M08-006 | `at()` est vérifié ; `operator[]` hors domaine notifie le gestionnaire d'anomalie et renvoie l'élément 0. | `StaticVector.checked_and_unchecked_access` |
+| LLR-M08-007 | `view()` expose exactement `size()` éléments, pas la capacité. | `StaticVector.view_limited_to_size` |
+| LLR-M08-008 | L'occupation mémoire est bornée par `N × sizeof(T) + 64` octets. | `StaticVector.known_memory_footprint` |
 | LLR-M08-010..011 | La réserve part avec tous les blocs libres ; allocation puis libération restituent l'état. | `MemoryPool.*` |
-| LLR-M08-012 | À épuisement, `allocate()` renvoie `nullptr` ; `high_water_mark()` mémorise le pic. | `MemoryPool.epuisement_borne_et_detectable` |
-| LLR-M08-013 | Deux blocs alloués sont distincts et espacés de `BlockSize`. | `MemoryPool.blocs_distincts_et_alignes` |
-| LLR-M08-014 | Une seconde libération du même bloc est refusée. | `MemoryPool.double_liberation_detectee` |
-| LLR-M08-015 | Un pointeur n'appartenant pas à la réserve, ou nul, est refusé. | `MemoryPool.pointeur_etranger_refuse` |
-| LLR-M08-016 | Un pointeur non aligné sur un début de bloc est refusé. | `MemoryPool.pointeur_mal_aligne_refuse` |
-| LLR-M08-017 | Après 400 allocations/libérations entrelacées, la réserve retrouve son état initial. | `MemoryPool.reutilisation_sans_fragmentation` |
-| LLR-M08-020 | `factorial()` a une profondeur d'appel de 1 quelle que soit l'entrée. | `Pile.factorielle_iterative_profondeur_constante` |
-| LLR-M08-021 | `factorial(n)` renvoie faux et 0 pour tout `n > 20`. | `Pile.factorielle_robustesse_hors_domaine` |
-| LLR-M08-022..023 | La version récursive atteint une profondeur `n` et produit le même résultat. | `Pile.*` |
-| LLR-M08-024 | La profondeur revient à 0 sur tous les chemins, y compris les sorties anticipées. | `Pile.profondeur_revient_a_zero` |
-| LLR-M08-025..026 | `sum_iterative()` et `binary_search()` sont itératives et robustes au pointeur nul et au tableau vide. | `Pile.*` |
+| LLR-M08-012 | À épuisement, `allocate()` renvoie `nullptr` ; `high_water_mark()` mémorise le pic. | `MemoryPool.bounded_and_detectable_exhaustion` |
+| LLR-M08-013 | Deux blocs alloués sont distincts et espacés de `BlockSize`. | `MemoryPool.distinct_and_aligned_blocks` |
+| LLR-M08-014 | Une seconde libération du même bloc est refusée. | `MemoryPool.double_release_detected` |
+| LLR-M08-015 | Un pointeur n'appartenant pas à la réserve, ou nul, est refusé. | `MemoryPool.foreign_pointer_rejected` |
+| LLR-M08-016 | Un pointeur non aligné sur un début de bloc est refusé. | `MemoryPool.misaligned_pointer_rejected` |
+| LLR-M08-017 | Après 400 allocations/libérations entrelacées, la réserve retrouve son état initial. | `MemoryPool.reuse_without_fragmentation` |
+| LLR-M08-020 | `factorial()` a une profondeur d'appel de 1 quelle que soit l'entrée. | `Stack.iterative_factorial_constant_depth` |
+| LLR-M08-021 | `factorial(n)` renvoie faux et 0 pour tout `n > 20`. | `Stack.factorial_robustness_out_of_domain` |
+| LLR-M08-022..023 | La version récursive atteint une profondeur `n` et produit le même résultat. | `Stack.*` |
+| LLR-M08-024 | La profondeur revient à 0 sur tous les chemins, y compris les sorties anticipées. | `Stack.depth_returns_to_zero` |
+| LLR-M08-025..026 | `sum_iterative()` et `binary_search()` sont itératives et robustes au pointeur nul et au tableau vide. | `Stack.*` |
 
 ---
 

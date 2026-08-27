@@ -62,7 +62,7 @@ CycleReport hold(FuelSystem& system, i32 left, i32 center, i32 right, usize cycl
 // =============================================================================
 //  HLR-FQMS-042 : etat au demarrage
 // =============================================================================
-TEST_REQ(Demarrage, aucune_alerte_a_la_mise_sous_tension, "HLR-FQMS-042") {
+TEST_REQ(Startup, no_alert_at_power_up, "HLR-FQMS-042") {
     FuelSystem system = fresh_system();
 
     // Meme avec des reservoirs quasi vides, aucune alerte au premier cycle :
@@ -78,7 +78,7 @@ TEST_REQ(Demarrage, aucune_alerte_a_la_mise_sous_tension, "HLR-FQMS-042") {
 // =============================================================================
 //  HLR-FQMS-001 / 010 / 011 : quantite et statut
 // =============================================================================
-TEST_REQ(Quantite, pleins_reservoirs, "HLR-FQMS-001,HLR-FQMS-010") {
+TEST_REQ(Quantity, full_tanks, "HLR-FQMS-001,HLR-FQMS-010") {
     FuelSystem system = fresh_system();
     const CycleReport report = hold(system, kFull, kFull, kFull, 1U);
 
@@ -89,7 +89,7 @@ TEST_REQ(Quantite, pleins_reservoirs, "HLR-FQMS-001,HLR-FQMS-010") {
     CHECK_EQ(report.status, Status::Ok);
 }
 
-TEST_REQ(Quantite, statut_degrade_sur_panne_partielle, "HLR-FQMS-011") {
+TEST_REQ(Quantity, status_degraded_on_partial_fault, "HLR-FQMS-011") {
     FuelSystem system = fresh_system();
     const CycleReport one_fault = hold(system, kFull, kFault, kFull, 1U);
     CHECK_EQ(one_fault.status, Status::NotReady);
@@ -101,14 +101,14 @@ TEST_REQ(Quantite, statut_degrade_sur_panne_partielle, "HLR-FQMS-011") {
     CHECK_EQ(two_faults.valid_tank_count, u8{1});
 }
 
-TEST_REQ(Quantite, statut_indisponible_sur_panne_totale, "HLR-FQMS-011") {
+TEST_REQ(Quantity, status_unavailable_on_total_fault, "HLR-FQMS-011") {
     FuelSystem system = fresh_system();
     const CycleReport report = hold(system, kFault, kFault, kFault, 1U);
     CHECK_EQ(report.status, Status::HardwareFault);
     CHECK_EQ(report.total.grams(), 0);
 }
 
-TEST_REQ(Quantite, mesure_hors_domaine_rejetee, "HLR-FQMS-002") {
+TEST_REQ(Quantity, out_of_domain_measurement_rejected, "HLR-FQMS-002") {
     FuelSystem system = fresh_system();
     const CycleReport report = hold(system, -5, 999999, kFull, 1U);
 
@@ -123,7 +123,7 @@ TEST_REQ(Quantite, mesure_hors_domaine_rejetee, "HLR-FQMS-002") {
 // =============================================================================
 //  HLR-FQMS-030 / 031 : alerte bas niveau
 // =============================================================================
-TEST_REQ(BasNiveau, confirmation_apres_cinq_cycles, "HLR-FQMS-030") {
+TEST_REQ(LowFuel, confirmation_after_five_cycles, "HLR-FQMS-030") {
     FuelSystem system = fresh_system();
     const i32 measurements[3] = {kEmpty, kCentral1400kg, kEmpty};
 
@@ -137,7 +137,7 @@ TEST_REQ(BasNiveau, confirmation_apres_cinq_cycles, "HLR-FQMS-030") {
     CHECK(fifth.low_fuel_alert);
 }
 
-TEST_REQ(BasNiveau, pas_d_alerte_au_dessus_du_seuil, "HLR-FQMS-030") {
+TEST_REQ(LowFuel, no_alert_above_threshold, "HLR-FQMS-030") {
     FuelSystem system = fresh_system();
     // 1600 kg > 1500 kg : aucune alerte, meme apres de nombreux cycles.
     const CycleReport report = hold(system, kEmpty, kCentral1600kg, kEmpty, 20U);
@@ -145,7 +145,7 @@ TEST_REQ(BasNiveau, pas_d_alerte_au_dessus_du_seuil, "HLR-FQMS-030") {
     CHECK_FALSE(report.low_fuel_alert);
 }
 
-TEST_REQ(BasNiveau, hysteresis_a_l_effacement, "HLR-FQMS-031") {
+TEST_REQ(LowFuel, hysteresis_on_clearing, "HLR-FQMS-031") {
     FuelSystem system = fresh_system();
 
     // 1. L'alerte se leve.
@@ -165,7 +165,7 @@ TEST_REQ(BasNiveau, hysteresis_a_l_effacement, "HLR-FQMS-031") {
     CHECK_FALSE(report.low_fuel_alert);
 }
 
-TEST_REQ(BasNiveau, bruit_ne_leve_pas_l_alerte, "HLR-FQMS-030") {
+TEST_REQ(LowFuel, noise_does_not_raise_alert, "HLR-FQMS-030") {
     // Ballottement du carburant en turbulence : la quantite oscille de part et
     // d'autre du seuil. L'anti-rebond doit filtrer.
     FuelSystem system = fresh_system();
@@ -179,7 +179,7 @@ TEST_REQ(BasNiveau, bruit_ne_leve_pas_l_alerte, "HLR-FQMS-030") {
     }
 }
 
-TEST_REQ(BasNiveau, alerte_gelee_sur_panne, "HLR-FQMS-032") {
+TEST_REQ(LowFuel, alert_frozen_on_fault, "HLR-FQMS-032") {
     FuelSystem system = fresh_system();
 
     // 1. Reservoirs pleins : aucune alerte.
@@ -197,7 +197,7 @@ TEST_REQ(BasNiveau, alerte_gelee_sur_panne, "HLR-FQMS-032") {
     // seuil ici. Le test suivant montre le cas ou cela ferait vraiment mal.
 }
 
-TEST_REQ(BasNiveau, panne_ne_declenche_pas_de_fausse_alerte, "HLR-FQMS-032") {
+TEST_REQ(LowFuel, fault_does_not_trigger_false_alert, "HLR-FQMS-032") {
     FuelSystem system = fresh_system();
 
     // 3000 kg au total, dont 2400 dans le central : au-dessus du seuil.
@@ -218,7 +218,7 @@ TEST_REQ(BasNiveau, panne_ne_declenche_pas_de_fausse_alerte, "HLR-FQMS-032") {
 // =============================================================================
 //  HLR-FQMS-020 / 021 / 022 : alerte de desequilibre
 // =============================================================================
-TEST_REQ(Desequilibre, confirmation_apres_cinq_cycles, "HLR-FQMS-020") {
+TEST_REQ(Imbalance, confirmation_after_five_cycles, "HLR-FQMS-020") {
     FuelSystem system = fresh_system();
     const i32 measurements[3] = {kFull, kFull, kAile4000kg};  // ecart 1000 kg
 
@@ -231,7 +231,7 @@ TEST_REQ(Desequilibre, confirmation_apres_cinq_cycles, "HLR-FQMS-020") {
     CHECK_NEAR(static_cast<double>(fifth.wing_imbalance.kilograms()), 1000.0, 1.0);
 }
 
-TEST_REQ(Desequilibre, pas_d_alerte_sous_le_seuil, "HLR-FQMS-020") {
+TEST_REQ(Imbalance, no_alert_below_threshold, "HLR-FQMS-020") {
     FuelSystem system = fresh_system();
     // ecart 450 kg < 500 kg
     const CycleReport report = hold(system, kFull, kFull, kAile4550kg, 20U);
@@ -239,7 +239,7 @@ TEST_REQ(Desequilibre, pas_d_alerte_sous_le_seuil, "HLR-FQMS-020") {
     CHECK_FALSE(report.imbalance_alert);
 }
 
-TEST_REQ(Desequilibre, hysteresis_a_l_effacement, "HLR-FQMS-021") {
+TEST_REQ(Imbalance, hysteresis_on_clearing, "HLR-FQMS-021") {
     FuelSystem system = fresh_system();
 
     // 1. Ecart de 1000 kg : l'alerte se leve.
@@ -258,7 +258,7 @@ TEST_REQ(Desequilibre, hysteresis_a_l_effacement, "HLR-FQMS-021") {
     CHECK_FALSE(report.imbalance_alert);
 }
 
-TEST_REQ(Desequilibre, alerte_gelee_sur_panne_d_aile, "HLR-FQMS-022") {
+TEST_REQ(Imbalance, alert_frozen_on_wing_fault, "HLR-FQMS-022") {
     FuelSystem system = fresh_system();
 
     // 1. L'alerte de desequilibre se leve.
@@ -276,7 +276,7 @@ TEST_REQ(Desequilibre, alerte_gelee_sur_panne_d_aile, "HLR-FQMS-022") {
     CHECK_FALSE(report.imbalance_alert);
 }
 
-TEST_REQ(Desequilibre, panne_ne_leve_pas_de_fausse_alerte, "HLR-FQMS-022") {
+TEST_REQ(Imbalance, fault_does_not_raise_false_alert, "HLR-FQMS-022") {
     FuelSystem system = fresh_system();
 
     // Ailes equilibrees, aucune alerte.
@@ -292,7 +292,7 @@ TEST_REQ(Desequilibre, panne_ne_leve_pas_de_fausse_alerte, "HLR-FQMS-022") {
 // =============================================================================
 //  HLR-FQMS-040 : maintenance
 // =============================================================================
-TEST_REQ(Maintenance, comptage_cumule_des_rejets, "HLR-FQMS-040") {
+TEST_REQ(Maintenance, cumulative_rejection_counting, "HLR-FQMS-040") {
     FuelSystem system = fresh_system();
     (void)hold(system, kFault, kFull, kFull, 7U);
     CHECK_EQ(system.fault_count(TankId::Left), u32{7});
@@ -304,7 +304,7 @@ TEST_REQ(Maintenance, comptage_cumule_des_rejets, "HLR-FQMS-040") {
 // =============================================================================
 //  Scenario de vol complet
 // =============================================================================
-TEST_REQ(Vol, profil_complet, "HLR-FQMS-010,HLR-FQMS-030,HLR-FQMS-020") {
+TEST_REQ(Flight, complete_profile, "HLR-FQMS-010,HLR-FQMS-030,HLR-FQMS-020") {
     FuelSystem system = fresh_system();
 
     // Decollage : pleins reservoirs.
@@ -336,7 +336,7 @@ TEST_REQ(Vol, profil_complet, "HLR-FQMS-010,HLR-FQMS-030,HLR-FQMS-020") {
 // =============================================================================
 //  Coherence des unites de bout en bout (module 12, matrice D1..D5)
 // =============================================================================
-TEST_REQ(Integration, coherence_des_unites, "HLR-FQMS-010") {
+TEST_REQ(Integration, unit_consistency, "HLR-FQMS-010") {
     // La chaine traverse deux unites : gramme (interne) et kilogramme
     // (interfaces des moniteurs). C'est le point le plus dangereux du systeme
     // (module 04, Mars Climate Orbiter). On le verifie explicitement.

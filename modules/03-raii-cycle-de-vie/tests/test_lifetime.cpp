@@ -26,7 +26,7 @@ void reset() noexcept {
 // -----------------------------------------------------------------------------
 //  Ordre de destruction
 // -----------------------------------------------------------------------------
-TEST_REQ(CycleDeVie, destruction_en_ordre_inverse, "LLR-M03-001") {
+TEST_REQ(LifeCycle, destruction_in_reverse_order, "LLR-M03-001") {
     reset();
     mod03::demonstrate_destruction_order();
 
@@ -50,7 +50,7 @@ TEST_REQ(CycleDeVie, destruction_en_ordre_inverse, "LLR-M03-001") {
     CHECK(mod03::LifetimeLog::is_balanced());
 }
 
-TEST_REQ(CycleDeVie, equilibre_constructions_destructions, "LLR-M03-002") {
+TEST_REQ(LifeCycle, balanced_constructions_destructions, "LLR-M03-002") {
     reset();
     {
         const mod03::Traced a(10);
@@ -66,7 +66,7 @@ TEST_REQ(CycleDeVie, equilibre_constructions_destructions, "LLR-M03-002") {
     CHECK(mod03::LifetimeLog::is_balanced());
 }
 
-TEST_REQ(CycleDeVie, copie_puis_deplacement, "LLR-M03-003") {
+TEST_REQ(LifeCycle, copy_then_move, "LLR-M03-003") {
     reset();
     {
         mod03::Traced original(7);
@@ -89,7 +89,7 @@ TEST_REQ(CycleDeVie, copie_puis_deplacement, "LLR-M03-003") {
     CHECK(mod03::LifetimeLog::is_balanced());
 }
 
-TEST_REQ(CycleDeVie, auto_affectation_sans_degat, "LLR-M03-004") {
+TEST_REQ(LifeCycle, self_assignment_is_harmless, "LLR-M03-004") {
     reset();
     mod03::Traced object(5);
     // On passe par un alias : l'auto-affectation directe declenche un
@@ -107,7 +107,7 @@ TEST_REQ(CycleDeVie, auto_affectation_sans_degat, "LLR-M03-004") {
 // -----------------------------------------------------------------------------
 //  RAII sur une ressource
 // -----------------------------------------------------------------------------
-TEST_REQ(RAII, acquisition_et_liberation_automatiques, "LLR-M03-010") {
+TEST_REQ(RAII, automatic_acquisition_and_release, "LLR-M03-010") {
     reset();
     CHECK_EQ(mod03::DeviceBank::acquired_count(), u8{0});
     {
@@ -122,7 +122,7 @@ TEST_REQ(RAII, acquisition_et_liberation_automatiques, "LLR-M03-010") {
     CHECK_EQ(mod03::DeviceBank::total_releases(), u32{1});
 }
 
-TEST_REQ(RAII, epuisement_des_canaux, "LLR-M03-011") {
+TEST_REQ(RAII, channel_exhaustion, "LLR-M03-011") {
     reset();
     mod03::ChannelHandle p1;
     mod03::ChannelHandle p2;
@@ -139,7 +139,7 @@ TEST_REQ(RAII, epuisement_des_canaux, "LLR-M03-011") {
     CHECK_EQ(mod03::DeviceBank::acquired_count(), mod03::DeviceBank::kChannelCount);
 }
 
-TEST_REQ(RAII, liberation_explicite_idempotente, "LLR-M03-012") {
+TEST_REQ(RAII, explicit_release_is_idempotent, "LLR-M03-012") {
     reset();
     mod03::ChannelHandle handle;
     REQUIRE(handle.is_valid());
@@ -152,7 +152,7 @@ TEST_REQ(RAII, liberation_explicite_idempotente, "LLR-M03-012") {
     CHECK_EQ(mod03::DeviceBank::total_releases(), u32{1});
 }
 
-TEST_REQ(RAII, deplacement_transfere_la_propriete, "LLR-M03-013") {
+TEST_REQ(RAII, move_transfers_ownership, "LLR-M03-013") {
     reset();
     {
         mod03::ChannelHandle source;
@@ -172,7 +172,7 @@ TEST_REQ(RAII, deplacement_transfere_la_propriete, "LLR-M03-013") {
     CHECK_EQ(mod03::DeviceBank::acquired_count(), u8{0});
 }
 
-TEST_REQ(RAII, affectation_par_deplacement_libere_l_ancienne, "LLR-M03-014") {
+TEST_REQ(RAII, move_assignment_releases_the_old, "LLR-M03-014") {
     reset();
     {
         mod03::ChannelHandle a;
@@ -193,7 +193,7 @@ TEST_REQ(RAII, affectation_par_deplacement_libere_l_ancienne, "LLR-M03-014") {
     CHECK_EQ(mod03::DeviceBank::total_acquisitions(), mod03::DeviceBank::total_releases());
 }
 
-TEST_REQ(RAII, robustesse_liberation_identifiant_invalide, "LLR-M03-015") {
+TEST_REQ(RAII, robustness_release_invalid_identifier, "LLR-M03-015") {
     reset();
     mod03::DeviceBank::release(0U);
     mod03::DeviceBank::release(99U);
@@ -205,7 +205,7 @@ TEST_REQ(RAII, robustesse_liberation_identifiant_invalide, "LLR-M03-015") {
 // -----------------------------------------------------------------------------
 //  Section critique
 // -----------------------------------------------------------------------------
-TEST_REQ(SectionCritique, interruptions_restaurees, "LLR-M03-020") {
+TEST_REQ(CriticalSection, interrupts_restored, "LLR-M03-020") {
     reset();
     CHECK(mod03::InterruptState::enabled());
     {
@@ -215,7 +215,7 @@ TEST_REQ(SectionCritique, interruptions_restaurees, "LLR-M03-020") {
     CHECK(mod03::InterruptState::enabled());
 }
 
-TEST_REQ(SectionCritique, imbrication, "LLR-M03-021") {
+TEST_REQ(CriticalSection, nesting, "LLR-M03-021") {
     reset();
     {
         const mod03::CriticalSection external;
@@ -230,7 +230,7 @@ TEST_REQ(SectionCritique, imbrication, "LLR-M03-021") {
     CHECK_EQ(mod03::InterruptState::max_nesting(), u32{2});
 }
 
-TEST_REQ(SectionCritique, liberation_sur_tous_les_chemins, "LLR-M03-022") {
+TEST_REQ(CriticalSection, release_on_all_paths, "LLR-M03-022") {
     // Le coeur du sujet : trois chemins de sortie differents, aucune ligne de
     // liberation ecrite a la main, et les interruptions sont restaurees dans
     // les trois cas. Sans RAII, il faudrait trois appels a enable(), et un

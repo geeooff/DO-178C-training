@@ -199,17 +199,17 @@ puis le code, puis le test*.
 
 | Id | Exigence | Vérifiée par |
 |----|----------|--------------|
-| LLR-M02-001 | `swap_values()` échange les valeurs des deux entiers référencés. | `Reference.echange_de_valeurs` |
-| LLR-M02-002 | `increment_if_valid()` incrémente de 1 la valeur pointée et renvoie vrai lorsque le pointeur est non nul. | `Pointeur.increment_valide` |
-| LLR-M02-003 | `increment_if_valid()` renvoie faux sans effet de bord lorsque le pointeur est nul. | `Pointeur.robustesse_pointeur_nul` |
+| LLR-M02-001 | `swap_values()` échange les valeurs des deux entiers référencés. | `Reference.value_swap` |
+| LLR-M02-002 | `increment_if_valid()` incrémente de 1 la valeur pointée et renvoie vrai lorsque le pointeur est non nul. | `Pointer.valid_increment` |
+| LLR-M02-003 | `increment_if_valid()` renvoie faux sans effet de bord lorsque le pointeur est nul. | `Pointer.robustness_null_pointer` |
 | LLR-M02-010..012 | `find_max()` place dans `out_max` la plus grande valeur du tampon et renvoie vrai. | `FindMax.*` |
-| LLR-M02-013 | `find_max()` renvoie faux et laisse `out_max` inchangé si le tampon est vide. | `FindMax.robustesse_tampon_vide` |
+| LLR-M02-013 | `find_max()` renvoie faux et laisse `out_max` inchangé si le tampon est vide. | `FindMax.robustness_empty_buffer` |
 | LLR-M02-020..022 | `checksum16()` calcule une somme de contrôle 16 bits déterministe, sensible à toute modification d'octet, y compris pour une longueur impaire. | `Checksum.*` |
-| LLR-M02-023 | `checksum16()` d'un tampon vide vaut `0xFFFF`. | `Checksum.robustesse_tampon_vide` |
+| LLR-M02-023 | `checksum16()` d'un tampon vide vaut `0xFFFF`. | `Checksum.robustness_empty_buffer` |
 | LLR-M02-030..032 | `copy_bounded()` copie `min(taille source, taille destination)` octets et renvoie ce nombre. Elle n'écrit jamais au-delà de la destination. | `Copy.*` |
 | LLR-M02-040..041 | `fill()` affecte la valeur à tous les octets ; `equals()` compare taille puis contenu. | `Fill.*`, `Equals.*` |
 | LLR-M02-050..053 | `MeasurementLog` mémorise au plus 8 mesures, écrase la plus ancienne au-delà, et signale l'écrasement. | `Log.*` |
-| LLR-M02-054 | `MeasurementLog::at()` renvoie faux sans modifier la sortie si l'index est ≥ à la taille courante. | `Log.robustesse_index_hors_domaine` |
+| LLR-M02-054 | `MeasurementLog::at()` renvoie faux sans modifier la sortie si l'index est ≥ à la taille courante. | `Log.robustness_index_out_of_domain` |
 | LLR-M02-055..056 | `clear()` remet le journal à l'état initial ; `raw_storage()` ne donne qu'un accès en lecture. | `Log.*` |
 
 ---

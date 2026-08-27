@@ -50,7 +50,7 @@ décision pour la rendre couvrable »*.
 - **Parent** : HLR-GPWS-001
 - **Énoncé** : `mode4a_decision()` doit renvoyer vrai si et seulement si les
   quatre conditions sont vraies simultanément.
-- **Vérification** : `Mode4a.*`, `Mcdc.mode4a_couverture_complete`
+- **Vérification** : `Mode4a.*`, `Mcdc.mode4a_full_coverage`
 
 ### LLR-GPWS-021
 
@@ -66,7 +66,7 @@ décision pour la rendre couvrable »*.
 - **Parent** : HLR-GPWS-002
 - **Énoncé** : `inhibition_decision()` doit renvoyer
   `test_mode OU (approach_config ET glideslope_captured)`.
-- **Vérification** : `Mcdc.table_de_verite_inhibition`, `Mcdc.inhibition_couverture_complete`, `Effective.alerte_emise_si_non_inhibee`
+- **Vérification** : `Mcdc.inhibition_truth_table`, `Mcdc.inhibition_full_coverage`, `Effective.alert_emitted_if_not_inhibited`
 
 ### LLR-GPWS-040
 
