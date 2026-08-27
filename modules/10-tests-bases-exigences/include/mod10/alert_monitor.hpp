@@ -54,8 +54,17 @@ public:
 
     AlertState state() const noexcept { return state_; }
 
-    /// Vrai si l'alerte est confirmee (etat Active).
-    bool is_raised() const noexcept { return state_ == AlertState::Active; }
+    /// Vrai si l'alerte est PRESENTEE a l'equipage.
+    ///
+    /// Elle l'est dans l'etat Active, mais AUSSI dans l'etat Clearing : tant
+    /// que la retombee n'est pas confirmee, l'alerte reste affichee. Sans
+    /// cela, `clear_cycles` ne servirait a rien -- l'alerte disparaitrait des
+    /// le premier echantillon sous le seuil, et l'anti-rebond ne jouerait que
+    /// dans un sens.
+    /// @satisfies LLR-ALERT-033
+    bool is_raised() const noexcept {
+        return (state_ == AlertState::Active) || (state_ == AlertState::Clearing);
+    }
 
     /// Progression de la confirmation en cours (0 si aucune).
     avio::u16 confirm_progress() const noexcept { return progress_; }

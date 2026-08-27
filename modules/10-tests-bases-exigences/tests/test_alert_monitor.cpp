@@ -430,3 +430,50 @@ TEST_REQ(Robustesse, compteur_de_rejets, "LLR-ALERT-051") {
 
     CHECK_EQ(moniteur.rejected_samples(), u32{3});
 }
+
+// =============================================================================
+//  7. PRESENTATION DE L'ALERTE
+//
+//  Distinction subtile mais essentielle : l'ETAT interne de la machine et ce
+//  qui est PRESENTE a l'equipage ne sont pas la meme chose.
+// =============================================================================
+TEST_REQ(Etats, alerte_presentee_pendant_la_retombee, "LLR-ALERT-033") {
+    AlertMonitor moniteur = moniteur_reference();
+
+    // Inactive et Pending : rien n'est presente.
+    CHECK_FALSE(moniteur.is_raised());
+    (void)moniteur.update(150.0F);
+    REQUIRE_EQ(moniteur.state(), AlertState::Pending);
+    CHECK_FALSE(moniteur.is_raised());
+
+    // Active : l'alerte est presentee.
+    (void)moniteur.update(150.0F);
+    (void)moniteur.update(150.0F);
+    REQUIRE_EQ(moniteur.state(), AlertState::Active);
+    CHECK(moniteur.is_raised());
+
+    // Clearing : l'alerte reste PRESENTEE tant que la retombee n'est pas
+    // confirmee. Sans cela, clear_cycles ne servirait a rien : l'alerte
+    // disparaitrait des le premier echantillon sous le seuil, et l'anti-rebond
+    // ne jouerait que dans un sens.
+    (void)moniteur.update(50.0F);
+    REQUIRE_EQ(moniteur.state(), AlertState::Clearing);
+    CHECK(moniteur.is_raised());
+
+    // Inactive : l'alerte disparait.
+    (void)moniteur.update(50.0F);
+    REQUIRE_EQ(moniteur.state(), AlertState::Inactive);
+    CHECK_FALSE(moniteur.is_raised());
+}
+
+TEST_REQ(Etats, retombee_annulee_maintient_l_alerte, "LLR-ALERT-033,LLR-ALERT-032") {
+    // Le scenario reel : la valeur passe brievement sous le seuil de retombee
+    // puis remonte. L'alerte ne doit jamais avoir clignote.
+    AlertMonitor moniteur = moniteur_reference();
+    porter_a_active(moniteur);
+
+    for (usize index = 0U; index < 30U; ++index) {
+        (void)moniteur.update(((index % 2U) == 0U) ? 50.0F : 150.0F);
+        CHECK(moniteur.is_raised());
+    }
+}

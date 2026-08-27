@@ -366,6 +366,13 @@ def write_csv(findings: Findings, path: Path) -> None:
 
 
 def main() -> int:
+    # La console Windows utilise cp1252 par defaut : on force l'UTF-8 pour que
+    # les accents et les symboles des rapports s'affichent correctement.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):
+        pass
+
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--root", default=".", help="racine du depot")
     parser.add_argument("--csv", help="exporte la matrice au format CSV")

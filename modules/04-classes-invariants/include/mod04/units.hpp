@@ -43,7 +43,7 @@ namespace mod04 {
 //  1. Masse : type fort a representation ENTIERE
 // -----------------------------------------------------------------------------
 //  Stockage en grammes sur 32 bits signes : plage +/- 2 147 tonnes, resolution
-//  1 g. Le choix d'un entier plutot que d'un flottant est deliberat :
+//  1 g. Le choix d'un entier plutot que d'un flottant est delibere :
 //    * l'egalite exacte a un sens ;
 //    * l'accumulation n'introduit aucune derive ;
 //    * le comportement est identique sur toute cible (module 15).

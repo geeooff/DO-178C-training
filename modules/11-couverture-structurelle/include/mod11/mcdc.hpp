@@ -109,6 +109,7 @@ struct McdcReport {
 };
 
 /// Analyse un jeu d'evaluations et produit le rapport MC/DC.
+/// @satisfies LLR-GPWS-050
 McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept;
 
 }  // namespace mod11

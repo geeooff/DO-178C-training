@@ -49,6 +49,7 @@ bool McdcReport::is_complete() const noexcept {
     return true;
 }
 
+/// @satisfies LLR-GPWS-050
 McdcReport analyze_mcdc(const DecisionRecorder& recorder) noexcept {
     McdcReport report;
     report.condition_count = recorder.condition_count();

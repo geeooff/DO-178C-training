@@ -72,7 +72,7 @@ const char* name_of(SensorId id) noexcept;
 //  C'est utile, mais rarement ce que l'on veut pour une grandeur physique.
 //
 //  En avionique, on choisit explicitement une strategie : saturer, signaler,
-//  ou passivher. Le silence n'est pas une option.
+//  ou passiver. Le silence n'est pas une option.
 // -----------------------------------------------------------------------------
 
 constexpr avio::i16 kI16Min = std::numeric_limits<avio::i16>::min();

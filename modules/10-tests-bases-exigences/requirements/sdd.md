@@ -114,6 +114,19 @@ configurée — l'invariant est établi par construction (module 04).
   seuil de retombée doit ramener l'état à `Active` et la progression à 0.
 - **Vérification** : `Retombee.annulation_retombee`
 
+### LLR-ALERT-033
+
+- **Type** : LLR
+- **Parent** : HLR-ALERT-002
+- **Énoncé** : `is_raised()` doit renvoyer vrai dans les états `Active` **et**
+  `Clearing`, et faux dans les états `Inactive` et `Pending`.
+- **Justification** : L'alerte reste **présentée à l'équipage** tant que la
+  retombée n'est pas confirmée. Sans cela, `clear_cycles` ne servirait à rien :
+  l'alerte disparaîtrait dès le premier échantillon sous le seuil, et
+  l'anti-rebond ne jouerait que dans un sens. C'est exactement le genre de
+  détail qu'une exigence explicite empêche d'implémenter de travers.
+- **Vérification** : `Etats.alerte_presentee_pendant_la_retombee`
+
 ### LLR-ALERT-040
 
 - **Type** : LLR
@@ -155,7 +168,7 @@ configurée — l'invariant est établi par construction (module 04).
 | HLR | LLR couvrantes |
 |-----|----------------|
 | HLR-ALERT-001 | LLR-ALERT-020, LLR-ALERT-021 |
-| HLR-ALERT-002 | LLR-ALERT-030, LLR-ALERT-031 |
+| HLR-ALERT-002 | LLR-ALERT-030, LLR-ALERT-031, LLR-ALERT-033 |
 | HLR-ALERT-003 | LLR-ALERT-022, LLR-ALERT-032 |
 | HLR-ALERT-004 | LLR-ALERT-010 |
 | HLR-ALERT-005 | LLR-ALERT-011 |
