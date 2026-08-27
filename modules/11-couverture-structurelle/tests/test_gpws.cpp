@@ -13,16 +13,16 @@ using mod11::Mode4aInputs;
 namespace {
 
 /// Applique un vecteur de conditions a la decision mode 4A et l'enregistre.
-void executer_mode4a(DecisionRecorder& enregistreur, bool c1, bool c2, bool c3, bool c4) noexcept {
+void run_mode4a(DecisionRecorder& recorder, bool c1, bool c2, bool c3, bool c4) noexcept {
     const bool conditions[4] = {c1, c2, c3, c4};
     const bool issue = mod11::mode4a_decision(c1, c2, c3, c4);
-    (void)enregistreur.record(conditions, 4U, issue);
+    (void)recorder.record(conditions, 4U, issue);
 }
 
-void executer_inhibition(DecisionRecorder& enregistreur, bool a, bool b, bool c) noexcept {
+void run_inhibition(DecisionRecorder& recorder, bool a, bool b, bool c) noexcept {
     const bool conditions[3] = {a, b, c};
     const bool issue = mod11::inhibition_decision(a, b, c);
-    (void)enregistreur.record(conditions, 3U, issue);
+    (void)recorder.record(conditions, 3U, issue);
 }
 
 }  // namespace
@@ -31,13 +31,13 @@ void executer_inhibition(DecisionRecorder& enregistreur, bool a, bool b, bool c)
 //  1. Evaluation des conditions (valeurs limites)
 // =============================================================================
 TEST_REQ(Conditions, seuils_exacts, "LLR-GPWS-010") {
-    Mode4aInputs entrees;
-    entrees.radio_altitude_ft = 500.0F;
-    entrees.airspeed_kt = 190.0F;
-    entrees.gear_down_locked = false;
-    entrees.on_ground = false;
+    Mode4aInputs inputs;
+    inputs.radio_altitude_ft = 500.0F;
+    inputs.airspeed_kt = 190.0F;
+    inputs.gear_down_locked = false;
+    inputs.on_ground = false;
 
-    const Mode4aConditions conditions = mod11::evaluate_conditions(entrees);
+    const Mode4aConditions conditions = mod11::evaluate_conditions(inputs);
     // Les conditions sont "STRICTEMENT inferieur" : a la valeur exacte du
     // seuil, elles sont FAUSSES.
     CHECK_FALSE(conditions.altitude_below_limit);
@@ -47,19 +47,19 @@ TEST_REQ(Conditions, seuils_exacts, "LLR-GPWS-010") {
 }
 
 TEST_REQ(Conditions, juste_sous_les_seuils, "LLR-GPWS-010") {
-    Mode4aInputs entrees;
-    entrees.radio_altitude_ft = 499.99F;
-    entrees.airspeed_kt = 189.99F;
-    const Mode4aConditions conditions = mod11::evaluate_conditions(entrees);
+    Mode4aInputs inputs;
+    inputs.radio_altitude_ft = 499.99F;
+    inputs.airspeed_kt = 189.99F;
+    const Mode4aConditions conditions = mod11::evaluate_conditions(inputs);
     CHECK(conditions.altitude_below_limit);
     CHECK(conditions.airspeed_below_limit);
 }
 
 TEST_REQ(Conditions, train_et_sol, "LLR-GPWS-010") {
-    Mode4aInputs entrees;
-    entrees.gear_down_locked = true;
-    entrees.on_ground = true;
-    const Mode4aConditions conditions = mod11::evaluate_conditions(entrees);
+    Mode4aInputs inputs;
+    inputs.gear_down_locked = true;
+    inputs.on_ground = true;
+    const Mode4aConditions conditions = mod11::evaluate_conditions(inputs);
     CHECK_FALSE(conditions.gear_not_down);
     CHECK_FALSE(conditions.airborne);
 }
@@ -79,20 +79,20 @@ TEST_REQ(Mode4a, aucune_alerte_si_une_condition_manque, "LLR-GPWS-020") {
 }
 
 TEST_REQ(Integration, chaine_complete, "LLR-GPWS-021") {
-    Mode4aInputs approche_dangereuse;
-    approche_dangereuse.radio_altitude_ft = 300.0F;
-    approche_dangereuse.airspeed_kt = 150.0F;
-    approche_dangereuse.gear_down_locked = false;
-    approche_dangereuse.on_ground = false;
-    CHECK(mod11::mode4a_alert(approche_dangereuse));
+    Mode4aInputs hazardous_approach;
+    hazardous_approach.radio_altitude_ft = 300.0F;
+    hazardous_approach.airspeed_kt = 150.0F;
+    hazardous_approach.gear_down_locked = false;
+    hazardous_approach.on_ground = false;
+    CHECK(mod11::mode4a_alert(hazardous_approach));
 
-    Mode4aInputs approche_normale = approche_dangereuse;
-    approche_normale.gear_down_locked = true;
-    CHECK_FALSE(mod11::mode4a_alert(approche_normale));
+    Mode4aInputs nominal_approach = hazardous_approach;
+    nominal_approach.gear_down_locked = true;
+    CHECK_FALSE(mod11::mode4a_alert(nominal_approach));
 
-    Mode4aInputs au_sol = approche_dangereuse;
-    au_sol.on_ground = true;
-    CHECK_FALSE(mod11::mode4a_alert(au_sol));
+    Mode4aInputs ground = hazardous_approach;
+    ground.on_ground = true;
+    CHECK_FALSE(mod11::mode4a_alert(ground));
 }
 
 // =============================================================================
@@ -103,23 +103,23 @@ TEST_REQ(Mcdc, couverture_de_decision_ne_suffit_pas, "LLR-GPWS-050") {
     // DEUX tests suffisent a atteindre 100 % de couverture de DECISION :
     // la decision prend ses deux issues. Beaucoup d'equipes s'arretent la...
     // et passent a cote de trois conditions sur quatre.
-    DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);      // -> vrai
-    executer_mode4a(enregistreur, false, false, false, false);  // -> faux
+    DecisionRecorder recorder(4U);
+    run_mode4a(recorder, true, true, true, true);      // -> vrai
+    run_mode4a(recorder, false, false, false, false);  // -> faux
 
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
+    const McdcReport report = mod11::analyze_mcdc(recorder);
 
     // Critere 3 satisfait : les deux issues sont vues.
-    CHECK(rapport.outcome_true_seen);
-    CHECK(rapport.outcome_false_seen);
+    CHECK(report.outcome_true_seen);
+    CHECK(report.outcome_false_seen);
     // Critere 2 satisfait : chaque condition a pris ses deux valeurs.
     for (usize index = 0U; index < 4U; ++index) {
-        CHECK(rapport.condition_both_values[index]);
+        CHECK(report.condition_both_values[index]);
     }
     // MAIS le critere 4 (independance) n'est satisfait pour AUCUNE condition :
     // les deux evaluations different sur les quatre conditions a la fois.
-    CHECK_EQ(rapport.covered_count(), usize{0});
-    CHECK_FALSE(rapport.is_complete());
+    CHECK_EQ(report.covered_count(), usize{0});
+    CHECK_FALSE(report.is_complete());
 }
 
 TEST_REQ(Mcdc, mode4a_couverture_complete, "LLR-GPWS-020,LLR-GPWS-050") {
@@ -132,39 +132,39 @@ TEST_REQ(Mcdc, mode4a_couverture_complete, "LLR-GPWS-020,LLR-GPWS-050") {
     //   E4  T T T F  -> faux    paire de C4
     //
     // 5 tests au lieu de 16 : c'est tout l'interet de MC/DC.
-    DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);
-    executer_mode4a(enregistreur, false, true, true, true);
-    executer_mode4a(enregistreur, true, false, true, true);
-    executer_mode4a(enregistreur, true, true, false, true);
-    executer_mode4a(enregistreur, true, true, true, false);
+    DecisionRecorder recorder(4U);
+    run_mode4a(recorder, true, true, true, true);
+    run_mode4a(recorder, false, true, true, true);
+    run_mode4a(recorder, true, false, true, true);
+    run_mode4a(recorder, true, true, false, true);
+    run_mode4a(recorder, true, true, true, false);
 
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
+    const McdcReport report = mod11::analyze_mcdc(recorder);
 
-    CHECK_EQ(rapport.covered_count(), usize{4});
-    CHECK(rapport.is_complete());
+    CHECK_EQ(report.covered_count(), usize{4});
+    CHECK(report.is_complete());
 
     // Chaque paire d'independance implique bien l'evaluation de reference E0.
     for (usize condition = 0U; condition < 4U; ++condition) {
-        CHECK(rapport.condition_covered[condition]);
-        CHECK_EQ(rapport.pair_first[condition], usize{0});
-        CHECK_EQ(rapport.pair_second[condition], condition + 1U);
+        CHECK(report.condition_covered[condition]);
+        CHECK_EQ(report.pair_first[condition], usize{0});
+        CHECK_EQ(report.pair_second[condition], condition + 1U);
     }
 }
 
 TEST_REQ(Mcdc, mode4a_jeu_incomplet_detecte, "LLR-GPWS-050") {
     // Un jeu qui oublie la condition C4 : l'analyseur doit le dire.
-    DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);
-    executer_mode4a(enregistreur, false, true, true, true);
-    executer_mode4a(enregistreur, true, false, true, true);
-    executer_mode4a(enregistreur, true, true, false, true);
+    DecisionRecorder recorder(4U);
+    run_mode4a(recorder, true, true, true, true);
+    run_mode4a(recorder, false, true, true, true);
+    run_mode4a(recorder, true, false, true, true);
+    run_mode4a(recorder, true, true, false, true);
 
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
-    CHECK_EQ(rapport.covered_count(), usize{3});
-    CHECK_FALSE(rapport.condition_covered[3]);
-    CHECK_FALSE(rapport.condition_both_values[3]);  // C4 n'a jamais valu faux
-    CHECK_FALSE(rapport.is_complete());
+    const McdcReport report = mod11::analyze_mcdc(recorder);
+    CHECK_EQ(report.covered_count(), usize{3});
+    CHECK_FALSE(report.condition_covered[3]);
+    CHECK_FALSE(report.condition_both_values[3]);  // C4 n'a jamais valu faux
+    CHECK_FALSE(report.is_complete());
 }
 
 TEST_REQ(Mcdc, inhibition_couverture_complete, "LLR-GPWS-030,LLR-GPWS-050") {
@@ -176,28 +176,27 @@ TEST_REQ(Mcdc, inhibition_couverture_complete, "LLR-GPWS-030,LLR-GPWS-050") {
     //   E3  F V F  -> faux   paire de C avec E2 (seul C change)
     //
     // 4 tests pour 3 conditions : N + 1, l'optimum theorique.
-    DecisionRecorder enregistreur(3U);
-    executer_inhibition(enregistreur, false, false, true);
-    executer_inhibition(enregistreur, true, false, true);
-    executer_inhibition(enregistreur, false, true, true);
-    executer_inhibition(enregistreur, false, true, false);
+    DecisionRecorder recorder(3U);
+    run_inhibition(recorder, false, false, true);
+    run_inhibition(recorder, true, false, true);
+    run_inhibition(recorder, false, true, true);
+    run_inhibition(recorder, false, true, false);
 
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
-    CHECK_EQ(rapport.covered_count(), usize{3});
-    CHECK(rapport.is_complete());
+    const McdcReport report = mod11::analyze_mcdc(recorder);
+    CHECK_EQ(report.covered_count(), usize{3});
+    CHECK(report.is_complete());
 }
 
 TEST_REQ(Mcdc, inhibition_exhaustif_est_aussi_complet, "LLR-GPWS-030") {
     // Les 8 combinaisons : evidemment complet, mais 8 tests au lieu de 4.
     // Sur une decision a 16 conditions, ce serait 65 536 tests contre 17.
-    DecisionRecorder enregistreur(3U);
-    for (avio::u32 masque = 0U; masque < 8U; ++masque) {
-        executer_inhibition(enregistreur, (masque & 4U) != 0U, (masque & 2U) != 0U,
-                            (masque & 1U) != 0U);
+    DecisionRecorder recorder(3U);
+    for (avio::u32 mask = 0U; mask < 8U; ++mask) {
+        run_inhibition(recorder, (mask & 4U) != 0U, (mask & 2U) != 0U, (mask & 1U) != 0U);
     }
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
-    CHECK(rapport.is_complete());
-    CHECK_EQ(enregistreur.size(), usize{8});
+    const McdcReport report = mod11::analyze_mcdc(recorder);
+    CHECK(report.is_complete());
+    CHECK_EQ(recorder.size(), usize{8});
 }
 
 TEST_REQ(Mcdc, table_de_verite_inhibition, "LLR-GPWS-030") {
@@ -216,58 +215,58 @@ TEST_REQ(Mcdc, table_de_verite_inhibition, "LLR-GPWS-030") {
 //  4. Alerte effective
 // =============================================================================
 TEST_REQ(Effective, alerte_emise_si_non_inhibee, "LLR-GPWS-040") {
-    Mode4aInputs entrees;
-    entrees.radio_altitude_ft = 300.0F;
-    entrees.airspeed_kt = 150.0F;
-    entrees.gear_down_locked = false;
-    entrees.on_ground = false;
+    Mode4aInputs inputs;
+    inputs.radio_altitude_ft = 300.0F;
+    inputs.airspeed_kt = 150.0F;
+    inputs.gear_down_locked = false;
+    inputs.on_ground = false;
 
-    CHECK(mod11::effective_alert(entrees, false, false, false));
-    CHECK_FALSE(mod11::effective_alert(entrees, true, false, false));  // mode test
-    CHECK_FALSE(mod11::effective_alert(entrees, false, true, true));   // approche stabilisee
-    CHECK(mod11::effective_alert(entrees, false, true, false));        // config seule : pas inhibe
+    CHECK(mod11::effective_alert(inputs, false, false, false));
+    CHECK_FALSE(mod11::effective_alert(inputs, true, false, false));  // mode test
+    CHECK_FALSE(mod11::effective_alert(inputs, false, true, true));   // approche stabilisee
+    CHECK(mod11::effective_alert(inputs, false, true, false));        // config seule : pas inhibe
 }
 
 TEST_REQ(Effective, pas_d_alerte_sans_condition, "LLR-GPWS-040") {
-    Mode4aInputs entrees;
-    entrees.radio_altitude_ft = 3000.0F;  // trop haut
-    entrees.airspeed_kt = 150.0F;
-    CHECK_FALSE(mod11::effective_alert(entrees, false, false, false));
+    Mode4aInputs inputs;
+    inputs.radio_altitude_ft = 3000.0F;  // trop haut
+    inputs.airspeed_kt = 150.0F;
+    CHECK_FALSE(mod11::effective_alert(inputs, false, false, false));
 }
 
 // =============================================================================
 //  5. L'analyseur lui-meme (DO-330 : verifier l'outil de verification)
 // =============================================================================
 TEST_REQ(Analyseur, robustesse_enregistreur, "LLR-GPWS-050") {
-    DecisionRecorder enregistreur(3U);
-    const bool bonnes[3] = {true, false, true};
-    const bool mauvaises[2] = {true, false};
+    DecisionRecorder recorder(3U);
+    const bool good[3] = {true, false, true};
+    const bool bad[2] = {true, false};
 
-    CHECK(enregistreur.record(bonnes, 3U, true));
-    CHECK_FALSE(enregistreur.record(mauvaises, 2U, true));  // mauvais nombre
-    CHECK_FALSE(enregistreur.record(nullptr, 3U, true));    // pointeur nul
-    CHECK_EQ(enregistreur.size(), usize{1});
+    CHECK(recorder.record(good, 3U, true));
+    CHECK_FALSE(recorder.record(bad, 2U, true));      // mauvais nombre
+    CHECK_FALSE(recorder.record(nullptr, 3U, true));  // pointeur nul
+    CHECK_EQ(recorder.size(), usize{1});
 
-    enregistreur.reset();
-    CHECK_EQ(enregistreur.size(), usize{0});
+    recorder.reset();
+    CHECK_EQ(recorder.size(), usize{0});
 }
 
 TEST_REQ(Analyseur, capacite_bornee, "LLR-GPWS-050") {
-    DecisionRecorder enregistreur(1U);
+    DecisionRecorder recorder(1U);
     const bool condition[1] = {true};
     for (usize index = 0U; index < mod11::kMaxEvaluations; ++index) {
-        CHECK(enregistreur.record(condition, 1U, true));
+        CHECK(recorder.record(condition, 1U, true));
     }
     // Au-dela : refus, jamais de debordement.
-    CHECK_FALSE(enregistreur.record(condition, 1U, true));
-    CHECK_EQ(enregistreur.size(), mod11::kMaxEvaluations);
+    CHECK_FALSE(recorder.record(condition, 1U, true));
+    CHECK_EQ(recorder.size(), mod11::kMaxEvaluations);
 }
 
 TEST_REQ(Analyseur, jeu_vide, "LLR-GPWS-050") {
-    const DecisionRecorder enregistreur(4U);
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
-    CHECK_FALSE(rapport.outcome_true_seen);
-    CHECK_FALSE(rapport.outcome_false_seen);
-    CHECK_EQ(rapport.covered_count(), usize{0});
-    CHECK_FALSE(rapport.is_complete());
+    const DecisionRecorder recorder(4U);
+    const McdcReport report = mod11::analyze_mcdc(recorder);
+    CHECK_FALSE(report.outcome_true_seen);
+    CHECK_FALSE(report.outcome_false_seen);
+    CHECK_EQ(report.covered_count(), usize{0});
+    CHECK_FALSE(report.is_complete());
 }

@@ -73,8 +73,8 @@ Les défauts se concentrent aux frontières. Pour chaque seuil : la valeur
 **exacte**, juste en dessous, juste au-dessus.
 
 ```cpp
-moniteur.update(100.000F);   // -> Inactive : la condition est "> 100"
-moniteur.update(100.001F);   // -> Pending
+monitor.update(100.000F);   // -> Inactive : la condition est "> 100"
+monitor.update(100.001F);   // -> Pending
 ```
 
 Un `>` écrit `>=` par erreur — le défaut le plus fréquent du métier — ne se

@@ -21,76 +21,76 @@ using avio::usize;
 // =============================================================================
 
 TEST_REQ(RingBuffer_i32_4, cycle_de_vie_complet, "LLR-M06-001") {
-    mod06::RingBuffer<i32, 4U> tampon;
+    mod06::RingBuffer<i32, 4U> buffer;
 
-    CHECK(tampon.empty());
-    CHECK_FALSE(tampon.full());
-    CHECK_EQ(tampon.size(), usize{0});
-    CHECK_EQ(tampon.kCapacity, usize{4});
+    CHECK(buffer.empty());
+    CHECK_FALSE(buffer.full());
+    CHECK_EQ(buffer.size(), usize{0});
+    CHECK_EQ(buffer.kCapacity, usize{4});
 
-    CHECK(tampon.push(10));
-    CHECK(tampon.push(20));
-    CHECK(tampon.push(30));
-    CHECK(tampon.push(40));
-    CHECK(tampon.full());
-    CHECK_EQ(tampon.overwrite_count(), u32{0});
+    CHECK(buffer.push(10));
+    CHECK(buffer.push(20));
+    CHECK(buffer.push(30));
+    CHECK(buffer.push(40));
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.overwrite_count(), u32{0});
 
     // Cinquieme element : le plus ancien (10) est ecrase.
-    CHECK_FALSE(tampon.push(50));
-    CHECK_EQ(tampon.overwrite_count(), u32{1});
-    CHECK_EQ(tampon.size(), usize{4});
+    CHECK_FALSE(buffer.push(50));
+    CHECK_EQ(buffer.overwrite_count(), u32{1});
+    CHECK_EQ(buffer.size(), usize{4});
 
-    i32 valeur = 0;
-    REQUIRE(tampon.pop(valeur));
-    CHECK_EQ(valeur, 20);  // 10 a disparu
-    REQUIRE(tampon.peek(0U, valeur));
-    CHECK_EQ(valeur, 30);
+    i32 value = 0;
+    REQUIRE(buffer.pop(value));
+    CHECK_EQ(value, 20);  // 10 a disparu
+    REQUIRE(buffer.peek(0U, value));
+    CHECK_EQ(value, 30);
 }
 
 TEST_REQ(RingBuffer_i32_4, robustesse_tampon_vide, "LLR-M06-002") {
-    mod06::RingBuffer<i32, 4U> tampon;
-    i32 valeur = 999;
-    CHECK_FALSE(tampon.pop(valeur));
-    CHECK_FALSE(tampon.peek(0U, valeur));
-    CHECK_EQ(valeur, 999);  // sortie non modifiee
+    mod06::RingBuffer<i32, 4U> buffer;
+    i32 value = 999;
+    CHECK_FALSE(buffer.pop(value));
+    CHECK_FALSE(buffer.peek(0U, value));
+    CHECK_EQ(value, 999);  // sortie non modifiee
 }
 
 TEST_REQ(RingBuffer_i32_4, remise_a_zero, "LLR-M06-003") {
-    mod06::RingBuffer<i32, 4U> tampon;
+    mod06::RingBuffer<i32, 4U> buffer;
     for (i32 index = 0; index < 10; ++index) {
-        (void)tampon.push(index);
+        (void)buffer.push(index);
     }
-    CHECK(tampon.overwrite_count() > 0U);
-    tampon.clear();
-    CHECK(tampon.empty());
-    CHECK_EQ(tampon.overwrite_count(), u32{0});
+    CHECK(buffer.overwrite_count() > 0U);
+    buffer.clear();
+    CHECK(buffer.empty());
+    CHECK_EQ(buffer.overwrite_count(), u32{0});
 }
 
 TEST_REQ(RingBuffer_f32_8, instanciation_flottante, "LLR-M06-004") {
     // MEME code source, AUTRE code executable : il faut le couvrir aussi.
-    mod06::RingBuffer<f32, 8U> tampon;
-    CHECK_EQ(tampon.kCapacity, usize{8});
+    mod06::RingBuffer<f32, 8U> buffer;
+    CHECK_EQ(buffer.kCapacity, usize{8});
 
     for (u32 index = 0U; index < 8U; ++index) {
-        CHECK(tampon.push(static_cast<f32>(index) * 1.5F));
+        CHECK(buffer.push(static_cast<f32>(index) * 1.5F));
     }
-    CHECK(tampon.full());
+    CHECK(buffer.full());
 
-    f32 valeur = 0.0F;
-    REQUIRE(tampon.peek(2U, valeur));
-    CHECK_NEAR(static_cast<double>(valeur), 3.0, 1e-6);
+    f32 value = 0.0F;
+    REQUIRE(buffer.peek(2U, value));
+    CHECK_NEAR(static_cast<double>(value), 3.0, 1e-6);
 }
 
 TEST_REQ(RingBuffer_u8_16, instanciation_octet, "LLR-M06-005") {
-    mod06::RingBuffer<u8, 16U> tampon;
-    CHECK_EQ(tampon.kCapacity, usize{16});
+    mod06::RingBuffer<u8, 16U> buffer;
+    CHECK_EQ(buffer.kCapacity, usize{16});
     for (u32 index = 0U; index < 20U; ++index) {
-        (void)tampon.push(static_cast<u8>(index));
+        (void)buffer.push(static_cast<u8>(index));
     }
-    CHECK_EQ(tampon.overwrite_count(), u32{4});
-    u8 valeur = 0U;
-    REQUIRE(tampon.peek(0U, valeur));
-    CHECK_EQ(valeur, u8{4U});  // 0..3 ont ete ecrases
+    CHECK_EQ(buffer.overwrite_count(), u32{4});
+    u8 value = 0U;
+    REQUIRE(buffer.peek(0U, value));
+    CHECK_EQ(value, u8{4U});  // 0..3 ont ete ecrases
 }
 
 TEST_REQ(RingBuffer, taille_memoire_par_instanciation, "LLR-M06-006") {
@@ -105,27 +105,27 @@ TEST_REQ(RingBuffer, taille_memoire_par_instanciation, "LLR-M06-006") {
 //  average : les deux branches de `if constexpr` sont DEUX codes distincts
 // -----------------------------------------------------------------------------
 TEST_REQ(Average, branche_entiere, "LLR-M06-010") {
-    mod06::RingBuffer<i32, 4U> tampon;
-    (void)tampon.push(10);
-    (void)tampon.push(20);
-    (void)tampon.push(31);
+    mod06::RingBuffer<i32, 4U> buffer;
+    (void)buffer.push(10);
+    (void)buffer.push(20);
+    (void)buffer.push(31);
     // Moyenne entiere : troncature vers zero, 61/3 = 20
-    CHECK_EQ(mod06::average(tampon), 20);
+    CHECK_EQ(mod06::average(buffer), 20);
 }
 
 TEST_REQ(Average, branche_flottante, "LLR-M06-011") {
-    mod06::RingBuffer<f32, 8U> tampon;
-    (void)tampon.push(1.0F);
-    (void)tampon.push(2.0F);
-    (void)tampon.push(4.0F);
-    CHECK_NEAR(static_cast<double>(mod06::average(tampon)), 2.3333333, 1e-5);
+    mod06::RingBuffer<f32, 8U> buffer;
+    (void)buffer.push(1.0F);
+    (void)buffer.push(2.0F);
+    (void)buffer.push(4.0F);
+    CHECK_NEAR(static_cast<double>(mod06::average(buffer)), 2.3333333, 1e-5);
 }
 
 TEST_REQ(Average, robustesse_tampon_vide, "LLR-M06-012") {
-    const mod06::RingBuffer<i32, 4U> entier;
-    const mod06::RingBuffer<f32, 8U> flottant;
-    CHECK_EQ(mod06::average(entier), 0);
-    CHECK_NEAR(static_cast<double>(mod06::average(flottant)), 0.0, 1e-9);
+    const mod06::RingBuffer<i32, 4U> integer;
+    const mod06::RingBuffer<f32, 8U> float_buffer;
+    CHECK_EQ(mod06::average(integer), 0);
+    CHECK_NEAR(static_cast<double>(mod06::average(float_buffer)), 0.0, 1e-9);
 }
 
 // =============================================================================
@@ -147,27 +147,27 @@ TEST_REQ(Constexpr, crc8_valeur_de_reference, "LLR-M06-021") {
 }
 
 TEST_REQ(Constexpr, crc8_detecte_une_alteration, "LLR-M06-022") {
-    u8 trame[4] = {0x12U, 0x34U, 0x56U, 0x78U};
-    const u8 reference = mod06::crc8(avio::make_const_span(trame));
+    u8 frame[4] = {0x12U, 0x34U, 0x56U, 0x78U};
+    const u8 reference = mod06::crc8(avio::make_const_span(frame));
     CHECK_EQ(reference, u8{0x1CU});
 
-    trame[1] = 0x35U;  // un seul bit change
-    CHECK(mod06::crc8(avio::make_const_span(trame)) != reference);
+    frame[1] = 0x35U;  // un seul bit change
+    CHECK(mod06::crc8(avio::make_const_span(frame)) != reference);
 }
 
 TEST_REQ(Constexpr, crc8_tampon_vide, "LLR-M06-023") {
-    const avio::Span<const u8> vide;
-    CHECK_EQ(mod06::crc8(vide, 0x5AU), u8{0x5AU});
+    const avio::Span<const u8> empty;
+    CHECK_EQ(mod06::crc8(empty, 0x5AU), u8{0x5AU});
 }
 
 TEST_REQ(Constexpr, fonctions_utilisables_aux_deux_moments, "LLR-M06-024") {
     // A la compilation :
-    constexpr avio::u64 mille_vingt_quatre = mod06::ipow(2U, 10U);
-    static_assert(mille_vingt_quatre == 1024U, "evaluation a la compilation attendue");
+    constexpr avio::u64 thousand_twenty_four = mod06::ipow(2U, 10U);
+    static_assert(thousand_twenty_four == 1024U, "evaluation a la compilation attendue");
 
     // A l'execution, avec une valeur qui n'est pas une constante :
-    u32 exposant = 3U;
-    CHECK_EQ(mod06::ipow(10U, exposant), avio::u64{1000U});
+    u32 exponent = 3U;
+    CHECK_EQ(mod06::ipow(10U, exponent), avio::u64{1000U});
 
     CHECK_EQ(mod06::popcount(0xFFFFU), u32{16});
     CHECK_EQ(mod06::popcount(0U), u32{0});
@@ -188,11 +188,11 @@ TEST_REQ(Constexpr, table_de_linearisation, "LLR-M06-025") {
 //  3. Polymorphisme statique (CRTP)
 // =============================================================================
 TEST_REQ(CRTP, comportement_identique_au_dynamique, "LLR-M06-030") {
-    const mod06::StaticPressureSensor pression;
+    const mod06::StaticPressureSensor pressure;
     const mod06::StaticTemperatureSensor temperature;
 
-    CHECK_NEAR(static_cast<double>(pression.to_engineering(0)), 0.0, 1e-3);
-    CHECK_NEAR(static_cast<double>(pression.to_engineering(4095)), 1200.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(pressure.to_engineering(0)), 0.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(pressure.to_engineering(4095)), 1200.0, 1e-3);
     CHECK_NEAR(static_cast<double>(temperature.to_engineering(0)), -60.0, 1e-3);
     CHECK_NEAR(static_cast<double>(temperature.to_engineering(4095)), 80.0, 1e-3);
 }
@@ -205,33 +205,33 @@ TEST_REQ(CRTP, aucun_cout_memoire, "LLR-M06-031") {
 }
 
 TEST_REQ(CRTP, comportement_commun_factorise, "LLR-M06-032") {
-    const mod06::StaticPressureSensor pression;
-    CHECK(pression.is_in_range(0));
-    CHECK(pression.is_in_range(4095));
-    CHECK_FALSE(pression.is_in_range(-1));
+    const mod06::StaticPressureSensor pressure;
+    CHECK(pressure.is_in_range(0));
+    CHECK(pressure.is_in_range(4095));
+    CHECK_FALSE(pressure.is_in_range(-1));
 
     // to_engineering_clamped est ecrit UNE FOIS dans SensorBase, et disponible
     // pour tous les derives sans aucune duplication.
-    CHECK_NEAR(static_cast<double>(pression.to_engineering_clamped(-500)), 0.0, 1e-3);
-    CHECK_NEAR(static_cast<double>(pression.to_engineering_clamped(99999)), 1200.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(pressure.to_engineering_clamped(-500)), 0.0, 1e-3);
+    CHECK_NEAR(static_cast<double>(pressure.to_engineering_clamped(99999)), 1200.0, 1e-3);
 }
 
 TEST_REQ(CRTP, fonction_generique_par_instanciation, "LLR-M06-033") {
-    const mod06::StaticPressureSensor pression;
+    const mod06::StaticPressureSensor pressure;
     const mod06::StaticTemperatureSensor temperature;
-    const i32 echantillons[4] = {0, 1365, 2730, 4095};
+    const i32 samples[4] = {0, 1365, 2730, 4095};
 
     // Deux instanciations distinctes de read_average : deux codes a couvrir.
-    const f32 moyenne_pression = mod06::read_average(pression, echantillons, 4U);
-    const f32 moyenne_temperature = mod06::read_average(temperature, echantillons, 4U);
+    const f32 average_pressure = mod06::read_average(pressure, samples, 4U);
+    const f32 average_temperature = mod06::read_average(temperature, samples, 4U);
 
-    CHECK_NEAR(static_cast<double>(moyenne_pression), 600.0, 1.0);
-    CHECK_NEAR(static_cast<double>(moyenne_temperature), 10.0, 1.0);
+    CHECK_NEAR(static_cast<double>(average_pressure), 600.0, 1.0);
+    CHECK_NEAR(static_cast<double>(average_temperature), 10.0, 1.0);
 }
 
 TEST_REQ(CRTP, robustesse_entree_nulle, "LLR-M06-034") {
-    const mod06::StaticPressureSensor pression;
-    CHECK_NEAR(static_cast<double>(mod06::read_average(pression, nullptr, 4U)), 0.0, 1e-3);
-    const i32 echantillons[1] = {100};
-    CHECK_NEAR(static_cast<double>(mod06::read_average(pression, echantillons, 0U)), 0.0, 1e-3);
+    const mod06::StaticPressureSensor pressure;
+    CHECK_NEAR(static_cast<double>(mod06::read_average(pressure, nullptr, 4U)), 0.0, 1e-3);
+    const i32 samples[1] = {100};
+    CHECK_NEAR(static_cast<double>(mod06::read_average(pressure, samples, 0U)), 0.0, 1e-3);
 }

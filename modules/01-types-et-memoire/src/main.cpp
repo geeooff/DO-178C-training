@@ -14,34 +14,34 @@ using avio::u8;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void promotion_entiere() {
-    titre("Promotion entiere : a + b n'a pas le type de a ni de b");
+void integer_promotion() {
+    title("Promotion entiere : a + b n'a pas le type de a ni de b");
 
     const u8 a = 200U;
     const u8 b = 100U;
 
     // a et b sont PROMUS en `int` avant l'addition. Le resultat est 300,
     // pas 44. Beaucoup de developpeurs attendent une arithmetique 8 bits.
-    const int somme_promue = a + b;
-    const u8 somme_tronquee = static_cast<u8>(a + b);
+    const int promoted_sum = a + b;
+    const u8 truncated_sum = static_cast<u8>(a + b);
 
-    std::printf("  u8(200) + u8(100) evalue en int   -> %d\n", somme_promue);
-    std::printf("  ... puis tronque en u8            -> %u\n", somme_tronquee);
+    std::printf("  u8(200) + u8(100) evalue en int   -> %d\n", promoted_sum);
+    std::printf("  ... puis tronque en u8            -> %u\n", truncated_sum);
     std::printf("  En C#, byte+byte donne int AUSSI, mais la conversion inverse\n");
     std::printf("  exige un cast explicite : le compilateur vous protege.\n");
     std::printf("  En C++, `u8 s = a + b;` compile sans broncher (avec /W4 il previent).\n");
 }
 
 // -----------------------------------------------------------------------------
-void comparaison_signee_non_signee() {
-    titre("Comparaison signe / non signe");
+void signed_unsigned_comparison() {
+    title("Comparaison signe / non signe");
 
-    const int moins_un = -1;
+    const int minus_one = -1;
     const unsigned int un = 1U;
 
     // SUPPRESSION PORTABLE D UN AVERTISSEMENT.
@@ -69,7 +69,7 @@ void comparaison_signee_non_signee() {
 #endif
     // Regle des conversions arithmetiques usuelles : `moins_un` est converti
     // en unsigned, donc vaut 4294967295. La comparaison est donc FAUSSE.
-    const bool surprise = (moins_un < un);
+    const bool surprise = (minus_one < un);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
@@ -79,19 +79,19 @@ void comparaison_signee_non_signee() {
     std::printf("  (-1 < 1u) vaut %s  <-- ce n'est pas une faute de frappe\n",
                 surprise ? "true" : "false");
     std::printf("  Cause : -1 devient %u apres conversion vers unsigned.\n",
-                static_cast<unsigned int>(moins_un));
+                static_cast<unsigned int>(minus_one));
     std::printf("  MISRA C++ interdit ce melange. clang-tidy et /W4 le signalent.\n");
     std::printf("  Corollaire : ne JAMAIS ecrire `for (u32 i = n - 1; i >= 0; --i)`\n");
     std::printf("               -- la condition est toujours vraie : boucle infinie.\n");
 }
 
 // -----------------------------------------------------------------------------
-void debordement() {
-    titre("Debordement : defini pour le non signe, INDEFINI pour le signe");
+void overflow() {
+    title("Debordement : defini pour le non signe, INDEFINI pour le signe");
 
-    u8 compteur = 255U;
-    compteur = static_cast<u8>(compteur + 1U);  // arithmetique modulo 256 : defini
-    std::printf("  u8 255 + 1 = %u  (modulo 2^8, comportement DEFINI par la norme)\n", compteur);
+    u8 counter = 255U;
+    counter = static_cast<u8>(counter + 1U);  // arithmetique modulo 256 : defini
+    std::printf("  u8 255 + 1 = %u  (modulo 2^8, comportement DEFINI par la norme)\n", counter);
 
     std::printf("  i32 2147483647 + 1 = COMPORTEMENT INDEFINI.\n");
     std::printf("  Le compilateur a le droit de supposer que cela n'arrive jamais\n");
@@ -100,27 +100,26 @@ void debordement() {
     std::printf("\n  Avec les briques du module :\n");
     std::printf("    saturating_add(32767, 1)   = %d\n",
                 mod01::saturating_add(mod01::kI16Max, i16{1}));
-    i32 resultat = 0;
-    const bool ok = mod01::checked_add(std::numeric_limits<i32>::max(), 1, resultat);
+    i32 result = 0;
+    const bool ok = mod01::checked_add(std::numeric_limits<i32>::max(), 1, result);
     std::printf("    checked_add(INT_MAX, 1)    = %s (resultat neutralise a %d)\n",
-                ok ? "true" : "false", resultat);
+                ok ? "true" : "false", result);
 }
 
 // -----------------------------------------------------------------------------
-void initialisation() {
-    titre("Initialisation : le defaut n'existe pas");
+void initialization() {
+    title("Initialisation : le defaut n'existe pas");
 
     // ATTENTION : `int x;` a l'interieur d'une fonction laisse x AVEC UNE
     // VALEUR INDETERMINEE. Le lire est un comportement indefini. On ne le fait
     // donc pas ici -- on montre seulement les formes correctes.
-    int zero_initialise{};  // vaut 0
-    int explicitement_initialise = 42;
-    u32 tableau[4] = {};  // les 4 elements valent 0
+    int zero_initialized{};  // vaut 0
+    int explicitly_initialized = 42;
+    u32 array[4] = {};  // les 4 elements valent 0
 
-    std::printf("  int x{};        -> %d   (initialisation de valeur)\n", zero_initialise);
-    std::printf("  int y = 42;     -> %d\n", explicitement_initialise);
-    std::printf("  u32 t[4] = {};  -> %u %u %u %u\n", tableau[0], tableau[1], tableau[2],
-                tableau[3]);
+    std::printf("  int x{};        -> %d   (initialisation de valeur)\n", zero_initialized);
+    std::printf("  int y = 42;     -> %d\n", explicitly_initialized);
+    std::printf("  u32 t[4] = {};  -> %u %u %u %u\n", array[0], array[1], array[2], array[3]);
     std::printf("\n  En C#, tout champ et tout element de tableau est zero-initialise,\n");
     std::printf("  et le compilateur refuse de lire une variable locale non assignee.\n");
     std::printf("  En C++, `int x;` local n'est PAS initialise : lire x est un UB.\n");
@@ -129,8 +128,8 @@ void initialisation() {
 }
 
 // -----------------------------------------------------------------------------
-void disposition_memoire() {
-    titre("Disposition memoire : taille, alignement, bourrage");
+void memory_layout() {
+    title("Disposition memoire : taille, alignement, bourrage");
 
     std::printf("  NaiveFrame   { u8; u32; u8; }  -> sizeof = %zu, alignof = %zu\n",
                 sizeof(mod01::NaiveFrame), alignof(mod01::NaiveFrame));
@@ -145,7 +144,7 @@ void disposition_memoire() {
 
 // -----------------------------------------------------------------------------
 void enumerations() {
-    titre("Enumerations fortement typees");
+    title("Enumerations fortement typees");
 
     for (u8 raw = 0U; raw < 6U; ++raw) {
         const mod01::SensorId id = static_cast<mod01::SensorId>(raw);
@@ -164,11 +163,11 @@ int main() {
     std::printf("#  Module 01 : types, valeurs, memoire                       #\n");
     std::printf("#############################################################\n");
 
-    promotion_entiere();
-    comparaison_signee_non_signee();
-    debordement();
-    initialisation();
-    disposition_memoire();
+    integer_promotion();
+    signed_unsigned_comparison();
+    overflow();
+    initialization();
+    memory_layout();
     enumerations();
 
     std::printf("\nModule 01 termine.\n");

@@ -18,13 +18,13 @@ using mod15::PartitionId;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void faits_ieee754() {
-    titre("Trois faits sur IEEE-754 que tout embarqueur doit connaitre");
+void ieee754_facts() {
+    title("Trois faits sur IEEE-754 que tout embarqueur doit connaitre");
 
     std::printf("  1. LA PRECISION DEPEND DE LA MAGNITUDE\n");
     const f32 magnitudes[5] = {1.0F, 1024.0F, 65536.0F, 8388608.0F, 16777216.0F};
@@ -50,12 +50,12 @@ void faits_ieee754() {
 
     std::printf("\n  3. L'ERREUR S'ACCUMULE\n");
     std::printf("     %-32s %20s %14s\n", "somme de N fois 0,1F", "resultat", "erreur");
-    const u32 comptes[3] = {10U, 100U, 1000U};
-    const double attendus[3] = {1.0, 10.0, 100.0};
+    const u32 counts[3] = {10U, 100U, 1000U};
+    const double expected[3] = {1.0, 10.0, 100.0};
     for (usize index = 0U; index < 3U; ++index) {
-        const f32 total = mod15::accumulate_float(0.1F, comptes[index]);
-        std::printf("     N = %-28u %20.9f %14.3g\n", comptes[index], static_cast<double>(total),
-                    static_cast<double>(total) - attendus[index]);
+        const f32 total = mod15::accumulate_float(0.1F, counts[index]);
+        std::printf("     N = %-28u %20.9f %14.3g\n", counts[index], static_cast<double>(total),
+                    static_cast<double>(total) - expected[index]);
     }
     const f32 kahan = mod15::accumulate_kahan(0.1F, 1000U);
     std::printf("     N = 1000, somme de KAHAN     %20.9f %14.3g\n", static_cast<double>(kahan),
@@ -66,8 +66,8 @@ void faits_ieee754() {
 }
 
 // -----------------------------------------------------------------------------
-void virgule_fixe() {
-    titre("Virgule fixe Q16.16 : la precision previsible");
+void fixed_point() {
+    title("Virgule fixe Q16.16 : la precision previsible");
 
     std::printf("  Format : 16 bits entiers signes + 16 bits fractionnaires\n");
     std::printf("    domaine    : [-32768 ; +32767]\n");
@@ -75,12 +75,12 @@ void virgule_fixe() {
                 static_cast<double>(Fixed::kResolution));
 
     std::printf("\n  Representation de quelques valeurs :\n");
-    const f32 valeurs[5] = {1.0F, 0.5F, 0.25F, 0.1F, -1.5F};
+    const f32 values[5] = {1.0F, 0.5F, 0.25F, 0.1F, -1.5F};
     std::printf("    %10s %14s %18s\n", "valeur", "brut (i32)", "relu");
     for (usize index = 0U; index < 5U; ++index) {
-        const Fixed fixe = Fixed::from_float(valeurs[index]);
-        std::printf("    %10.4f %14d %18.9f\n", static_cast<double>(valeurs[index]), fixe.raw(),
-                    static_cast<double>(fixe.to_float()));
+        const Fixed fixed = Fixed::from_float(values[index]);
+        std::printf("    %10.4f %14d %18.9f\n", static_cast<double>(values[index]), fixed.raw(),
+                    static_cast<double>(fixed.to_float()));
     }
     std::printf("\n    0,5 et 0,25 sont EXACTS (puissances de deux).\n");
     std::printf("    0,1 ne l'est pas : 0,1 x 65536 = 6553,6, arrondi a 6554.\n");
@@ -88,12 +88,12 @@ void virgule_fixe() {
     std::printf("    calcule A LA MAIN, avant toute execution.\n");
 
     std::printf("\n  Accumulation de 1000 fois 0,1 :\n");
-    const Fixed total_fixe = mod15::accumulate(Fixed::from_float(0.1F), 1000U);
-    const f32 total_flottant = mod15::accumulate_float(0.1F, 1000U);
-    std::printf("    virgule fixe : brut = %d = 1000 x 6554  ->  %.9f\n", total_fixe.raw(),
-                static_cast<double>(total_fixe.to_float()));
+    const Fixed fixed_total = mod15::accumulate(Fixed::from_float(0.1F), 1000U);
+    const f32 float_total = mod15::accumulate_float(0.1F, 1000U);
+    std::printf("    virgule fixe : brut = %d = 1000 x 6554  ->  %.9f\n", fixed_total.raw(),
+                static_cast<double>(fixed_total.to_float()));
     std::printf("    flottant     :                            %.9f\n",
-                static_cast<double>(total_flottant));
+                static_cast<double>(float_total));
 
     std::printf("\n  Notez bien : la virgule fixe n'est pas forcement PLUS PRECISE.\n");
     std::printf("  Ici son erreur est meme plus grande. Ce qu'elle apporte, c'est\n");
@@ -113,8 +113,8 @@ void virgule_fixe() {
 }
 
 // -----------------------------------------------------------------------------
-void ordonnancement() {
-    titre("Ordonnancement a fenetres fixes (ARINC 653)");
+void scheduling() {
+    title("Ordonnancement a fenetres fixes (ARINC 653)");
 
     MajorFrame frame(10000U);
     (void)frame.add_window(PartitionId::FlightControl, 0U, 3000U);
@@ -127,10 +127,9 @@ void ordonnancement() {
     std::printf("    %-26s %10s %10s %10s\n", "partition", "debut", "duree", "fin");
     std::printf("    --------------------------------------------------------------\n");
     for (usize index = 0U; index < frame.window_count(); ++index) {
-        const mod15::Window& fenetre = frame.window(index);
-        std::printf("    %-26s %9u %9u %9u\n", mod15::partition_name(fenetre.partition),
-                    fenetre.offset_us, fenetre.duration_us,
-                    fenetre.offset_us + fenetre.duration_us);
+        const mod15::Window& window = frame.window(index);
+        std::printf("    %-26s %9u %9u %9u\n", mod15::partition_name(window.partition),
+                    window.offset_us, window.duration_us, window.offset_us + window.duration_us);
     }
     std::printf("\n    alloue      : %u us (%u %%)\n", frame.allocated_us(),
                 frame.utilisation_percent());
@@ -140,17 +139,17 @@ void ordonnancement() {
 
     std::printf("\n  Execution nominale :\n");
     const u32 nominal[4] = {2500U, 1200U, 1400U, 800U};
-    mod15::FrameResult resultat = mod15::run_major_frame(frame, nominal, 4U);
+    mod15::FrameResult result = mod15::run_major_frame(frame, nominal, 4U);
     std::printf("    echeances tenues : %s, depassements : %zu\n",
-                resultat.deadline_met ? "OUI" : "non", resultat.overrun_count);
+                result.deadline_met ? "OUI" : "non", result.overrun_count);
 
     std::printf("\n  La partition Maintenance (DAL D) part en boucle :\n");
-    const u32 degrade[4] = {2500U, 1200U, 1400U, 9000U};
-    resultat = mod15::run_major_frame(frame, degrade, 4U);
-    std::printf("    echeances tenues : %s\n", resultat.deadline_met ? "oui" : "NON");
-    std::printf("    depassements     : %zu\n", resultat.overrun_count);
-    std::printf("    pire depassement : %u us, partition %s\n", resultat.worst_overrun_us,
-                mod15::partition_name(resultat.worst_partition));
+    const u32 degraded[4] = {2500U, 1200U, 1400U, 9000U};
+    result = mod15::run_major_frame(frame, degraded, 4U);
+    std::printf("    echeances tenues : %s\n", result.deadline_met ? "oui" : "NON");
+    std::printf("    depassements     : %zu\n", result.overrun_count);
+    std::printf("    pire depassement : %u us, partition %s\n", result.worst_overrun_us,
+                mod15::partition_name(result.worst_partition));
 
     std::printf("\n  POINT DECISIF : la partition fautive est INTERROMPUE a la fin de\n");
     std::printf("  sa fenetre. Elle ne vole pas une microseconde aux commandes de vol.\n");
@@ -163,7 +162,7 @@ void ordonnancement() {
 
 // -----------------------------------------------------------------------------
 void wcet() {
-    titre("Le WCET : ce qu'on doit demontrer");
+    title("Le WCET : ce qu'on doit demontrer");
     std::printf("  WCET = Worst-Case Execution Time. Il faut demontrer que chaque\n");
     std::printf("  partition tient dans sa fenetre, DANS LE PIRE CAS -- pas en moyenne.\n\n");
     std::printf("  DEUX APPROCHES :\n");
@@ -189,20 +188,20 @@ void wcet() {
 }
 
 // -----------------------------------------------------------------------------
-void registres_et_volatile() {
-    titre("volatile : ce qu'il garantit, ce qu'il ne garantit pas");
+void registers_and_volatile() {
+    title("volatile : ce qu'il garantit, ce qu'il ne garantit pas");
 
-    mod15::SimulatedRegister registre;
-    registre.set_hardware_value(0x0000U);
-    const bool sans_reponse = mod15::wait_for_bit(registre, 0x0004U, 50U);
+    mod15::SimulatedRegister hw_register;
+    hw_register.set_hardware_value(0x0000U);
+    const bool without_response = mod15::wait_for_bit(hw_register, 0x0004U, 50U);
     std::printf("  Materiel muet   : attente = %s apres %u lectures (budget 50)\n",
-                sans_reponse ? "reussie" : "ECHOUEE", registre.read_count());
+                without_response ? "reussie" : "ECHOUEE", hw_register.read_count());
 
-    mod15::SimulatedRegister pret;
-    pret.set_hardware_value(0x0004U);
-    const bool reponse = mod15::wait_for_bit(pret, 0x0004U, 50U);
+    mod15::SimulatedRegister ready;
+    ready.set_hardware_value(0x0004U);
+    const bool response = mod15::wait_for_bit(ready, 0x0004U, 50U);
     std::printf("  Materiel pret   : attente = %s apres %u lecture(s)\n",
-                reponse ? "reussie" : "echouee", pret.read_count());
+                response ? "reussie" : "echouee", ready.read_count());
 
     std::printf("\n  GARANTIT : chaque lecture et chaque ecriture produit un acces\n");
     std::printf("  memoire reel. Sans volatile, ce code est une boucle infinie :\n\n");
@@ -226,11 +225,11 @@ int main() {
     std::printf("#  Module 15 : determinisme, flottants, temps reel           #\n");
     std::printf("#############################################################\n");
 
-    faits_ieee754();
-    virgule_fixe();
-    ordonnancement();
+    ieee754_facts();
+    fixed_point();
+    scheduling();
     wcet();
-    registres_et_volatile();
+    registers_and_volatile();
 
     std::printf("\nModule 15 termine.\n");
     return 0;

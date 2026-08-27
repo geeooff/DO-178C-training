@@ -32,9 +32,9 @@ TEST_REQ(Enum, valeurs_nominales_valides, "LLR-M01-001") {
 TEST_REQ(Enum, robustesse_valeur_hors_domaine, "LLR-M01-002") {
     // Une valeur recue d'un bus peut etre n'importe quoi. Le cast la transforme
     // en SensorId sans aucun controle : c'est a nous de valider.
-    const mod01::SensorId corrompu = static_cast<mod01::SensorId>(u8{200U});
-    CHECK_FALSE(mod01::is_valid(corrompu));
-    CHECK_EQ(mod01::name_of(corrompu), "Inconnu");
+    const mod01::SensorId corrupted = static_cast<mod01::SensorId>(u8{200U});
+    CHECK_FALSE(mod01::is_valid(corrupted));
+    CHECK_EQ(mod01::name_of(corrupted), "Inconnu");
 }
 
 TEST_REQ(Enum, nom_de_chaque_membre, "LLR-M01-003") {
@@ -89,66 +89,66 @@ TEST_REQ(Saturation, multiplication_aux_bornes, "LLR-M01-013") {
 TEST_REQ(Saturation, evaluation_a_la_compilation, "LLR-M01-014") {
     // `constexpr` : la valeur est calculee par le compilateur. Zero cycle a
     // l'execution, et une erreur de calcul devient une erreur de COMPILATION.
-    constexpr i16 resultat = mod01::saturating_add(mod01::kI16Max, i16{10});
-    static_assert(resultat == mod01::kI16Max, "la saturation doit etre constexpr");
-    CHECK_EQ(resultat, mod01::kI16Max);
+    constexpr i16 result = mod01::saturating_add(mod01::kI16Max, i16{10});
+    static_assert(result == mod01::kI16Max, "la saturation doit etre constexpr");
+    CHECK_EQ(result, mod01::kI16Max);
 }
 
 // -----------------------------------------------------------------------------
 //  Operations verifiees
 // -----------------------------------------------------------------------------
 TEST_REQ(Checked, addition_nominale, "LLR-M01-020") {
-    i32 resultat = 0;
-    CHECK(mod01::checked_add(2000000000, 100, resultat));
-    CHECK_EQ(resultat, 2000000100);
+    i32 result = 0;
+    CHECK(mod01::checked_add(2000000000, 100, result));
+    CHECK_EQ(result, 2000000100);
 }
 
 TEST_REQ(Checked, addition_debordement_positif, "LLR-M01-021") {
     constexpr i32 kMax = std::numeric_limits<i32>::max();
-    i32 resultat = 42;
-    CHECK_FALSE(mod01::checked_add(kMax, 1, resultat));
-    CHECK_EQ(resultat, 0);  // sortie neutralisee : pas de valeur trompeuse
+    i32 result = 42;
+    CHECK_FALSE(mod01::checked_add(kMax, 1, result));
+    CHECK_EQ(result, 0);  // sortie neutralisee : pas de valeur trompeuse
 }
 
 TEST_REQ(Checked, addition_debordement_negatif, "LLR-M01-022") {
     constexpr i32 kMin = std::numeric_limits<i32>::min();
-    i32 resultat = 42;
-    CHECK_FALSE(mod01::checked_add(kMin, -1, resultat));
-    CHECK_EQ(resultat, 0);
+    i32 result = 42;
+    CHECK_FALSE(mod01::checked_add(kMin, -1, result));
+    CHECK_EQ(result, 0);
 }
 
 TEST_REQ(Checked, division_par_zero, "LLR-M01-023") {
-    i32 resultat = 42;
-    CHECK_FALSE(mod01::checked_div(100, 0, resultat));
-    CHECK_EQ(resultat, 0);
+    i32 result = 42;
+    CHECK_FALSE(mod01::checked_div(100, 0, result));
+    CHECK_EQ(result, 0);
 }
 
 TEST_REQ(Checked, division_cas_min_sur_moins_un, "LLR-M01-024") {
     constexpr i32 kMin = std::numeric_limits<i32>::min();
-    i32 resultat = 42;
-    CHECK_FALSE(mod01::checked_div(kMin, -1, resultat));
-    CHECK(mod01::checked_div(kMin, 2, resultat));
-    CHECK_EQ(resultat, kMin / 2);
+    i32 result = 42;
+    CHECK_FALSE(mod01::checked_div(kMin, -1, result));
+    CHECK(mod01::checked_div(kMin, 2, result));
+    CHECK_EQ(result, kMin / 2);
 }
 
 // -----------------------------------------------------------------------------
 //  Conversions
 // -----------------------------------------------------------------------------
 TEST_REQ(Cast, retrecissement_valide, "LLR-M01-030") {
-    u8 petit = 0U;
-    CHECK(mod01::checked_cast<u8>(i32{200}, petit));
-    CHECK_EQ(petit, u8{200U});
+    u8 small = 0U;
+    CHECK(mod01::checked_cast<u8>(i32{200}, small));
+    CHECK_EQ(small, u8{200U});
 }
 
 TEST_REQ(Cast, retrecissement_refuse, "LLR-M01-031") {
     // Le scenario Ariane 5 : une valeur qui ne tient pas dans la cible.
-    u8 petit = 99U;
-    CHECK_FALSE(mod01::checked_cast<u8>(i32{300}, petit));
-    CHECK_EQ(petit, u8{0U});
+    u8 small = 99U;
+    CHECK_FALSE(mod01::checked_cast<u8>(i32{300}, small));
+    CHECK_EQ(small, u8{0U});
 
-    i16 court = 99;
-    CHECK_FALSE(mod01::checked_cast<i16>(i32{40000}, court));
-    CHECK_EQ(court, i16{0});
+    i16 short_value = 99;
+    CHECK_FALSE(mod01::checked_cast<i16>(i32{40000}, short_value));
+    CHECK_EQ(short_value, i16{0});
 }
 
 TEST_REQ(Cast, signe_vers_non_signe_negatif_refuse, "LLR-M01-032") {
@@ -166,9 +166,9 @@ TEST_REQ(Cast, non_signe_vers_signe_trop_grand_refuse, "LLR-M01-033") {
 }
 
 TEST_REQ(Cast, elargissement_toujours_valide, "LLR-M01-034") {
-    i32 grand = 0;
-    CHECK(mod01::checked_cast<i32>(i16{-1234}, grand));
-    CHECK_EQ(grand, -1234);
+    i32 large = 0;
+    CHECK(mod01::checked_cast<i32>(i16{-1234}, large));
+    CHECK_EQ(large, -1234);
 }
 
 // -----------------------------------------------------------------------------

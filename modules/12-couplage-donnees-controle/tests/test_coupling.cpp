@@ -40,9 +40,9 @@ constexpr f32 kNaN = std::numeric_limits<f32>::quiet_NaN();
 TEST_REQ(Acquisition, conversion_nominale, "LLR-CHAIN-010") {
     Acquisition acquisition;
     acquisition.set_raw(2000);
-    const mod07::Result<f32> resultat = acquisition.read();
-    REQUIRE(resultat.is_ok());
-    CHECK_NEAR(static_cast<double>(resultat.value()), 500.0, 1e-3);
+    const mod07::Result<f32> result = acquisition.read();
+    REQUIRE(result.is_ok());
+    CHECK_NEAR(static_cast<double>(result.value()), 500.0, 1e-3);
     CHECK_EQ(acquisition.read_count(), u32{1});
     CHECK_EQ(acquisition.reject_count(), u32{0});
 }
@@ -54,9 +54,9 @@ TEST_REQ(Acquisition, bornes_du_convertisseur, "LLR-CHAIN-010") {
     CHECK(acquisition.read().is_ok());
 
     acquisition.set_raw(Acquisition::kRawMax);
-    const mod07::Result<f32> plein_echelle = acquisition.read();
-    REQUIRE(plein_echelle.is_ok());
-    CHECK_NEAR(static_cast<double>(plein_echelle.value()), 1023.75, 1e-3);
+    const mod07::Result<f32> full_scale = acquisition.read();
+    REQUIRE(full_scale.is_ok());
+    CHECK_NEAR(static_cast<double>(full_scale.value()), 1023.75, 1e-3);
 }
 
 TEST_REQ(Acquisition, robustesse_hors_domaine, "LLR-CHAIN-010") {
@@ -70,49 +70,49 @@ TEST_REQ(Acquisition, robustesse_hors_domaine, "LLR-CHAIN-010") {
 }
 
 TEST_REQ(Filtre, fenetre_incomplete_ne_produit_rien, "LLR-CHAIN-021") {
-    Filter filtre;
+    Filter filter;
     for (usize index = 0U; index < (Filter::kWindow - 1U); ++index) {
-        CHECK(filtre.push(100.0F));
-        CHECK_EQ(filtre.average().status(), Status::NotReady);
+        CHECK(filter.push(100.0F));
+        CHECK_EQ(filter.average().status(), Status::NotReady);
     }
-    CHECK(filtre.push(100.0F));
-    CHECK(filtre.average().is_ok());
+    CHECK(filter.push(100.0F));
+    CHECK(filter.average().is_ok());
 }
 
 TEST_REQ(Filtre, moyenne_glissante, "LLR-CHAIN-020,LLR-CHAIN-021") {
-    Filter filtre;
-    CHECK(filtre.push(100.0F));
-    CHECK(filtre.push(200.0F));
-    CHECK(filtre.push(300.0F));
-    CHECK(filtre.push(400.0F));
+    Filter filter;
+    CHECK(filter.push(100.0F));
+    CHECK(filter.push(200.0F));
+    CHECK(filter.push(300.0F));
+    CHECK(filter.push(400.0F));
 
-    const mod07::Result<f32> moyenne = filtre.average();
-    REQUIRE(moyenne.is_ok());
-    CHECK_NEAR(static_cast<double>(moyenne.value()), 250.0, 1e-4);
+    const mod07::Result<f32> average = filter.average();
+    REQUIRE(average.is_ok());
+    CHECK_NEAR(static_cast<double>(average.value()), 250.0, 1e-4);
 
     // Cinquieme echantillon : le plus ancien sort de la fenetre.
-    CHECK(filtre.push(500.0F));
-    const mod07::Result<f32> glissee = filtre.average();
-    REQUIRE(glissee.is_ok());
-    CHECK_NEAR(static_cast<double>(glissee.value()), 350.0, 1e-4);
+    CHECK(filter.push(500.0F));
+    const mod07::Result<f32> shifted = filter.average();
+    REQUIRE(shifted.is_ok());
+    CHECK_NEAR(static_cast<double>(shifted.value()), 350.0, 1e-4);
 }
 
 TEST_REQ(Filtre, robustesse_echantillon_non_fini, "LLR-CHAIN-020") {
-    Filter filtre;
-    CHECK_FALSE(filtre.push(kNaN));
-    CHECK_EQ(filtre.sample_count(), usize{0});
+    Filter filter;
+    CHECK_FALSE(filter.push(kNaN));
+    CHECK_EQ(filter.sample_count(), usize{0});
 }
 
 TEST_REQ(Filtre, remise_a_zero, "LLR-CHAIN-022") {
-    Filter filtre;
+    Filter filter;
     for (usize index = 0U; index < Filter::kWindow; ++index) {
-        (void)filtre.push(100.0F);
+        (void)filter.push(100.0F);
     }
-    REQUIRE(filtre.average().is_ok());
+    REQUIRE(filter.average().is_ok());
 
-    filtre.reset();
-    CHECK_EQ(filtre.sample_count(), usize{0});
-    CHECK_EQ(filtre.average().status(), Status::NotReady);
+    filter.reset();
+    CHECK_EQ(filter.sample_count(), usize{0});
+    CHECK_EQ(filter.average().status(), Status::NotReady);
 }
 
 // =============================================================================
@@ -122,23 +122,23 @@ namespace {
 
 /// Contexte d'integration instrumente. Les composants REELS sont utilises ;
 /// seuls des decorateurs d'observation sont interposes.
-struct ContexteTrace {
-    Acquisition acquisition_reelle;
-    Filter filtre_reel;
-    mod12::TracingAcquisition acquisition{acquisition_reelle};
-    mod12::TracingFilter filtre{filtre_reel};
-    mod12::TracedSupervisor superviseur{acquisition, filtre};
+struct TraceContext {
+    Acquisition real_acquisition;
+    Filter real_filter;
+    mod12::TracingAcquisition acquisition{real_acquisition};
+    mod12::TracingFilter filter{real_filter};
+    mod12::TracedSupervisor supervisor{acquisition, filter};
 
-    ContexteTrace() noexcept { CouplingTrace::reset(); }
+    TraceContext() noexcept { CouplingTrace::reset(); }
 };
 
 }  // namespace
 
 TEST_REQ(Couplage, cycle_nominal, "LLR-CHAIN-030") {
-    ContexteTrace contexte;
-    contexte.acquisition.set_raw(2000);
+    TraceContext context;
+    context.acquisition.set_raw(2000);
 
-    const CycleOutcome resultat = contexte.superviseur.cycle();
+    const CycleOutcome result = context.supervisor.cycle();
 
     // Couplage de CONTROLE : trois interfaces exercees en un cycle.
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorReadsAcquisition), u32{1});
@@ -147,42 +147,42 @@ TEST_REQ(Couplage, cycle_nominal, "LLR-CHAIN-030") {
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{0});
 
     // La fenetre n'est pas encore pleine.
-    CHECK_EQ(resultat.status, Status::NotReady);
+    CHECK_EQ(result.status, Status::NotReady);
 }
 
 TEST_REQ(Couplage, donnee_transmise_sans_alteration, "LLR-CHAIN-030") {
     // COUPLAGE DE DONNEES : on verifie que la valeur produite par
     // Acquisition est EXACTEMENT celle recue par Filter. Une conversion
     // d'unite oubliee a cette frontiere serait invisible autrement.
-    ContexteTrace contexte;
-    contexte.acquisition.set_raw(2000);
-    (void)contexte.superviseur.cycle();
+    TraceContext context;
+    context.acquisition.set_raw(2000);
+    (void)context.supervisor.cycle();
 
     REQUIRE(CouplingTrace::data_count() >= 2U);
 
-    Interface interface_lue = Interface::Count;
-    f32 valeur_lue = 0.0F;
-    REQUIRE(CouplingTrace::data_at(0U, interface_lue, valeur_lue));
-    CHECK_EQ(interface_lue, Interface::SupervisorReadsAcquisition);
-    CHECK_NEAR(static_cast<double>(valeur_lue), 500.0, 1e-3);
+    Interface interface_read = Interface::Count;
+    f32 value_read = 0.0F;
+    REQUIRE(CouplingTrace::data_at(0U, interface_read, value_read));
+    CHECK_EQ(interface_read, Interface::SupervisorReadsAcquisition);
+    CHECK_NEAR(static_cast<double>(value_read), 500.0, 1e-3);
 
-    Interface interface_poussee = Interface::Count;
-    f32 valeur_poussee = 0.0F;
-    REQUIRE(CouplingTrace::data_at(1U, interface_poussee, valeur_poussee));
-    CHECK_EQ(interface_poussee, Interface::SupervisorPushesFilter);
+    Interface pushed_interface = Interface::Count;
+    f32 pushed_value = 0.0F;
+    REQUIRE(CouplingTrace::data_at(1U, pushed_interface, pushed_value));
+    CHECK_EQ(pushed_interface, Interface::SupervisorPushesFilter);
     // MEME valeur, MEME unite : la frontiere ne transforme rien.
-    CHECK_NEAR(static_cast<double>(valeur_poussee), static_cast<double>(valeur_lue), 1e-6);
+    CHECK_NEAR(static_cast<double>(pushed_value), static_cast<double>(value_read), 1e-6);
 }
 
 TEST_REQ(Couplage, lecture_en_erreur, "LLR-CHAIN-030") {
     // Lecture en erreur : le filtre ne doit PAS etre sollicite. Ce test
     // verifie une ABSENCE d'appel, ce qu'aucun test unitaire ne peut faire.
-    ContexteTrace contexte;
-    contexte.acquisition.set_raw(9999);  // hors domaine
+    TraceContext context;
+    context.acquisition.set_raw(9999);  // hors domaine
 
-    const CycleOutcome resultat = contexte.superviseur.cycle();
+    const CycleOutcome result = context.supervisor.cycle();
 
-    CHECK_EQ(resultat.status, Status::OutOfRange);
+    CHECK_EQ(result.status, Status::OutOfRange);
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorReadsAcquisition), u32{1});
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorPushesFilter), u32{0});
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorReadsAverage), u32{0});
@@ -192,61 +192,61 @@ TEST_REQ(Couplage, purge_apres_rejets, "LLR-CHAIN-031") {
     // LE cas d'integration : couplage de CONTROLE CONDITIONNEL, declenche par
     // une SEQUENCE. Aucun test unitaire de Filter ni d'Acquisition ne peut
     // l'exercer.
-    ContexteTrace contexte;
+    TraceContext context;
 
     // Quatre mesures valides : la fenetre se remplit.
-    contexte.acquisition.set_raw(2000);
+    context.acquisition.set_raw(2000);
     for (usize cycle = 0U; cycle < 4U; ++cycle) {
-        (void)contexte.superviseur.cycle();
+        (void)context.supervisor.cycle();
     }
-    CHECK_EQ(contexte.filtre.sample_count(), Filter::kWindow);
+    CHECK_EQ(context.filter.sample_count(), Filter::kWindow);
 
     // Trois lectures en erreur consecutives -> purge.
-    contexte.acquisition.set_raw(-5);
-    (void)contexte.superviseur.cycle();
+    context.acquisition.set_raw(-5);
+    (void)context.supervisor.cycle();
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{0});
-    (void)contexte.superviseur.cycle();
+    (void)context.supervisor.cycle();
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{0});
-    (void)contexte.superviseur.cycle();
+    (void)context.supervisor.cycle();
 
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{1});
-    CHECK_EQ(contexte.filtre.sample_count(), usize{0});
-    CHECK_EQ(contexte.superviseur.flush_count(), u32{1});
+    CHECK_EQ(context.filter.sample_count(), usize{0});
+    CHECK_EQ(context.supervisor.flush_count(), u32{1});
 }
 
 TEST_REQ(Couplage, compteur_de_rejets_reinitialise, "LLR-CHAIN-031") {
     // Deux rejets, puis une lecture valide : le compteur doit repartir de zero.
     // Sans cette remise a zero, des rejets ISOLES finiraient par declencher la
     // purge -- exactement le defaut que le mot "consecutifs" doit empecher.
-    ContexteTrace contexte;
+    TraceContext context;
 
-    contexte.acquisition.set_raw(-5);
-    (void)contexte.superviseur.cycle();
-    (void)contexte.superviseur.cycle();
-    CHECK_EQ(contexte.superviseur.consecutive_rejects(), u32{2});
+    context.acquisition.set_raw(-5);
+    (void)context.supervisor.cycle();
+    (void)context.supervisor.cycle();
+    CHECK_EQ(context.supervisor.consecutive_rejects(), u32{2});
 
-    contexte.acquisition.set_raw(2000);
-    (void)contexte.superviseur.cycle();
-    CHECK_EQ(contexte.superviseur.consecutive_rejects(), u32{0});
+    context.acquisition.set_raw(2000);
+    (void)context.supervisor.cycle();
+    CHECK_EQ(context.supervisor.consecutive_rejects(), u32{0});
 
-    contexte.acquisition.set_raw(-5);
-    (void)contexte.superviseur.cycle();
-    (void)contexte.superviseur.cycle();
+    context.acquisition.set_raw(-5);
+    (void)context.supervisor.cycle();
+    (void)context.supervisor.cycle();
     CHECK_EQ(CouplingTrace::call_count(Interface::SupervisorResetsFilter), u32{0});
 }
 
 TEST_REQ(Couplage, toutes_les_interfaces_exercees, "LLR-CHAIN-040") {
     // LA demonstration de l'objectif A-7.8 : une seule campagne, qui exerce
     // TOUTES les interfaces declarees dans le SDD.
-    ContexteTrace contexte;
+    TraceContext context;
 
-    contexte.acquisition.set_raw(2000);
+    context.acquisition.set_raw(2000);
     for (usize cycle = 0U; cycle < 5U; ++cycle) {
-        (void)contexte.superviseur.cycle();
+        (void)context.supervisor.cycle();
     }
-    contexte.acquisition.set_raw(-1);
+    context.acquisition.set_raw(-1);
     for (usize cycle = 0U; cycle < 3U; ++cycle) {
-        (void)contexte.superviseur.cycle();
+        (void)context.supervisor.cycle();
     }
 
     CHECK_EQ(CouplingTrace::unexercised_count(), usize{0});
@@ -262,9 +262,9 @@ TEST_REQ(Couplage, interface_non_exercee_detectee, "LLR-CHAIN-040") {
     // L'outil doit VRAIMENT detecter une interface manquante : sans ce test,
     // `all_interfaces_exercised()` pourrait renvoyer vrai en permanence et le
     // test precedent ne prouverait rien (DO-330 : verifier l'outil).
-    ContexteTrace contexte;
-    contexte.acquisition.set_raw(2000);
-    (void)contexte.superviseur.cycle();  // n'exerce pas reset()
+    TraceContext context;
+    context.acquisition.set_raw(2000);
+    (void)context.supervisor.cycle();  // n'exerce pas reset()
 
     CHECK_FALSE(CouplingTrace::all_interfaces_exercised());
     CHECK_EQ(CouplingTrace::unexercised_count(), usize{1});
@@ -277,70 +277,70 @@ TEST_REQ(Couplage, interface_non_exercee_detectee, "LLR-CHAIN-040") {
 namespace {
 
 /// Contexte d'integration NON instrumente : c'est la configuration EMBARQUEE.
-struct ContexteEmbarque {
+struct EmbeddedContext {
     Acquisition acquisition;
-    Filter filtre;
-    mod12::FlightSupervisor superviseur{acquisition, filtre};
+    Filter filter;
+    mod12::FlightSupervisor supervisor{acquisition, filter};
 };
 
 }  // namespace
 
 TEST_REQ(Supervision, alerte_au_dela_du_seuil, "LLR-CHAIN-032") {
-    ContexteEmbarque contexte;
+    EmbeddedContext context;
     // 3600 counts x 0,25 = 900 unites > 800
-    contexte.acquisition.set_raw(3600);
+    context.acquisition.set_raw(3600);
 
-    CycleOutcome resultat;
+    CycleOutcome result;
     for (usize cycle = 0U; cycle < Filter::kWindow; ++cycle) {
-        resultat = contexte.superviseur.cycle();
+        result = context.supervisor.cycle();
     }
-    REQUIRE_EQ(resultat.status, Status::Ok);
-    CHECK_NEAR(static_cast<double>(resultat.filtered_value), 900.0, 1e-3);
-    CHECK(resultat.alert);
+    REQUIRE_EQ(result.status, Status::Ok);
+    CHECK_NEAR(static_cast<double>(result.filtered_value), 900.0, 1e-3);
+    CHECK(result.alert);
 }
 
 TEST_REQ(Supervision, pas_d_alerte_sous_le_seuil, "LLR-CHAIN-032") {
-    ContexteEmbarque contexte;
-    contexte.acquisition.set_raw(2000);  // 500 unites
+    EmbeddedContext context;
+    context.acquisition.set_raw(2000);  // 500 unites
 
-    CycleOutcome resultat;
+    CycleOutcome result;
     for (usize cycle = 0U; cycle < Filter::kWindow; ++cycle) {
-        resultat = contexte.superviseur.cycle();
+        result = context.supervisor.cycle();
     }
-    REQUIRE_EQ(resultat.status, Status::Ok);
-    CHECK_FALSE(resultat.alert);
+    REQUIRE_EQ(result.status, Status::Ok);
+    CHECK_FALSE(result.alert);
 }
 
 TEST_REQ(Supervision, seuil_exact_ne_declenche_pas, "LLR-CHAIN-032") {
     // 3200 counts x 0,25 = exactement 800,0. La condition est "> 800".
-    ContexteEmbarque contexte;
-    contexte.acquisition.set_raw(3200);
+    EmbeddedContext context;
+    context.acquisition.set_raw(3200);
 
-    CycleOutcome resultat;
+    CycleOutcome result;
     for (usize cycle = 0U; cycle < Filter::kWindow; ++cycle) {
-        resultat = contexte.superviseur.cycle();
+        result = context.supervisor.cycle();
     }
-    REQUIRE_EQ(resultat.status, Status::Ok);
-    CHECK_NEAR(static_cast<double>(resultat.filtered_value), 800.0, 1e-3);
-    CHECK_FALSE(resultat.alert);
+    REQUIRE_EQ(result.status, Status::Ok);
+    CHECK_NEAR(static_cast<double>(result.filtered_value), 800.0, 1e-3);
+    CHECK_FALSE(result.alert);
 }
 
 TEST_REQ(Supervision, le_filtre_lisse_les_transitoires, "LLR-CHAIN-032") {
     // Comportement de l'ASSEMBLAGE : un pic isole ne doit pas declencher
     // l'alerte, parce que la moyenne l'attenue. Ni Acquisition ni Filter ne
     // possedent cette propriete a eux seuls.
-    ContexteEmbarque contexte;
+    EmbeddedContext context;
 
-    const i32 profil[6] = {2000, 2000, 2000, 4000, 2000, 2000};
-    CycleOutcome resultat;
-    bool alerte_vue = false;
+    const i32 profile[6] = {2000, 2000, 2000, 4000, 2000, 2000};
+    CycleOutcome result;
+    bool alert_seen = false;
     for (usize cycle = 0U; cycle < 6U; ++cycle) {
-        contexte.acquisition.set_raw(profil[cycle]);
-        resultat = contexte.superviseur.cycle();
-        if (resultat.alert) {
-            alerte_vue = true;
+        context.acquisition.set_raw(profile[cycle]);
+        result = context.supervisor.cycle();
+        if (result.alert) {
+            alert_seen = true;
         }
     }
     // Pic a 1000 unites, mais moyenne maximale = (500+500+500+1000)/4 = 625.
-    CHECK_FALSE(alerte_vue);
+    CHECK_FALSE(alert_seen);
 }

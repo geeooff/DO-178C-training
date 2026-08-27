@@ -49,9 +49,9 @@ auto s = a + b;    // s est un `int` valant 300, pas un uint8_t valant 44
 
 ⚠️ **Signe et comparaison** :
 ```cpp
-int  moins_un = -1;
-unsigned int un = 1U;
-bool r = (moins_un < un);   // FALSE : -1 devient 4294967295
+int  minus_one = -1;
+unsigned int one = 1U;
+bool r = (minus_one < one);   // FALSE : -1 devient 4294967295
 ```
 
 ---

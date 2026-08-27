@@ -13,13 +13,13 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void reference_contre_pointeur() {
-    titre("Reference ou pointeur : comment choisir");
+void reference_vs_pointer() {
+    title("Reference ou pointeur : comment choisir");
 
     i32 a = 1;
     i32 b = 2;
@@ -27,10 +27,10 @@ void reference_contre_pointeur() {
     mod02::swap_values(a, b);
     std::printf("  apres  : a=%d b=%d   (references : les objets existent forcement)\n", a, b);
 
-    i32 compteur = 41;
-    const bool ok = mod02::increment_if_valid(&compteur);
+    i32 counter = 41;
+    const bool ok = mod02::increment_if_valid(&counter);
     std::printf("  increment_if_valid(&compteur) -> %s, compteur=%d\n", ok ? "true" : "false",
-                compteur);
+                counter);
     std::printf("  increment_if_valid(nullptr)   -> %s\n",
                 mod02::increment_if_valid(nullptr) ? "true" : "false");
 
@@ -41,27 +41,26 @@ void reference_contre_pointeur() {
 }
 
 // -----------------------------------------------------------------------------
-void decay_de_tableau() {
-    titre("Le tableau qui perd sa taille (array decay)");
+void array_decay() {
+    title("Le tableau qui perd sa taille (array decay)");
 
-    const i32 tableau[5] = {1, 2, 3, 4, 5};
-    const i32* pointeur = tableau;  // conversion implicite : on perd la taille
+    const i32 array[5] = {1, 2, 3, 4, 5};
+    const i32* pointer = array;  // conversion implicite : on perd la taille
 
-    std::printf("  sizeof(tableau)  = %zu octets  (le tableau connait sa taille)\n",
-                sizeof(tableau));
-    std::printf("  sizeof(pointeur) = %zu octets  (juste une adresse !)\n", sizeof(pointeur));
+    std::printf("  sizeof(tableau)  = %zu octets  (le tableau connait sa taille)\n", sizeof(array));
+    std::printf("  sizeof(pointeur) = %zu octets  (juste une adresse !)\n", sizeof(pointer));
     std::printf("\n  Des qu'un tableau est passe a une fonction, il devient un pointeur\n");
     std::printf("  et la taille est PERDUE. `void f(int t[10])` accepte un tableau\n");
     std::printf("  de 3 elements sans broncher : le 10 est purement decoratif.\n");
     std::printf("\n  Solution : avio::Span<T>, qui transporte (pointeur, taille) ensemble.\n");
 
-    const avio::Span<const i32> vue = avio::make_const_span(tableau);
-    std::printf("  vue.size() = %zu  -- la taille voyage avec la donnee.\n", vue.size());
+    const avio::Span<const i32> view = avio::make_const_span(array);
+    std::printf("  vue.size() = %zu  -- la taille voyage avec la donnee.\n", view.size());
 }
 
 // -----------------------------------------------------------------------------
 void const_correctness() {
-    titre("Les quatre const (se lisent de droite a gauche)");
+    title("Les quatre const (se lisent de droite a gauche)");
 
     i32 x = 1;
     i32 y = 2;
@@ -87,42 +86,42 @@ void const_correctness() {
 }
 
 // -----------------------------------------------------------------------------
-void tampons_bornes() {
-    titre("Copie bornee : la fin des debordements de tampon");
+void bounded_buffers() {
+    title("Copie bornee : la fin des debordements de tampon");
 
     u8 source[6] = {1U, 2U, 3U, 4U, 5U, 6U};
-    u8 petit[3] = {0U, 0U, 0U};
+    u8 small[3] = {0U, 0U, 0U};
 
-    const usize copies = mod02::copy_bounded(avio::make_const_span(source), avio::make_span(petit));
+    const usize copies = mod02::copy_bounded(avio::make_const_span(source), avio::make_span(small));
 
     std::printf("  source de %zu octets -> destination de %zu octets\n", sizeof(source),
-                sizeof(petit));
+                sizeof(small));
     std::printf("  octets copies : %zu  (aucun debordement possible)\n", copies);
-    std::printf("  destination   : %u %u %u\n", petit[0], petit[1], petit[2]);
+    std::printf("  destination   : %u %u %u\n", small[0], small[1], small[2]);
     std::printf("\n  Comparez avec memcpy(petit, source, sizeof(source)) : compile,\n");
     std::printf("  s'execute, corrompt la pile, et plante 200 ms plus tard ailleurs.\n");
 
-    const avio::u16 somme = mod02::checksum16(avio::make_const_span(source));
-    std::printf("\n  checksum16(source) = 0x%04X\n", somme);
+    const avio::u16 sum = mod02::checksum16(avio::make_const_span(source));
+    std::printf("\n  checksum16(source) = 0x%04X\n", sum);
 }
 
 // -----------------------------------------------------------------------------
-void journal_circulaire() {
-    titre("MeasurementLog : capacite fixe, ecrasement du plus ancien");
+void circular_log() {
+    title("MeasurementLog : capacite fixe, ecrasement du plus ancien");
 
-    mod02::MeasurementLog journal;
+    mod02::MeasurementLog log;
     for (i32 i = 1; i <= 11; ++i) {
-        journal.push(i * 10);
+        log.push(i * 10);
     }
 
     std::printf("  capacite      : %zu\n", mod02::MeasurementLog::kCapacity);
-    std::printf("  taille        : %zu\n", journal.size());
-    std::printf("  a deborde     : %s\n", journal.has_overflowed() ? "oui" : "non");
+    std::printf("  taille        : %zu\n", log.size());
+    std::printf("  a deborde     : %s\n", log.has_overflowed() ? "oui" : "non");
     std::printf("  contenu (du plus ancien au plus recent) :");
-    for (usize index = 0U; index < journal.size(); ++index) {
-        i32 valeur = 0;
-        if (journal.at(index, valeur)) {
-            std::printf(" %d", valeur);
+    for (usize index = 0U; index < log.size(); ++index) {
+        i32 value = 0;
+        if (log.at(index, value)) {
+            std::printf(" %d", value);
         }
     }
     std::printf("\n");
@@ -132,8 +131,8 @@ void journal_circulaire() {
 }
 
 // -----------------------------------------------------------------------------
-void pieges_de_duree_de_vie() {
-    titre("Duree de vie : ce que le GC faisait pour vous");
+void lifetime_pitfalls() {
+    title("Duree de vie : ce que le GC faisait pour vous");
 
     std::printf("  Les trois fautes que le compilateur ne detecte PAS :\n\n");
     std::printf("  1. Renvoyer l'adresse d'une variable locale\n");
@@ -156,12 +155,12 @@ int main() {
     std::printf("#  Module 02 : pointeurs, references, const-correctness      #\n");
     std::printf("#############################################################\n");
 
-    reference_contre_pointeur();
-    decay_de_tableau();
+    reference_vs_pointer();
+    array_decay();
     const_correctness();
-    tampons_bornes();
-    journal_circulaire();
-    pieges_de_duree_de_vie();
+    bounded_buffers();
+    circular_log();
+    lifetime_pitfalls();
 
     std::printf("\nModule 02 termine.\n");
     return 0;

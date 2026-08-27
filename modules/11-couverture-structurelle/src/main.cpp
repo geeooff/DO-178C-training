@@ -14,67 +14,67 @@ using mod11::McdcReport;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
-void executer_mode4a(DecisionRecorder& enregistreur, bool c1, bool c2, bool c3, bool c4) {
+void run_mode4a(DecisionRecorder& recorder, bool c1, bool c2, bool c3, bool c4) {
     const bool conditions[4] = {c1, c2, c3, c4};
-    (void)enregistreur.record(conditions, 4U, mod11::mode4a_decision(c1, c2, c3, c4));
+    (void)recorder.record(conditions, 4U, mod11::mode4a_decision(c1, c2, c3, c4));
 }
 
-void executer_inhibition(DecisionRecorder& enregistreur, bool a, bool b, bool c) {
+void run_inhibition(DecisionRecorder& recorder, bool a, bool b, bool c) {
     const bool conditions[3] = {a, b, c};
-    (void)enregistreur.record(conditions, 3U, mod11::inhibition_decision(a, b, c));
+    (void)recorder.record(conditions, 3U, mod11::inhibition_decision(a, b, c));
 }
 
-void afficher_jeu(const DecisionRecorder& enregistreur, const char* const* noms) {
+void print_set(const DecisionRecorder& recorder, const char* const* names) {
     std::printf("    #  ");
-    for (usize index = 0U; index < enregistreur.condition_count(); ++index) {
-        std::printf("%-6s", noms[index]);
+    for (usize index = 0U; index < recorder.condition_count(); ++index) {
+        std::printf("%-6s", names[index]);
     }
     std::printf("| issue\n");
     std::printf("    ---");
-    for (usize index = 0U; index < enregistreur.condition_count(); ++index) {
+    for (usize index = 0U; index < recorder.condition_count(); ++index) {
         std::printf("------");
     }
     std::printf("+-------\n");
 
-    for (usize index = 0U; index < enregistreur.size(); ++index) {
+    for (usize index = 0U; index < recorder.size(); ++index) {
         std::printf("    %zu  ", index);
-        for (usize condition = 0U; condition < enregistreur.condition_count(); ++condition) {
-            std::printf("%-6s", enregistreur.at(index).conditions[condition] ? "V" : "F");
+        for (usize condition = 0U; condition < recorder.condition_count(); ++condition) {
+            std::printf("%-6s", recorder.at(index).conditions[condition] ? "V" : "F");
         }
-        std::printf("| %s\n", enregistreur.at(index).outcome ? "VRAI" : "faux");
+        std::printf("| %s\n", recorder.at(index).outcome ? "VRAI" : "faux");
     }
 }
 
-void afficher_rapport(const DecisionRecorder& enregistreur, const char* const* noms) {
-    const McdcReport rapport = mod11::analyze_mcdc(enregistreur);
+void print_report(const DecisionRecorder& recorder, const char* const* names) {
+    const McdcReport report = mod11::analyze_mcdc(recorder);
     std::printf("\n    Analyse MC/DC :\n");
     std::printf("      issues observees : vrai=%s faux=%s\n",
-                rapport.outcome_true_seen ? "oui" : "NON",
-                rapport.outcome_false_seen ? "oui" : "NON");
+                report.outcome_true_seen ? "oui" : "NON",
+                report.outcome_false_seen ? "oui" : "NON");
 
-    for (usize condition = 0U; condition < rapport.condition_count; ++condition) {
-        if (rapport.condition_covered[condition]) {
+    for (usize condition = 0U; condition < report.condition_count; ++condition) {
+        if (report.condition_covered[condition]) {
             std::printf("      %-6s : COUVERTE   paire d'independance (%zu, %zu)\n",
-                        noms[condition], rapport.pair_first[condition],
-                        rapport.pair_second[condition]);
+                        names[condition], report.pair_first[condition],
+                        report.pair_second[condition]);
         } else {
-            std::printf("      %-6s : NON COUVERTE%s\n", noms[condition],
-                        rapport.condition_both_values[condition]
+            std::printf("      %-6s : NON COUVERTE%s\n", names[condition],
+                        report.condition_both_values[condition]
                             ? ""
                             : "  (et n'a pas pris ses deux valeurs)");
         }
     }
-    std::printf("      -> %zu/%zu conditions couvertes, MC/DC %s\n", rapport.covered_count(),
-                rapport.condition_count, rapport.is_complete() ? "ATTEINT" : "NON ATTEINT");
+    std::printf("      -> %zu/%zu conditions couvertes, MC/DC %s\n", report.covered_count(),
+                report.condition_count, report.is_complete() ? "ATTEINT" : "NON ATTEINT");
 }
 
 // -----------------------------------------------------------------------------
-void criteres_par_niveau() {
-    titre("Quel critere de couverture pour quel niveau ?");
+void criteria_by_level() {
+    title("Quel critere de couverture pour quel niveau ?");
     std::printf("  DAL | statement | decision | MC/DC | couplage donnees/controle\n");
     std::printf("  ----+-----------+----------+-------+--------------------------\n");
     std::printf("   A  |    oui    |   oui    |  OUI  |          oui\n");
@@ -89,17 +89,17 @@ void criteres_par_niveau() {
 }
 
 // -----------------------------------------------------------------------------
-void decision_ne_suffit_pas() {
-    titre("Piege : 100 %% de couverture de DECISION, 0 %% de MC/DC");
+void decision_is_not_enough() {
+    title("Piege : 100 %% de couverture de DECISION, 0 %% de MC/DC");
 
-    const char* const noms[4] = {"alt", "vit", "train", "vol"};
-    DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);
-    executer_mode4a(enregistreur, false, false, false, false);
+    const char* const names[4] = {"alt", "vit", "train", "vol"};
+    DecisionRecorder recorder(4U);
+    run_mode4a(recorder, true, true, true, true);
+    run_mode4a(recorder, false, false, false, false);
 
     std::printf("\n  Deux tests. La decision prend ses DEUX issues :\n");
-    afficher_jeu(enregistreur, noms);
-    afficher_rapport(enregistreur, noms);
+    print_set(recorder, names);
+    print_report(recorder, names);
 
     std::printf("\n  Couverture de decision : 100 %%. Couverture MC/DC : 0 %%.\n");
     std::printf("  Les deux evaluations different sur les QUATRE conditions a la\n");
@@ -109,19 +109,19 @@ void decision_ne_suffit_pas() {
 }
 
 // -----------------------------------------------------------------------------
-void jeu_mcdc_minimal() {
-    titre("Le jeu MC/DC minimal d'une conjonction : N + 1 tests");
+void minimal_mcdc_set() {
+    title("Le jeu MC/DC minimal d'une conjonction : N + 1 tests");
 
-    const char* const noms[4] = {"alt", "vit", "train", "vol"};
-    DecisionRecorder enregistreur(4U);
-    executer_mode4a(enregistreur, true, true, true, true);
-    executer_mode4a(enregistreur, false, true, true, true);
-    executer_mode4a(enregistreur, true, false, true, true);
-    executer_mode4a(enregistreur, true, true, false, true);
-    executer_mode4a(enregistreur, true, true, true, false);
+    const char* const names[4] = {"alt", "vit", "train", "vol"};
+    DecisionRecorder recorder(4U);
+    run_mode4a(recorder, true, true, true, true);
+    run_mode4a(recorder, false, true, true, true);
+    run_mode4a(recorder, true, false, true, true);
+    run_mode4a(recorder, true, true, false, true);
+    run_mode4a(recorder, true, true, true, false);
 
-    afficher_jeu(enregistreur, noms);
-    afficher_rapport(enregistreur, noms);
+    print_set(recorder, names);
+    print_report(recorder, names);
 
     std::printf("\n  5 tests au lieu de 16. Le gain croit vite :\n");
     std::printf("      N =  4 ->  5 tests au lieu de 16\n");
@@ -131,18 +131,18 @@ void jeu_mcdc_minimal() {
 }
 
 // -----------------------------------------------------------------------------
-void decision_mixte() {
-    titre("Une decision MIXTE : A OU (B ET C)");
+void mixed_decision() {
+    title("Une decision MIXTE : A OU (B ET C)");
 
-    const char* const noms[3] = {"test", "appr", "plan"};
-    DecisionRecorder enregistreur(3U);
-    executer_inhibition(enregistreur, false, false, true);
-    executer_inhibition(enregistreur, true, false, true);
-    executer_inhibition(enregistreur, false, true, true);
-    executer_inhibition(enregistreur, false, true, false);
+    const char* const names[3] = {"test", "appr", "plan"};
+    DecisionRecorder recorder(3U);
+    run_inhibition(recorder, false, false, true);
+    run_inhibition(recorder, true, false, true);
+    run_inhibition(recorder, false, true, true);
+    run_inhibition(recorder, false, true, false);
 
-    afficher_jeu(enregistreur, noms);
-    afficher_rapport(enregistreur, noms);
+    print_set(recorder, names);
+    print_report(recorder, names);
 
     std::printf("\n  4 tests pour 3 conditions : l'optimum theorique N + 1.\n");
     std::printf("  Remarquez que l'evaluation 0 sert de reference pour DEUX paires,\n");
@@ -152,8 +152,8 @@ void decision_mixte() {
 }
 
 // -----------------------------------------------------------------------------
-void court_circuit() {
-    titre("Le piege du court-circuit");
+void short_circuit() {
+    title("Le piege du court-circuit");
     std::printf("  En C++, `&&` et `||` sont a COURT-CIRCUIT :\n\n");
     std::printf("      if (a && b) { ... }   // b n'est PAS evalue si a est faux\n\n");
     std::printf("  Consequence pour MC/DC : une condition non evaluee n'a pas pris\n");
@@ -175,8 +175,8 @@ void court_circuit() {
 }
 
 // -----------------------------------------------------------------------------
-void mesurer_la_couverture() {
-    titre("Mesurer la couverture pour de vrai");
+void measure_coverage() {
+    title("Mesurer la couverture pour de vrai");
     std::printf("  L'analyseur de ce module raisonne sur les DECISIONS. Pour la\n");
     std::printf("  couverture d'INSTRUCTIONS et de BRANCHES, il faut instrumenter\n");
     std::printf("  le binaire. Sous Windows/MSVC, l'outil de reference est\n");
@@ -198,12 +198,12 @@ int main() {
     std::printf("#  Module 11 : couverture structurelle et MC/DC              #\n");
     std::printf("#############################################################\n");
 
-    criteres_par_niveau();
-    decision_ne_suffit_pas();
-    jeu_mcdc_minimal();
-    decision_mixte();
-    court_circuit();
-    mesurer_la_couverture();
+    criteria_by_level();
+    decision_is_not_enough();
+    minimal_mcdc_set();
+    mixed_decision();
+    short_circuit();
+    measure_coverage();
 
     std::printf("\nModule 11 termine.\n");
     return 0;

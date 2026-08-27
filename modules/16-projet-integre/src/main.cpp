@@ -15,20 +15,20 @@ using mod16::TankId;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 /// Une phase du profil de vol.
 struct Phase {
-    const char* libelle;
-    i32 gauche;
-    i32 central;
-    i32 droite;
+    const char* label;
+    i32 left;
+    i32 center;
+    i32 right;
     usize cycles;
 };
 
-void afficher_entete() {
+void print_header() {
     std::printf("  %-30s %8s %8s %8s %9s %8s %-7s %-7s %s\n", "phase", "gauche", "central",
                 "droite", "total", "ecart", "BAS", "DESEQ", "statut");
     std::printf(
@@ -36,20 +36,20 @@ void afficher_entete() {
         "--------------------------------------\n");
 }
 
-void afficher_ligne(const char* libelle, const CycleReport& rapport) {
-    std::printf("  %-30s %8.0f %8.0f %8.0f %9.0f %8.0f %-7s %-7s %s\n", libelle,
-                static_cast<double>(rapport.tank_quantity[0].kilograms()),
-                static_cast<double>(rapport.tank_quantity[1].kilograms()),
-                static_cast<double>(rapport.tank_quantity[2].kilograms()),
-                static_cast<double>(rapport.total.kilograms()),
-                static_cast<double>(rapport.wing_imbalance.kilograms()),
-                rapport.low_fuel_alert ? "ALERTE" : "-", rapport.imbalance_alert ? "ALERTE" : "-",
-                mod07::status_name(rapport.status));
+void print_line(const char* label, const CycleReport& report) {
+    std::printf("  %-30s %8.0f %8.0f %8.0f %9.0f %8.0f %-7s %-7s %s\n", label,
+                static_cast<double>(report.tank_quantity[0].kilograms()),
+                static_cast<double>(report.tank_quantity[1].kilograms()),
+                static_cast<double>(report.tank_quantity[2].kilograms()),
+                static_cast<double>(report.total.kilograms()),
+                static_cast<double>(report.wing_imbalance.kilograms()),
+                report.low_fuel_alert ? "ALERTE" : "-", report.imbalance_alert ? "ALERTE" : "-",
+                mod07::status_name(report.status));
 }
 
 // -----------------------------------------------------------------------------
 void presentation() {
-    titre("FQMS -- Fuel Quantity Management System");
+    title("FQMS -- Fuel Quantity Management System");
     std::printf("  Systeme de gestion de la quantite de carburant d'un birecteur.\n");
     std::printf("  Trois reservoirs : aile gauche 5000 kg, central 8000 kg,\n");
     std::printf("  aile droite 5000 kg. Total 18 000 kg.\n\n");
@@ -67,11 +67,11 @@ void presentation() {
 }
 
 // -----------------------------------------------------------------------------
-void profil_de_vol() {
-    titre("Profil de vol nominal");
+void flight_profile() {
+    title("Profil de vol nominal");
 
-    FuelSystem systeme;
-    if (!FuelSystem::create(mod16::default_config(), systeme)) {
+    FuelSystem system;
+    if (!FuelSystem::create(mod16::default_config(), system)) {
         std::printf("  ERREUR : configuration refusee.\n");
         return;
     }
@@ -85,14 +85,14 @@ void profil_de_vol() {
                              {"7. Descente", 819, 0, 819, 5U},
                              {"8. Approche, reserve", 0, 717, 0, 8U}};
 
-    afficher_entete();
+    print_header();
     for (usize index = 0U; index < 8U; ++index) {
-        const i32 mesures[3] = {phases[index].gauche, phases[index].central, phases[index].droite};
-        CycleReport rapport;
+        const i32 measurements[3] = {phases[index].left, phases[index].center, phases[index].right};
+        CycleReport report;
         for (usize cycle = 0U; cycle < phases[index].cycles; ++cycle) {
-            rapport = systeme.update(mesures);
+            report = system.update(measurements);
         }
-        afficher_ligne(phases[index].libelle, rapport);
+        print_line(phases[index].label, report);
     }
 
     std::printf("\n  Phase 5 : le desequilibre de 1000 kg leve l'alerte apres\n");
@@ -100,35 +100,35 @@ void profil_de_vol() {
     std::printf("  l'equilibre, l'alerte s'efface apres 5 cycles.\n");
     std::printf("  Phase 8 : la quantite passe sous 1500 kg, l'alerte bas niveau\n");
     std::printf("  se leve.\n");
-    std::printf("\n  Cycles traites : %u\n", systeme.cycle_count());
+    std::printf("\n  Cycles traites : %u\n", system.cycle_count());
 }
 
 // -----------------------------------------------------------------------------
-void panne_de_jauge() {
-    titre("Panne de jauge : le cas qui justifie le gel des alertes");
+void gauge_fault() {
+    title("Panne de jauge : le cas qui justifie le gel des alertes");
 
-    FuelSystem systeme;
-    (void)FuelSystem::create(mod16::default_config(), systeme);
+    FuelSystem system;
+    (void)FuelSystem::create(mod16::default_config(), system);
 
-    afficher_entete();
+    print_header();
 
     // Situation de depart : 3000 kg au total, au-dessus du seuil.
     const i32 nominal[3] = {246, 819, 246};
-    CycleReport rapport;
+    CycleReport report;
     for (usize cycle = 0U; cycle < 10U; ++cycle) {
-        rapport = systeme.update(nominal);
+        report = system.update(nominal);
     }
-    afficher_ligne("Nominal, 2200 kg", rapport);
+    print_line("Nominal, 2200 kg", report);
 
     // La jauge centrale tombe en panne.
-    const i32 avec_panne[3] = {246, -1, 246};
+    const i32 with_fault[3] = {246, -1, 246};
     for (usize cycle = 0U; cycle < 20U; ++cycle) {
-        rapport = systeme.update(avec_panne);
+        report = system.update(with_fault);
     }
-    afficher_ligne("Jauge centrale en panne", rapport);
+    print_line("Jauge centrale en panne", report);
 
     std::printf("\n  La quantite VISIBLE est tombee a %.0f kg, soit sous le seuil de\n",
-                static_cast<double>(rapport.total.kilograms()));
+                static_cast<double>(report.total.kilograms()));
     std::printf("  1500 kg. Et pourtant AUCUNE alerte bas niveau.\n\n");
     std::printf("  POURQUOI : la quantite n'est pas mesurable (HLR-FQMS-032). Un\n");
     std::printf("  echantillon non fini est transmis au moniteur d'alerte, qui\n");
@@ -139,20 +139,20 @@ void panne_de_jauge() {
     std::printf("  fausse alerte a effet operationnel majeur est un defaut de\n");
     std::printf("  securite, au meme titre qu'une alerte manquante.\n\n");
     std::printf("  Le statut passe a \"%s\" : l'equipage SAIT que la quantite\n",
-                mod07::status_name(rapport.status));
+                mod07::status_name(report.status));
     std::printf("  affichee est incomplete. C'est HLR-FQMS-011.\n");
 
     std::printf("\n  Compteurs de maintenance (BITE) :\n");
-    const TankId reservoirs[3] = {TankId::Left, TankId::Center, TankId::Right};
+    const TankId tanks[3] = {TankId::Left, TankId::Center, TankId::Right};
     for (usize index = 0U; index < 3U; ++index) {
-        std::printf("    %-12s : %u rejet(s)\n", mod16::tank_name(reservoirs[index]),
-                    systeme.fault_count(reservoirs[index]));
+        std::printf("    %-12s : %u rejet(s)\n", mod16::tank_name(tanks[index]),
+                    system.fault_count(tanks[index]));
     }
 }
 
 // -----------------------------------------------------------------------------
-void bilan_de_la_formation() {
-    titre("Ce que ce composant rassemble");
+void training_summary() {
+    title("Ce que ce composant rassemble");
     std::printf("  module 01  types de largeur fixe, arithmetique bornee\n");
     std::printf("  module 02  const-correctness, Span, pas d'arithmetique de pointeur\n");
     std::printf("  module 03  regle de 0 : aucune ressource a liberer\n");
@@ -187,9 +187,9 @@ int main() {
     std::printf("#############################################################\n");
 
     presentation();
-    profil_de_vol();
-    panne_de_jauge();
-    bilan_de_la_formation();
+    flight_profile();
+    gauge_fault();
+    training_summary();
 
     std::printf("\nProjet integre termine. Fin de la formation.\n");
     return 0;

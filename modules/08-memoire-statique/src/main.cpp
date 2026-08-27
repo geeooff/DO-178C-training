@@ -16,13 +16,13 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void pourquoi_pas_de_new() {
-    titre("Pourquoi `new` est interdit apres l'initialisation");
+void why_no_new() {
+    title("Pourquoi `new` est interdit apres l'initialisation");
     std::printf("  1. NON-DETERMINISME TEMPOREL\n");
     std::printf("     La duree de `new` depend de l'historique complet des\n");
     std::printf("     allocations. Elle n'est pas bornable utilement.\n\n");
@@ -40,23 +40,23 @@ void pourquoi_pas_de_new() {
 }
 
 // -----------------------------------------------------------------------------
-void vecteur_statique() {
-    titre("StaticVector : la capacite est dans le TYPE");
+void static_vector() {
+    title("StaticVector : la capacite est dans le TYPE");
 
-    mod08::StaticVector<i32, 4U> mesures;
-    const i32 entrees[7] = {10, 20, 30, 40, 50, 60, 70};
+    mod08::StaticVector<i32, 4U> measurements;
+    const i32 inputs[7] = {10, 20, 30, 40, 50, 60, 70};
 
     for (usize index = 0U; index < 7U; ++index) {
-        const bool accepte = mesures.push_back(entrees[index]);
-        std::printf("  push_back(%2d) -> %-8s taille=%zu\n", entrees[index],
-                    accepte ? "accepte" : "REFUSE", mesures.size());
+        const bool accepted = measurements.push_back(inputs[index]);
+        std::printf("  push_back(%2d) -> %-8s taille=%zu\n", inputs[index],
+                    accepted ? "accepte" : "REFUSE", measurements.size());
     }
 
-    std::printf("\n  ajouts refuses : %u\n", mesures.rejected_count());
+    std::printf("\n  ajouts refuses : %u\n", measurements.rejected_count());
     std::printf("  contenu        :");
-    const avio::Span<const i32> vue = mesures.view();
-    for (usize index = 0U; index < vue.size(); ++index) {
-        std::printf(" %d", vue[index]);
+    const avio::Span<const i32> view = measurements.view();
+    for (usize index = 0U; index < view.size(); ++index) {
+        std::printf(" %d", view[index]);
     }
     std::printf("\n");
 
@@ -71,18 +71,18 @@ void vecteur_statique() {
 }
 
 // -----------------------------------------------------------------------------
-void reserve_de_blocs() {
-    titre("MemoryPool : allouer sans `new`, en temps constant");
+void block_reserve() {
+    title("MemoryPool : allouer sans `new`, en temps constant");
 
     mod08::MemoryPool<32U, 8U> pool;
-    void* blocs[8] = {};
+    void* blocks[8] = {};
 
     std::printf("  taille d'un bloc : %zu octets, %zu blocs\n",
                 mod08::MemoryPool<32U, 8U>::kBlockSize, mod08::MemoryPool<32U, 8U>::kBlockCount);
     std::printf("  occupation RAM totale : %zu octets\n", sizeof(pool));
 
     for (usize index = 0U; index < 8U; ++index) {
-        blocs[index] = pool.allocate();
+        blocks[index] = pool.allocate();
     }
     std::printf("\n  apres 8 allocations : libres=%zu, pic=%zu\n", pool.available(),
                 pool.high_water_mark());
@@ -95,19 +95,18 @@ void reserve_de_blocs() {
     // printf donnerait un resultat dependant du compilateur. On sequence donc
     // explicitement. Piege classique, et regle MISRA (au plus un effet de
     // bord par expression).
-    const bool premiere = pool.deallocate(blocs[0]);
-    const bool seconde = pool.deallocate(blocs[0]);
-    std::printf("    liberer deux fois le meme bloc : %s puis %s\n",
-                premiere ? "accepte" : "refuse",
-                seconde ? "accepte" : "REFUSE (double liberation)");
+    const bool first = pool.deallocate(blocks[0]);
+    const bool second = pool.deallocate(blocks[0]);
+    std::printf("    liberer deux fois le meme bloc : %s puis %s\n", first ? "accepte" : "refuse",
+                second ? "accepte" : "REFUSE (double liberation)");
 
-    i32 variable_locale = 0;
+    i32 local_variable = 0;
     std::printf("    liberer un pointeur etranger   : %s\n",
-                pool.deallocate(&variable_locale) ? "accepte" : "REFUSE");
+                pool.deallocate(&local_variable) ? "accepte" : "REFUSE");
 
-    u8* milieu = static_cast<u8*>(blocs[1]);
+    u8* middle = static_cast<u8*>(blocks[1]);
     std::printf("    liberer le milieu d'un bloc    : %s\n",
-                pool.deallocate(milieu + 8) ? "accepte" : "REFUSE");
+                pool.deallocate(middle + 8) ? "accepte" : "REFUSE");
 
     std::printf("\n  Aucune fragmentation possible : tous les blocs font la meme\n");
     std::printf("  taille. Allocation et liberation en O(1) : le WCET est borne.\n");
@@ -115,23 +114,23 @@ void reserve_de_blocs() {
 }
 
 // -----------------------------------------------------------------------------
-void analyse_de_pile() {
-    titre("Analyse de pile : pourquoi la recursion est bannie");
+void stack_analysis() {
+    title("Analyse de pile : pourquoi la recursion est bannie");
 
     mod08::CallDepthMonitor::reset();
-    u64 resultat = 0U;
-    (void)mod08::factorial(20U, resultat);
-    const u32 profondeur_iterative = mod08::CallDepthMonitor::maximum();
+    u64 result = 0U;
+    (void)mod08::factorial(20U, result);
+    const u32 iterative_depth = mod08::CallDepthMonitor::maximum();
 
     mod08::CallDepthMonitor::reset();
-    (void)mod08::factorial_recursive(20U, resultat);
-    const u32 profondeur_recursive = mod08::CallDepthMonitor::maximum();
+    (void)mod08::factorial_recursive(20U, result);
+    const u32 recursive_depth = mod08::CallDepthMonitor::maximum();
 
-    std::printf("  20! = %llu\n\n", static_cast<unsigned long long>(resultat));
-    std::printf("  version iterative : profondeur de pile maximale = %u\n", profondeur_iterative);
-    std::printf("  version recursive : profondeur de pile maximale = %u\n", profondeur_recursive);
+    std::printf("  20! = %llu\n\n", static_cast<unsigned long long>(result));
+    std::printf("  version iterative : profondeur de pile maximale = %u\n", iterative_depth);
+    std::printf("  version recursive : profondeur de pile maximale = %u\n", recursive_depth);
     std::printf("\n  Meme resultat, %ux plus de pile. Sur une cible ou chaque trame\n",
-                profondeur_recursive / ((profondeur_iterative == 0U) ? 1U : profondeur_iterative));
+                recursive_depth / ((iterative_depth == 0U) ? 1U : iterative_depth));
     std::printf("  fait 48 octets : 960 octets contre 48.\n");
 
     std::printf("\n  Ce qui rend une ANALYSE DE PILE possible :\n");
@@ -146,15 +145,15 @@ void analyse_de_pile() {
 }
 
 // -----------------------------------------------------------------------------
-void budget_memoire() {
-    titre("Le budget memoire : un livrable, pas une estimation");
+void memory_budget() {
+    title("Le budget memoire : un livrable, pas une estimation");
 
-    const usize taille_vecteur = sizeof(mod08::StaticVector<i32, 100U>);
-    const usize taille_pool = sizeof(mod08::MemoryPool<32U, 8U>);
-    const usize total = taille_vecteur + taille_pool;
+    const usize vector_size = sizeof(mod08::StaticVector<i32, 100U>);
+    const usize pool_size = sizeof(mod08::MemoryPool<32U, 8U>);
+    const usize total = vector_size + pool_size;
 
-    std::printf("  %-40s %8zu octets\n", "StaticVector<i32,100> (journal mesures)", taille_vecteur);
-    std::printf("  %-40s %8zu octets\n", "MemoryPool<32,8> (tampons messages)", taille_pool);
+    std::printf("  %-40s %8zu octets\n", "StaticVector<i32,100> (journal mesures)", vector_size);
+    std::printf("  %-40s %8zu octets\n", "MemoryPool<32,8> (tampons messages)", pool_size);
     std::printf("  %-40s %8zu octets\n", "TOTAL alloue statiquement", total);
     std::printf("\n  Chaque octet de RAM de ce composant est connu AVANT l'execution.\n");
     std::printf("  On peut donc ecrire, dans le dossier de certification :\n");
@@ -169,11 +168,11 @@ int main() {
     std::printf("#  Module 08 : memoire statique, reserve de blocs, pile      #\n");
     std::printf("#############################################################\n");
 
-    pourquoi_pas_de_new();
-    vecteur_statique();
-    reserve_de_blocs();
-    analyse_de_pile();
-    budget_memoire();
+    why_no_new();
+    static_vector();
+    block_reserve();
+    stack_analysis();
+    memory_budget();
 
     std::printf("\nModule 08 termine.\n");
     return 0;

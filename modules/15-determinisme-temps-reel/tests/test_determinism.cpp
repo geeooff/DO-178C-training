@@ -74,17 +74,17 @@ TEST_REQ(Flottant, addition_non_associative, "LLR-DET-012") {
 TEST_REQ(Flottant, derive_d_accumulation, "LLR-DET-013") {
     // 0,1 n'est pas representable exactement en binaire. Additionner dix fois
     // 0,1F ne donne PAS 1,0F.
-    const f32 dix_fois = mod15::accumulate_float(0.1F, 10U);
-    CHECK(dix_fois != 1.0F);
-    CHECK_NEAR(static_cast<double>(dix_fois), 1.0, 1e-6);
+    const f32 ten_times = mod15::accumulate_float(0.1F, 10U);
+    CHECK(ten_times != 1.0F);
+    CHECK_NEAR(static_cast<double>(ten_times), 1.0, 1e-6);
 
     // Et la derive CROIT avec le nombre de termes.
-    const f32 mille_fois = mod15::accumulate_float(0.1F, 1000U);
-    CHECK(mille_fois != 100.0F);
-    const double erreur_10 = static_cast<double>(dix_fois) - 1.0;
-    const double erreur_1000 = static_cast<double>(mille_fois) - 100.0;
-    const double abs_10 = (erreur_10 < 0.0) ? -erreur_10 : erreur_10;
-    const double abs_1000 = (erreur_1000 < 0.0) ? -erreur_1000 : erreur_1000;
+    const f32 thousand_times = mod15::accumulate_float(0.1F, 1000U);
+    CHECK(thousand_times != 100.0F);
+    const double error_10 = static_cast<double>(ten_times) - 1.0;
+    const double error_1000 = static_cast<double>(thousand_times) - 100.0;
+    const double abs_10 = (error_10 < 0.0) ? -error_10 : error_10;
+    const double abs_1000 = (error_1000 < 0.0) ? -error_1000 : error_1000;
     CHECK(abs_1000 > abs_10);
 }
 
@@ -94,10 +94,10 @@ TEST_REQ(Flottant, somme_de_kahan_borne_la_derive, "LLR-DET-014") {
     const f32 naive = mod15::accumulate_float(0.1F, 1000U);
     const f32 kahan = mod15::accumulate_kahan(0.1F, 1000U);
 
-    const double erreur_naive = static_cast<double>(naive) - 100.0;
-    const double erreur_kahan = static_cast<double>(kahan) - 100.0;
-    const double abs_naive = (erreur_naive < 0.0) ? -erreur_naive : erreur_naive;
-    const double abs_kahan = (erreur_kahan < 0.0) ? -erreur_kahan : erreur_kahan;
+    const double error_naive = static_cast<double>(naive) - 100.0;
+    const double error_kahan = static_cast<double>(kahan) - 100.0;
+    const double abs_naive = (error_naive < 0.0) ? -error_naive : error_naive;
+    const double abs_kahan = (error_kahan < 0.0) ? -error_kahan : error_kahan;
 
     CHECK(abs_kahan <= abs_naive);
     CHECK(abs_kahan < 1.0e-4);
@@ -171,18 +171,18 @@ TEST_REQ(VirguleFixe, robustesse_non_fini, "LLR-FIX-011") {
 }
 
 TEST_REQ(VirguleFixe, arithmetique_exacte, "LLR-FIX-020,LLR-FIX-021,LLR-FIX-022") {
-    const Fixed deux = Fixed::from_int(2);
-    const Fixed trois = Fixed::from_int(3);
+    const Fixed two = Fixed::from_int(2);
+    const Fixed three = Fixed::from_int(3);
 
     // Egalite EXACTE : impensable en flottant, naturelle ici.
-    CHECK(((deux + trois) == Fixed::from_int(5)));
-    CHECK(((trois - deux) == Fixed::from_int(1)));
-    CHECK(((deux * trois) == Fixed::from_int(6)));
-    CHECK(((-deux) == Fixed::from_int(-2)));
+    CHECK(((two + three) == Fixed::from_int(5)));
+    CHECK(((three - two) == Fixed::from_int(1)));
+    CHECK(((two * three) == Fixed::from_int(6)));
+    CHECK(((-two) == Fixed::from_int(-2)));
 
-    const Fixed demi = Fixed::from_float(0.5F);
-    CHECK(((demi * deux) == Fixed::from_int(1)));
-    CHECK(((demi + demi) == Fixed::from_int(1)));
+    const Fixed half = Fixed::from_float(0.5F);
+    CHECK(((half * two) == Fixed::from_int(1)));
+    CHECK(((half + half) == Fixed::from_int(1)));
 }
 
 TEST_REQ(VirguleFixe, saturation, "LLR-FIX-020,LLR-FIX-021") {
@@ -198,17 +198,17 @@ TEST_REQ(VirguleFixe, saturation, "LLR-FIX-020,LLR-FIX-021") {
 }
 
 TEST_REQ(VirguleFixe, division, "LLR-FIX-023") {
-    Fixed resultat;
-    REQUIRE(Fixed::from_int(6).divide(Fixed::from_int(2), resultat));
-    CHECK((resultat == Fixed::from_int(3)));
+    Fixed result;
+    REQUIRE(Fixed::from_int(6).divide(Fixed::from_int(2), result));
+    CHECK((result == Fixed::from_int(3)));
 
-    REQUIRE(Fixed::from_int(1).divide(Fixed::from_int(4), resultat));
-    CHECK((resultat == Fixed::from_float(0.25F)));
+    REQUIRE(Fixed::from_int(1).divide(Fixed::from_int(4), result));
+    CHECK((result == Fixed::from_float(0.25F)));
 
     // Division par zero : refusee, sortie neutralisee, jamais de piege
     // materiel.
-    CHECK_FALSE(Fixed::from_int(1).divide(Fixed(), resultat));
-    CHECK_EQ(resultat.raw(), 0);
+    CHECK_FALSE(Fixed::from_int(1).divide(Fixed(), result));
+    CHECK_EQ(result.raw(), 0);
 }
 
 TEST_REQ(VirguleFixe, derive_previsible, "LLR-FIX-030") {
@@ -239,7 +239,7 @@ TEST_REQ(VirguleFixe, derive_previsible, "LLR-FIX-030") {
 namespace {
 
 /// Trame majeure de reference : 10 ms (100 Hz), quatre partitions.
-MajorFrame trame_reference() noexcept {
+MajorFrame reference_frame() noexcept {
     MajorFrame frame(10000U);
     (void)frame.add_window(PartitionId::FlightControl, 0U, 3000U);
     (void)frame.add_window(PartitionId::FuelManagement, 3000U, 1500U);
@@ -251,7 +251,7 @@ MajorFrame trame_reference() noexcept {
 }  // namespace
 
 TEST_REQ(Ordonnancement, plan_valide, "LLR-SCH-010,LLR-SCH-011") {
-    const MajorFrame frame = trame_reference();
+    const MajorFrame frame = reference_frame();
     CHECK_EQ(frame.window_count(), usize{4});
     CHECK_EQ(frame.period_us(), u32{10000});
     CHECK_EQ(frame.allocated_us(), u32{7000});
@@ -299,7 +299,7 @@ TEST_REQ(Ordonnancement, capacite_bornee, "LLR-SCH-010") {
 }
 
 TEST_REQ(Ordonnancement, marge_temporelle, "LLR-SCH-012") {
-    const MajorFrame frame = trame_reference();
+    const MajorFrame frame = reference_frame();
     // 30 % de marge : conforme a une exigence de 20 %, pas a une exigence
     // de 40 %.
     CHECK(frame.has_margin(20U));
@@ -308,32 +308,32 @@ TEST_REQ(Ordonnancement, marge_temporelle, "LLR-SCH-012") {
 
     // Une trame allouee a 100 % n'a AUCUNE marge : la moindre variation
     // (defaut de cache, interruption materielle) provoque un depassement.
-    MajorFrame saturee(10000U);
-    REQUIRE(saturee.add_window(PartitionId::FlightControl, 0U, 10000U));
-    CHECK_EQ(saturee.utilisation_percent(), u32{100});
-    CHECK_FALSE(saturee.has_margin(1U));
+    MajorFrame saturated(10000U);
+    REQUIRE(saturated.add_window(PartitionId::FlightControl, 0U, 10000U));
+    CHECK_EQ(saturated.utilisation_percent(), u32{100});
+    CHECK_FALSE(saturated.has_margin(1U));
 }
 
 TEST_REQ(Ordonnancement, execution_nominale, "LLR-SCH-020") {
-    const MajorFrame frame = trame_reference();
-    const u32 consommations[4] = {2500U, 1200U, 1400U, 800U};
+    const MajorFrame frame = reference_frame();
+    const u32 consumptions[4] = {2500U, 1200U, 1400U, 800U};
 
-    const mod15::FrameResult resultat = mod15::run_major_frame(frame, consommations, 4U);
-    CHECK(resultat.deadline_met);
-    CHECK_EQ(resultat.overrun_count, usize{0});
-    CHECK_EQ(resultat.worst_overrun_us, u32{0});
+    const mod15::FrameResult result = mod15::run_major_frame(frame, consumptions, 4U);
+    CHECK(result.deadline_met);
+    CHECK_EQ(result.overrun_count, usize{0});
+    CHECK_EQ(result.worst_overrun_us, u32{0});
 }
 
 TEST_REQ(Ordonnancement, depassement_detecte_et_localise, "LLR-SCH-020") {
-    const MajorFrame frame = trame_reference();
+    const MajorFrame frame = reference_frame();
     // La partition Maintenance (DAL D) deborde de 500 us.
-    const u32 consommations[4] = {2500U, 1200U, 1400U, 1500U};
+    const u32 consumptions[4] = {2500U, 1200U, 1400U, 1500U};
 
-    const mod15::FrameResult resultat = mod15::run_major_frame(frame, consommations, 4U);
-    CHECK_FALSE(resultat.deadline_met);
-    CHECK_EQ(resultat.overrun_count, usize{1});
-    CHECK_EQ(resultat.worst_overrun_us, u32{500});
-    CHECK_EQ(resultat.worst_partition, PartitionId::Maintenance);
+    const mod15::FrameResult result = mod15::run_major_frame(frame, consumptions, 4U);
+    CHECK_FALSE(result.deadline_met);
+    CHECK_EQ(result.overrun_count, usize{1});
+    CHECK_EQ(result.worst_overrun_us, u32{500});
+    CHECK_EQ(result.worst_partition, PartitionId::Maintenance);
 
     // POINT CLE : la partition fautive est IDENTIFIEE, et les partitions
     // suivantes ne sont pas affectees. Sans partitionnement temporel, une
@@ -341,59 +341,59 @@ TEST_REQ(Ordonnancement, depassement_detecte_et_localise, "LLR-SCH-020") {
 }
 
 TEST_REQ(Ordonnancement, plusieurs_depassements, "LLR-SCH-020") {
-    const MajorFrame frame = trame_reference();
-    const u32 consommations[4] = {3500U, 1200U, 3000U, 800U};
+    const MajorFrame frame = reference_frame();
+    const u32 consumptions[4] = {3500U, 1200U, 3000U, 800U};
 
-    const mod15::FrameResult resultat = mod15::run_major_frame(frame, consommations, 4U);
-    CHECK_EQ(resultat.overrun_count, usize{2});
+    const mod15::FrameResult result = mod15::run_major_frame(frame, consumptions, 4U);
+    CHECK_EQ(result.overrun_count, usize{2});
     // Le PIRE depassement est retenu : 1500 us pour Display, contre 500 pour
     // FlightControl.
-    CHECK_EQ(resultat.worst_overrun_us, u32{1500});
-    CHECK_EQ(resultat.worst_partition, PartitionId::Display);
+    CHECK_EQ(result.worst_overrun_us, u32{1500});
+    CHECK_EQ(result.worst_partition, PartitionId::Display);
 }
 
 TEST_REQ(Ordonnancement, robustesse_entrees, "LLR-SCH-020") {
-    const MajorFrame frame = trame_reference();
-    const mod15::FrameResult sans_donnees = mod15::run_major_frame(frame, nullptr, 4U);
-    CHECK(sans_donnees.deadline_met);
-    CHECK_EQ(sans_donnees.overrun_count, usize{0});
+    const MajorFrame frame = reference_frame();
+    const mod15::FrameResult without_data = mod15::run_major_frame(frame, nullptr, 4U);
+    CHECK(without_data.deadline_met);
+    CHECK_EQ(without_data.overrun_count, usize{0});
 
     // Moins de mesures que de fenetres : on n'analyse que ce que l'on a.
-    const u32 partielles[2] = {5000U, 100U};
-    const mod15::FrameResult partiel = mod15::run_major_frame(frame, partielles, 2U);
-    CHECK_EQ(partiel.overrun_count, usize{1});
+    const u32 partial_durations[2] = {5000U, 100U};
+    const mod15::FrameResult partial_result = mod15::run_major_frame(frame, partial_durations, 2U);
+    CHECK_EQ(partial_result.overrun_count, usize{1});
 }
 
 // =============================================================================
 //  4. Registre materiel et attente bornee
 // =============================================================================
 TEST_REQ(Registre, attente_reussie, "LLR-DET-030") {
-    mod15::SimulatedRegister registre;
-    registre.set_hardware_value(0x0004U);
-    CHECK(mod15::wait_for_bit(registre, 0x0004U, 100U));
-    CHECK_EQ(registre.read_count(), u32{1});
+    mod15::SimulatedRegister hw_register;
+    hw_register.set_hardware_value(0x0004U);
+    CHECK(mod15::wait_for_bit(hw_register, 0x0004U, 100U));
+    CHECK_EQ(hw_register.read_count(), u32{1});
 }
 
 TEST_REQ(Registre, attente_bornee_en_cas_de_panne, "LLR-DET-030") {
     // Le materiel ne repond jamais. La boucle DOIT se terminer : une attente
     // active non bornee provoquerait un redemarrage par le chien de garde,
     // evenement bien plus grave en vol que la panne du peripherique.
-    mod15::SimulatedRegister registre;
-    registre.set_hardware_value(0x0000U);
+    mod15::SimulatedRegister hw_register;
+    hw_register.set_hardware_value(0x0000U);
 
-    CHECK_FALSE(mod15::wait_for_bit(registre, 0x0004U, 50U));
-    CHECK_EQ(registre.read_count(), u32{50});  // exactement le budget, pas plus
+    CHECK_FALSE(mod15::wait_for_bit(hw_register, 0x0004U, 50U));
+    CHECK_EQ(hw_register.read_count(), u32{50});  // exactement le budget, pas plus
 }
 
 TEST_REQ(Registre, robustesse_masque_nul, "LLR-DET-030") {
-    mod15::SimulatedRegister registre;
-    registre.set_hardware_value(0xFFFFFFFFU);
-    CHECK_FALSE(mod15::wait_for_bit(registre, 0U, 10U));
-    CHECK_EQ(registre.read_count(), u32{0});  // aucun acces inutile
+    mod15::SimulatedRegister hw_register;
+    hw_register.set_hardware_value(0xFFFFFFFFU);
+    CHECK_FALSE(mod15::wait_for_bit(hw_register, 0U, 10U));
+    CHECK_EQ(hw_register.read_count(), u32{0});  // aucun acces inutile
 }
 
 TEST_REQ(Registre, ecriture_et_relecture, "LLR-DET-030") {
-    mod15::SimulatedRegister registre;
-    registre.write(0x1234U);
-    CHECK_EQ(registre.read(), u32{0x1234U});
+    mod15::SimulatedRegister hw_register;
+    hw_register.write(0x1234U);
+    CHECK_EQ(hw_register.read(), u32{0x1234U});
 }

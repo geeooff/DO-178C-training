@@ -12,13 +12,13 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void pourquoi_un_standard() {
-    titre("Pourquoi un standard de codage (objectif A-5.4)");
+void why_a_standard() {
+    title("Pourquoi un standard de codage (objectif A-5.4)");
     std::printf("  La DO-178C n'impose AUCUN standard particulier. Elle impose :\n");
     std::printf("    * d'en AVOIR un, decrit dans le SDP (plan de developpement) ;\n");
     std::printf("    * que le code y soit CONFORME (objectif A-5.4) ;\n");
@@ -37,27 +37,27 @@ void pourquoi_un_standard() {
 }
 
 // -----------------------------------------------------------------------------
-void deux_implementations() {
-    titre("Le meme algorithme, deux fois : conforme et non conforme");
+void two_implementations() {
+    title("Le meme algorithme, deux fois : conforme et non conforme");
 
-    const u16 mots[6] = {0x0000U, 0x0001U, 0x1234U, 0x9999U, 0x000AU, 0x12F4U};
+    const u16 words[6] = {0x0000U, 0x0001U, 0x1234U, 0x9999U, 0x000AU, 0x12F4U};
 
     std::printf("  %-10s | %-22s | %-22s\n", "mot BCD", "version CONFORME", "version NON CONFORME");
     std::printf("  -----------+------------------------+------------------------\n");
 
     for (usize index = 0U; index < 6U; ++index) {
-        const mod07::Result<u32> conforme = mod13::bcd_to_binary(mots[index]);
-        const u32 non_conforme = mod13_nonconforming::bcd_to_binary(mots[index]);
+        const mod07::Result<u32> conforming = mod13::bcd_to_binary(words[index]);
+        const u32 nonconforming = mod13_nonconforming::bcd_to_binary(words[index]);
 
-        char texte_conforme[32];
-        if (conforme.is_ok()) {
-            (void)std::snprintf(texte_conforme, sizeof(texte_conforme), "%u", conforme.value());
+        char conforming_text[32];
+        if (conforming.is_ok()) {
+            (void)std::snprintf(conforming_text, sizeof(conforming_text), "%u", conforming.value());
         } else {
-            (void)std::snprintf(texte_conforme, sizeof(texte_conforme), "ERREUR (%s)",
-                                mod07::status_name(conforme.status()));
+            (void)std::snprintf(conforming_text, sizeof(conforming_text), "ERREUR (%s)",
+                                mod07::status_name(conforming.status()));
         }
 
-        std::printf("  0x%04X     | %-22s | %-22u\n", mots[index], texte_conforme, non_conforme);
+        std::printf("  0x%04X     | %-22s | %-22u\n", words[index], conforming_text, nonconforming);
     }
 
     std::printf("\n  Resultats FONCTIONNELLEMENT identiques sur le domaine valide.\n");
@@ -67,8 +67,8 @@ void deux_implementations() {
 }
 
 // -----------------------------------------------------------------------------
-void les_douze_violations() {
-    titre("Les douze violations de src/nonconforming.cpp");
+void twelve_violations() {
+    title("Les douze violations de src/nonconforming.cpp");
     std::printf("  V01  using namespace en portee de fichier\n");
     std::printf("       -> ambiguites de resolution de surcharge, provenance des\n");
     std::printf("          identifiants illisible\n\n");
@@ -97,8 +97,8 @@ void les_douze_violations() {
 }
 
 // -----------------------------------------------------------------------------
-void outils() {
-    titre("Ce que trouve chaque niveau de verification");
+void tools() {
+    title("Ce que trouve chaque niveau de verification");
     std::printf("  NIVEAU 1 -- le COMPILATEUR (/W4 /permissive-)\n");
     std::printf("    Trouve : conversions implicites, variables non utilisees,\n");
     std::printf("             membres non initialises, comparaisons signe/non signe.\n");
@@ -123,7 +123,7 @@ void outils() {
 
 // -----------------------------------------------------------------------------
 void deviations() {
-    titre("Le processus de deviation");
+    title("Le processus de deviation");
     std::printf("  Aucun standard n'est applicable a 100 %% sans exception. Ce qui\n");
     std::printf("  compte, ce n'est pas l'absence de deviation : c'est leur\n");
     std::printf("  MAITRISE. Une deviation doit etre :\n\n");
@@ -154,10 +154,10 @@ int main() {
     std::printf("#  Module 13 : standards de codage et analyse statique       #\n");
     std::printf("#############################################################\n");
 
-    pourquoi_un_standard();
-    deux_implementations();
-    les_douze_violations();
-    outils();
+    why_a_standard();
+    two_implementations();
+    twelve_violations();
+    tools();
     deviations();
 
     std::printf("\nModule 13 termine.\n");

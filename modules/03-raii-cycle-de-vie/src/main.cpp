@@ -13,17 +13,17 @@ using Event = mod03::LifetimeLog::Event;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
-void afficher_journal() {
+void print_log() {
     for (usize index = 0U; index < mod03::LifetimeLog::count(); ++index) {
-        Event evenement = Event::Construct;
+        Event event = Event::Construct;
         i32 tag = 0;
-        if (mod03::LifetimeLog::entry(index, evenement, tag)) {
+        if (mod03::LifetimeLog::entry(index, event, tag)) {
             std::printf("    %2zu. %-28s objet #%d\n", index + 1U,
-                        mod03::LifetimeLog::event_name(evenement), tag);
+                        mod03::LifetimeLog::event_name(event), tag);
         }
     }
     std::printf("    equilibre construction/destruction : %s\n",
@@ -31,25 +31,25 @@ void afficher_journal() {
 }
 
 // -----------------------------------------------------------------------------
-void ordre_de_destruction() {
-    titre("Ordre de destruction : inverse de la construction");
+void destruction_order() {
+    title("Ordre de destruction : inverse de la construction");
     mod03::LifetimeLog::reset();
     mod03::demonstrate_destruction_order();
-    afficher_journal();
+    print_log();
     std::printf("\n  Garanti par la norme, donc utilisable comme propriete de conception :\n");
     std::printf("  un membre declare APRES un autre est detruit AVANT lui.\n");
 }
 
 // -----------------------------------------------------------------------------
-void copie_et_deplacement() {
-    titre("Copie contre deplacement");
+void copy_and_move() {
+    title("Copie contre deplacement");
     mod03::LifetimeLog::reset();
     {
         mod03::Traced original(7);
-        const mod03::Traced copie(original);
-        const mod03::Traced deplace(std::move(original));
-        std::printf("    tag de la copie          : %d\n", copie.tag());
-        std::printf("    tag du deplace           : %d\n", deplace.tag());
+        const mod03::Traced copy(original);
+        const mod03::Traced moved(std::move(original));
+        std::printf("    tag de la copie          : %d\n", copy.tag());
+        std::printf("    tag du deplace           : %d\n", moved.tag());
         // DEVIATION JUSTIFIEE (bugprone-use-after-move) : lire un objet deplace
         // est normalement suspect. Ici, c'est precisement le COMPORTEMENT
         // SPECIFIE que l'on veut montrer (LLR-M03-003 : la source est
@@ -57,21 +57,21 @@ void copie_et_deplacement() {
         // NOLINTNEXTLINE(bugprone-use-after-move)
         std::printf("    tag de la source apres move : %d  (neutralisee)\n", original.tag());
     }
-    afficher_journal();
+    print_log();
     std::printf("\n  `std::move` ne DEPLACE rien : c'est un simple cast qui autorise\n");
     std::printf("  le constructeur de deplacement a piller la source. C'est votre\n");
     std::printf("  code qui doit laisser la source dans un etat valide.\n");
 }
 
 // -----------------------------------------------------------------------------
-void raii_ressource() {
-    titre("RAII : la ressource se libere toute seule");
+void raii_resource() {
+    title("RAII : la ressource se libere toute seule");
     mod03::DeviceBank::reset();
 
     std::printf("  canaux occupes au depart : %u\n", mod03::DeviceBank::acquired_count());
     {
-        const mod03::ChannelHandle poignee;
-        std::printf("  dans la portee : canal #%u, occupes = %u\n", poignee.channel(),
+        const mod03::ChannelHandle handle;
+        std::printf("  dans la portee : canal #%u, occupes = %u\n", handle.channel(),
                     mod03::DeviceBank::acquired_count());
     }
     std::printf("  apres la portee : occupes = %u (aucune ligne de liberation ecrite)\n",
@@ -84,24 +84,24 @@ void raii_ressource() {
         std::printf("    source detient le canal #%u\n", source.channel());
         const mod03::ChannelHandle destination(std::move(source));
         // NOLINTNEXTLINE(bugprone-use-after-move) -- etat post-deplacement specifie
-        const bool source_valide = source.is_valid();
+        const bool valid_source = source.is_valid();
         std::printf("    apres move : source valide = %s, destination = canal #%u\n",
-                    source_valide ? "oui" : "non", destination.channel());
+                    valid_source ? "oui" : "non", destination.channel());
     }
     std::printf("    deux destructeurs appeles, UNE seule liberation : %u\n",
                 mod03::DeviceBank::total_releases());
 }
 
 // -----------------------------------------------------------------------------
-void section_critique() {
-    titre("Section critique : liberation sur TOUS les chemins de sortie");
+void critical_section() {
+    title("Section critique : liberation sur TOUS les chemins de sortie");
     mod03::InterruptState::reset();
 
-    const i32 entrees[3] = {-5, 0, 7};
+    const i32 inputs[3] = {-5, 0, 7};
     for (usize index = 0U; index < 3U; ++index) {
-        const i32 resultat = mod03::multi_exit_processing(entrees[index]);
-        std::printf("  traitement(%2d) -> %d ; interruptions actives apres : %s\n", entrees[index],
-                    resultat, mod03::InterruptState::enabled() ? "OUI" : "NON");
+        const i32 result = mod03::multi_exit_processing(inputs[index]);
+        std::printf("  traitement(%2d) -> %d ; interruptions actives apres : %s\n", inputs[index],
+                    result, mod03::InterruptState::enabled() ? "OUI" : "NON");
     }
 
     std::printf("\n  Sans RAII, il faudrait un enable() sur chacune des 3 sorties.\n");
@@ -111,8 +111,8 @@ void section_critique() {
 }
 
 // -----------------------------------------------------------------------------
-void comparaison_csharp() {
-    titre("Comparaison avec C#");
+void csharp_comparison() {
+    title("Comparaison avec C#");
     std::printf("  C#                                   C++\n");
     std::printf("  ----------------------------------   --------------------------------\n");
     std::printf("  using (var l = new Lock()) { }       { ScopedLock l; }\n");
@@ -132,11 +132,11 @@ int main() {
     std::printf("#  Module 03 : RAII et cycle de vie                          #\n");
     std::printf("#############################################################\n");
 
-    ordre_de_destruction();
-    copie_et_deplacement();
-    raii_ressource();
-    section_critique();
-    comparaison_csharp();
+    destruction_order();
+    copy_and_move();
+    raii_resource();
+    critical_section();
+    csharp_comparison();
 
     std::printf("\nModule 03 termine.\n");
     return 0;

@@ -16,54 +16,54 @@ using mod10::AlertState;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
-AlertMonitor moniteur_reference() noexcept {
+AlertMonitor reference_monitor() noexcept {
     AlertConfig config;
     config.raise_threshold = 100.0F;
     config.clear_threshold = 90.0F;
     config.confirm_cycles = 3U;
     config.clear_cycles = 2U;
 
-    AlertMonitor moniteur;
-    (void)AlertMonitor::create(config, moniteur);
-    return moniteur;
+    AlertMonitor monitor;
+    (void)AlertMonitor::create(config, monitor);
+    return monitor;
 }
 
-void derouler(const char* libelle, const f32* profil, usize count) {
-    AlertMonitor moniteur = moniteur_reference();
-    std::printf("\n  %s\n", libelle);
+void run(const char* label, const f32* profile, usize count) {
+    AlertMonitor monitor = reference_monitor();
+    std::printf("\n  %s\n", label);
     std::printf("    cycle : ");
     for (usize index = 0U; index < count; ++index) {
-        std::printf("%7.1f", static_cast<double>(profil[index]));
+        std::printf("%7.1f", static_cast<double>(profile[index]));
     }
     std::printf("\n    etat  : ");
     for (usize index = 0U; index < count; ++index) {
-        const AlertState etat = moniteur.update(profil[index]);
-        std::printf("%7.7s", mod10::state_name(etat));
+        const AlertState state = monitor.update(profile[index]);
+        std::printf("%7.7s", mod10::state_name(state));
     }
-    std::printf("\n    -> activations : %u, rejets : %u\n", moniteur.activation_count(),
-                moniteur.rejected_samples());
+    std::printf("\n    -> activations : %u, rejets : %u\n", monitor.activation_count(),
+                monitor.rejected_samples());
 }
 
 // -----------------------------------------------------------------------------
-void machine_a_etats() {
-    titre("ALERT-MON : seuil 100, retombee 90, confirmation 3, retombee 2");
+void state_machine() {
+    title("ALERT-MON : seuil 100, retombee 90, confirmation 3, retombee 2");
 
-    const f32 rampe[10] = {80.0F, 95.0F, 105.0F, 110.0F, 115.0F, 95.0F, 85.0F, 80.0F, 85.0F, 95.0F};
-    derouler("Rampe de montee puis de descente", rampe, 10U);
+    const f32 ramp[10] = {80.0F, 95.0F, 105.0F, 110.0F, 115.0F, 95.0F, 85.0F, 80.0F, 85.0F, 95.0F};
+    run("Rampe de montee puis de descente", ramp, 10U);
 
-    const f32 bruit[10] = {150.0F, 95.0F,  150.0F, 95.0F,  150.0F,
+    const f32 noise[10] = {150.0F, 95.0F,  150.0F, 95.0F,  150.0F,
                            95.0F,  150.0F, 95.0F,  150.0F, 95.0F};
-    derouler("Bruit de capteur (un cycle sur deux au-dessus du seuil)", bruit, 10U);
+    run("Bruit de capteur (un cycle sur deux au-dessus du seuil)", noise, 10U);
 
     const f32 oscillation[10] = {150.0F, 150.0F, 150.0F, 85.0F, 95.0F,
                                  85.0F,  95.0F,  85.0F,  95.0F, 85.0F};
-    derouler("Oscillation autour du seuil de retombee", oscillation, 10U);
+    run("Oscillation autour du seuil de retombee", oscillation, 10U);
 
-    const f32 panne[8] = {150.0F,
+    const f32 fault[8] = {150.0F,
                           150.0F,
                           std::numeric_limits<f32>::quiet_NaN(),
                           std::numeric_limits<f32>::infinity(),
@@ -71,12 +71,12 @@ void machine_a_etats() {
                           std::numeric_limits<f32>::quiet_NaN(),
                           85.0F,
                           85.0F};
-    derouler("Capteur intermittent (NaN / infini)", panne, 8U);
+    run("Capteur intermittent (NaN / infini)", fault, 8U);
 }
 
 // -----------------------------------------------------------------------------
-void techniques_de_conception() {
-    titre("Les techniques de conception des cas de test");
+void design_techniques() {
+    title("Les techniques de conception des cas de test");
 
     std::printf("  1. CLASSES D'EQUIVALENCE\n");
     std::printf("     Partitionner le domaine d'entree en classes produisant un\n");
@@ -112,8 +112,8 @@ void techniques_de_conception() {
 }
 
 // -----------------------------------------------------------------------------
-void que_teste_le_test() {
-    titre("Revue de test : est-ce que le test teste vraiment ?");
+void what_the_test_tests() {
+    title("Revue de test : est-ce que le test teste vraiment ?");
     std::printf("  Un test qui passe ne prouve rien s'il passerait AUSSI avec un\n");
     std::printf("  code faux. La technique de verification s'appelle l'ANALYSE DE\n");
     std::printf("  MUTATION : on introduit volontairement un defaut, et on verifie\n");
@@ -136,9 +136,9 @@ int main() {
     std::printf("#  Module 10 : tests bases sur les exigences                 #\n");
     std::printf("#############################################################\n");
 
-    machine_a_etats();
-    techniques_de_conception();
-    que_teste_le_test();
+    state_machine();
+    design_techniques();
+    what_the_test_tests();
 
     std::printf("\nModule 10 termine.\n");
     return 0;

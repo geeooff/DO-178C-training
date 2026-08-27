@@ -66,19 +66,19 @@ vérifiabilité ».
 ### 1.3 Le *decay* des tableaux
 
 ```cpp
-const i32 tableau[5] = {1, 2, 3, 4, 5};
-const i32* pointeur  = tableau;   // conversion implicite
+const i32 array[5] = {1, 2, 3, 4, 5};
+const i32* pointer  = array;   // conversion implicite
 
-sizeof(tableau);   // 20 — le tableau connaît sa taille
-sizeof(pointeur);  //  8 — juste une adresse
+sizeof(array);   // 20 — le tableau connaît sa taille
+sizeof(pointer);  //  8 — juste une adresse
 ```
 
 Dès qu'un tableau est passé à une fonction, **la taille est perdue**. Pire :
 
 ```cpp
 void f(int t[10]);   // le "10" est purement décoratif
-int petit[3];
-f(petit);            // compile sans le moindre avertissement
+int small[3];
+f(small);            // compile sans le moindre avertissement
 ```
 
 C'est la source de la moitié des CVE mémoire du monde C/C++. La contre-mesure

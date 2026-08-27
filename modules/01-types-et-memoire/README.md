@@ -62,9 +62,9 @@ Conséquences à connaître par cœur :
 avio::u8 a = 200U, b = 100U;
 auto s = a + b;              // s est un `int` valant 300, pas un u8 valant 44
 
-int   moins_un = -1;
-unsigned int un = 1U;
-bool  r = (moins_un < un);   // r vaut FALSE : -1 devient 4294967295
+int   minus_one = -1;
+unsigned int one = 1U;
+bool  r = (minus_one < one);   // r vaut FALSE : -1 devient 4294967295
 ```
 
 Et le classique qui boucle à l'infini :

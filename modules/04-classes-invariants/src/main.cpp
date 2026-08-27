@@ -15,31 +15,31 @@ using mod04::Mass;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 Mass grams(i32 value) noexcept {
-    Mass masse;
-    (void)Mass::from_grams(value, masse);
-    return masse;
+    Mass mass;
+    (void)Mass::from_grams(value, mass);
+    return mass;
 }
 
 // -----------------------------------------------------------------------------
-void confusion_d_unites() {
-    titre("Le vol Air Canada 143, ou 22 300 unites de carburant");
+void unit_confusion() {
+    title("Le vol Air Canada 143, ou 22 300 unites de carburant");
 
-    Mass en_livres;
-    Mass en_kilogrammes;
-    (void)Mass::from_pounds(22300.0F, en_livres);
-    (void)Mass::from_kilograms(22300.0F, en_kilogrammes);
+    Mass pounds;
+    Mass kilograms;
+    (void)Mass::from_pounds(22300.0F, pounds);
+    (void)Mass::from_kilograms(22300.0F, kilograms);
 
     std::printf("  22300 interprete en LIVRES      : %10.1f kg\n",
-                static_cast<double>(en_livres.kilograms()));
+                static_cast<double>(pounds.kilograms()));
     std::printf("  22300 interprete en KILOGRAMMES : %10.1f kg\n",
-                static_cast<double>(en_kilogrammes.kilograms()));
+                static_cast<double>(kilograms.kilograms()));
     std::printf("  ecart                            : %10.1f kg\n",
-                static_cast<double>((en_kilogrammes - en_livres).kilograms()));
+                static_cast<double>((kilograms - pounds).kilograms()));
 
     std::printf("\n  En 1983, cet ecart a vide les reservoirs d'un Boeing 767 a\n");
     std::printf("  12 500 m d'altitude. L'equipage a pose l'appareil en vol plane.\n");
@@ -50,8 +50,8 @@ void confusion_d_unites() {
 }
 
 // -----------------------------------------------------------------------------
-void ce_qui_ne_compile_pas() {
-    titre("Ce que le type fort REFUSE de compiler");
+void what_does_not_compile() {
+    title("Ce que le type fort REFUSE de compiler");
     std::printf("  Altitude a; Mass m;\n\n");
     std::printf("    a = m;                  // erreur : types incompatibles\n");
     std::printf("    if (a < m) { }          // erreur : pas d'operateur\n");
@@ -65,18 +65,18 @@ void ce_qui_ne_compile_pas() {
 }
 
 // -----------------------------------------------------------------------------
-void validation_aux_frontieres() {
-    titre("Validation aux frontieres : NaN et infini s'arretent ici");
+void boundary_validation() {
+    title("Validation aux frontieres : NaN et infini s'arretent ici");
 
-    const f32 entrees[5] = {35000.0F, -5000.0F, 80000.0F, std::numeric_limits<f32>::quiet_NaN(),
-                            std::numeric_limits<f32>::infinity()};
+    const f32 inputs[5] = {35000.0F, -5000.0F, 80000.0F, std::numeric_limits<f32>::quiet_NaN(),
+                           std::numeric_limits<f32>::infinity()};
     const char* libelles[5] = {"35000 ft (nominal)", "-5000 ft (sous le domaine)",
                                "80000 ft (au-dessus)", "NaN", "+infini"};
 
     for (avio::usize index = 0U; index < 5U; ++index) {
         Altitude altitude;
-        const bool accepte = Altitude::from_feet(entrees[index], altitude);
-        std::printf("  %-28s -> %s\n", libelles[index], accepte ? "ACCEPTE" : "REJETE");
+        const bool accepted = Altitude::from_feet(inputs[index], altitude);
+        std::printf("  %-28s -> %s\n", libelles[index], accepted ? "ACCEPTE" : "REJETE");
     }
 
     std::printf("\n  Un NaN qui entre dans un calcul en ressort partout : toute\n");
@@ -85,39 +85,39 @@ void validation_aux_frontieres() {
 }
 
 // -----------------------------------------------------------------------------
-void invariant_du_reservoir() {
-    titre("Un invariant qui tient, quelles que soient les demandes");
+void tank_invariant() {
+    title("Un invariant qui tient, quelles que soient les demandes");
 
-    FuelTank reservoir;
-    (void)FuelTank::create(grams(5000), reservoir);
+    FuelTank tank;
+    (void)FuelTank::create(grams(5000), tank);
 
-    const i32 demandes[6] = {2000, 4000, -1000, -9000, 500, -500};
-    std::printf("  capacite : %d g\n\n", reservoir.capacity().grams());
+    const i32 requests[6] = {2000, 4000, -1000, -9000, 500, -500};
+    std::printf("  capacite : %d g\n\n", tank.capacity().grams());
     std::printf("  %-22s %10s %10s %8s\n", "operation", "demande", "effectif", "contenu");
     std::printf("  ---------------------------------------------------------\n");
 
     for (avio::usize index = 0U; index < 6U; ++index) {
-        const i32 demande = demandes[index];
-        i32 effectif = 0;
-        if (demande >= 0) {
-            effectif = reservoir.add(grams(demande)).grams();
+        const i32 request = requests[index];
+        i32 effective = 0;
+        if (request >= 0) {
+            effective = tank.add(grams(request)).grams();
         } else {
-            effectif = -reservoir.remove(grams(-demande)).grams();
+            effective = -tank.remove(grams(-request)).grams();
         }
         std::printf("  %-22s %10d %10d %8d   invariant : %s\n",
-                    (demande >= 0) ? "ajout" : "prelevement", demande, effectif,
-                    reservoir.quantity().grams(), reservoir.invariant_holds() ? "OK" : "VIOLE");
+                    (request >= 0) ? "ajout" : "prelevement", request, effective,
+                    tank.quantity().grams(), tank.invariant_holds() ? "OK" : "VIOLE");
     }
 
-    std::printf("\n  Remplissage : %.1f %%\n", static_cast<double>(reservoir.fill_ratio_percent()));
+    std::printf("\n  Remplissage : %.1f %%\n", static_cast<double>(tank.fill_ratio_percent()));
     std::printf("\n  L'appelant ne peut PAS violer l'invariant, meme en demandant\n");
     std::printf("  n'importe quoi. C'est la difference entre une classe et une\n");
     std::printf("  structure de donnees accompagnee d'un mode d'emploi.\n");
 }
 
 // -----------------------------------------------------------------------------
-void egalite_flottante() {
-    titre("Pourquoi Altitude n'a PAS d'operator==");
+void float_equality() {
+    title("Pourquoi Altitude n'a PAS d'operator==");
 
     const double a = 0.1 + 0.2;
     std::printf("  0.1 + 0.2 == 0.3 ?  ->  %s   (0.1+0.2 = %.17g)\n", (a == 0.3) ? "true" : "false",
@@ -149,11 +149,11 @@ int main() {
     std::printf("#  Module 04 : classes, invariants, types forts              #\n");
     std::printf("#############################################################\n");
 
-    confusion_d_unites();
-    ce_qui_ne_compile_pas();
-    validation_aux_frontieres();
-    invariant_du_reservoir();
-    egalite_flottante();
+    unit_confusion();
+    what_does_not_compile();
+    boundary_validation();
+    tank_invariant();
+    float_equality();
 
     std::printf("\nModule 04 termine.\n");
     return 0;

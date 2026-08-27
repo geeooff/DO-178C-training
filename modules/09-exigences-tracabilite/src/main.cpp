@@ -12,13 +12,13 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void hierarchie_des_exigences() {
-    titre("La hierarchie des exigences DO-178C");
+void requirements_hierarchy() {
+    title("La hierarchie des exigences DO-178C");
     std::printf("  Exigences SYSTEME            (hors perimetre logiciel)\n");
     std::printf("         |\n");
     std::printf("         v\n");
@@ -42,28 +42,28 @@ void hierarchie_des_exigences() {
 }
 
 // -----------------------------------------------------------------------------
-void calcul_altitude() {
-    titre("ADC-ALT en fonctionnement");
+void altitude_computation() {
+    title("ADC-ALT en fonctionnement");
 
-    const f32 pressions[8] = {1013.25F, 1000.0F, 950.0F, 850.0F, 700.0F, 500.0F, 300.0F, 200.0F};
+    const f32 pressures[8] = {1013.25F, 1000.0F, 950.0F, 850.0F, 700.0F, 500.0F, 300.0F, 200.0F};
 
     std::printf("  %-14s %14s\n", "pression (hPa)", "altitude (ft)");
     std::printf("  ------------------------------\n");
     for (usize index = 0U; index < 8U; ++index) {
-        const mod07::Result<f32> resultat = mod09::pressure_altitude_feet(pressions[index]);
-        if (resultat.is_ok()) {
-            std::printf("  %14.2f %14.1f\n", static_cast<double>(pressions[index]),
-                        static_cast<double>(resultat.value()));
+        const mod07::Result<f32> result = mod09::pressure_altitude_feet(pressures[index]);
+        if (result.is_ok()) {
+            std::printf("  %14.2f %14.1f\n", static_cast<double>(pressures[index]),
+                        static_cast<double>(result.value()));
         }
     }
 
     std::printf("\n  Effet du calage altimetrique (QNH) a 850 hPa :\n");
-    const f32 calages[3] = {1003.25F, 1013.25F, 1023.25F};
+    const f32 settings[3] = {1003.25F, 1013.25F, 1023.25F};
     for (usize index = 0U; index < 3U; ++index) {
-        const mod07::Result<f32> resultat = mod09::corrected_altitude_feet(850.0F, calages[index]);
-        if (resultat.is_ok()) {
-            std::printf("    QNH %7.2f hPa -> %9.1f ft\n", static_cast<double>(calages[index]),
-                        static_cast<double>(resultat.value()));
+        const mod07::Result<f32> result = mod09::corrected_altitude_feet(850.0F, settings[index]);
+        if (result.is_ok()) {
+            std::printf("    QNH %7.2f hPa -> %9.1f ft\n", static_cast<double>(settings[index]),
+                        static_cast<double>(result.value()));
         }
     }
     std::printf("\n  %.1f ft par hectopascal (LLR-ADCALT-033).\n",
@@ -71,30 +71,30 @@ void calcul_altitude() {
 }
 
 // -----------------------------------------------------------------------------
-void robustesse() {
-    titre("Robustesse : chaque rejet a une cause identifiee");
+void robustness() {
+    title("Robustesse : chaque rejet a une cause identifiee");
 
-    struct Cas {
-        const char* libelle;
-        f32 pression;
+    struct Case {
+        const char* label;
+        f32 pressure;
         f32 qnh;
     };
-    const Cas cas[6] = {{"nominal", 850.0F, 1013.0F},
-                        {"pression trop basse", 50.0F, 1013.0F},
-                        {"pression trop haute", 1200.0F, 1013.0F},
-                        {"pression NaN", std::numeric_limits<f32>::quiet_NaN(), 1013.0F},
-                        {"calage hors domaine", 850.0F, 1200.0F},
-                        {"les DEUX invalides", 50.0F, 1200.0F}};
+    const Case cases[6] = {{"nominal", 850.0F, 1013.0F},
+                           {"pression trop basse", 50.0F, 1013.0F},
+                           {"pression trop haute", 1200.0F, 1013.0F},
+                           {"pression NaN", std::numeric_limits<f32>::quiet_NaN(), 1013.0F},
+                           {"calage hors domaine", 850.0F, 1200.0F},
+                           {"les DEUX invalides", 50.0F, 1200.0F}};
 
     for (usize index = 0U; index < 6U; ++index) {
-        const mod07::Result<f32> resultat =
-            mod09::corrected_altitude_feet(cas[index].pression, cas[index].qnh);
-        if (resultat.is_ok()) {
-            std::printf("  %-24s -> %.1f ft\n", cas[index].libelle,
-                        static_cast<double>(resultat.value()));
+        const mod07::Result<f32> result =
+            mod09::corrected_altitude_feet(cases[index].pressure, cases[index].qnh);
+        if (result.is_ok()) {
+            std::printf("  %-24s -> %.1f ft\n", cases[index].label,
+                        static_cast<double>(result.value()));
         } else {
-            std::printf("  %-24s -> REJET : %s\n", cas[index].libelle,
-                        mod07::status_name(resultat.status()));
+            std::printf("  %-24s -> REJET : %s\n", cases[index].label,
+                        mod07::status_name(result.status()));
         }
     }
     std::printf("\n  Le dernier cas est instructif : les DEUX entrees sont invalides.\n");
@@ -104,8 +104,8 @@ void robustesse() {
 }
 
 // -----------------------------------------------------------------------------
-void verifier_la_tracabilite() {
-    titre("Verifier la tracabilite");
+void check_traceability() {
+    title("Verifier la tracabilite");
     std::printf("  Lancez, a la racine du depot :\n\n");
     std::printf("      python tools/trace_check.py\n\n");
     std::printf("  L'outil lit :\n");
@@ -127,10 +127,10 @@ int main() {
     std::printf("#  Module 09 : exigences et tracabilite                      #\n");
     std::printf("#############################################################\n");
 
-    hierarchie_des_exigences();
-    calcul_altitude();
-    robustesse();
-    verifier_la_tracabilite();
+    requirements_hierarchy();
+    altitude_computation();
+    robustness();
+    check_traceability();
 
     std::printf("\nModule 09 termine.\n");
     return 0;

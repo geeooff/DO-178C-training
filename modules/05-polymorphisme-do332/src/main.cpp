@@ -13,44 +13,44 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
-void afficher_rapport(const mod05::Sensor& capteur) {
-    const mod05::ContractReport rapport = mod05::verify_contract(capteur, 200U);
-    const char* const oui_non[2] = {"NON", "oui"};
+void print_report(const mod05::Sensor& sensor) {
+    const mod05::ContractReport report = mod05::verify_contract(sensor, 200U);
+    const char* const yes_no[2] = {"NON", "oui"};
 
     std::printf(
-        "  %-16s C1:%-3s C2:%-3s C3:%-3s C4:%-3s C5:%-3s C6:%-3s C7:%-3s  -> %s\n", capteur.name(),
-        oui_non[rapport.c1_name_valid ? 1 : 0], oui_non[rapport.c2_raw_domain_valid ? 1 : 0],
-        oui_non[rapport.c3_value_domain_valid ? 1 : 0],
-        oui_non[rapport.c4_result_in_domain ? 1 : 0], oui_non[rapport.c5_monotonic ? 1 : 0],
-        oui_non[rapport.c6_endpoints_match ? 1 : 0], oui_non[rapport.c7_clamped_outside ? 1 : 0],
-        rapport.all_satisfied() ? "CONFORME" : "NON CONFORME");
-    if (!rapport.all_satisfied()) {
-        std::printf("                   premiere clause violee : %s\n", rapport.first_violation());
+        "  %-16s C1:%-3s C2:%-3s C3:%-3s C4:%-3s C5:%-3s C6:%-3s C7:%-3s  -> %s\n", sensor.name(),
+        yes_no[report.c1_name_valid ? 1 : 0], yes_no[report.c2_raw_domain_valid ? 1 : 0],
+        yes_no[report.c3_value_domain_valid ? 1 : 0], yes_no[report.c4_result_in_domain ? 1 : 0],
+        yes_no[report.c5_monotonic ? 1 : 0], yes_no[report.c6_endpoints_match ? 1 : 0],
+        yes_no[report.c7_clamped_outside ? 1 : 0],
+        report.all_satisfied() ? "CONFORME" : "NON CONFORME");
+    if (!report.all_satisfied()) {
+        std::printf("                   premiere clause violee : %s\n", report.first_violation());
     }
 }
 
 // -----------------------------------------------------------------------------
 void resolution_dynamique() {
-    titre("Resolution dynamique : un seul code, plusieurs comportements");
+    title("Resolution dynamique : un seul code, plusieurs comportements");
 
-    const mod05::PressureSensor pression;
+    const mod05::PressureSensor pressure;
     const mod05::TemperatureSensor temperature;
-    const mod05::Sensor* capteurs[2] = {&pression, &temperature};
+    const mod05::Sensor* sensors[2] = {&pressure, &temperature};
 
-    const i32 valeurs_brutes[4] = {0, 1365, 2730, 4095};
+    const i32 raw_values[4] = {0, 1365, 2730, 4095};
 
     std::printf("  %-14s %10s %10s %10s %10s\n", "capteur", "brut 0", "brut 1365", "brut 2730",
                 "brut 4095");
     std::printf("  ----------------------------------------------------------------\n");
     for (usize index = 0U; index < 2U; ++index) {
-        std::printf("  %-14s", capteurs[index]->name());
+        std::printf("  %-14s", sensors[index]->name());
         for (usize k = 0U; k < 4U; ++k) {
             std::printf(" %10.2f",
-                        static_cast<double>(capteurs[index]->to_engineering(valeurs_brutes[k])));
+                        static_cast<double>(sensors[index]->to_engineering(raw_values[k])));
         }
         std::printf("\n");
     }
@@ -62,18 +62,18 @@ void resolution_dynamique() {
 }
 
 // -----------------------------------------------------------------------------
-void coherence_locale_de_type() {
-    titre("DO-332 : coherence locale de type (objectif OO.6.7)");
+void local_type_consistency() {
+    title("DO-332 : coherence locale de type (objectif OO.6.7)");
 
     std::printf("  Le contrat de Sensor (7 clauses) est rejoue sur CHAQUE sous-type.\n\n");
 
-    const mod05::PressureSensor pression;
+    const mod05::PressureSensor pressure;
     const mod05::TemperatureSensor temperature;
-    const mod05::BrokenSensor fautif;
+    const mod05::BrokenSensor faulty;
 
-    afficher_rapport(pression);
-    afficher_rapport(temperature);
-    afficher_rapport(fautif);
+    print_report(pressure);
+    print_report(temperature);
+    print_report(faulty);
 
     std::printf("\n  Le capteur fautif COMPILE, s'utilise normalement et passerait\n");
     std::printf("  n'importe quel test nominal ecrit a la va-vite. Seul le rejeu du\n");
@@ -83,19 +83,19 @@ void coherence_locale_de_type() {
 }
 
 // -----------------------------------------------------------------------------
-void decoupage() {
-    titre("Decoupage (slicing) : le sous-type qui disparait");
+void split() {
+    title("Decoupage (slicing) : le sous-type qui disparait");
 
     const mod05::ExtendedMessage message(0x101U, 20U);
 
     std::printf("  ExtendedMessage(id=0x101, charge utile=20) -> length() = %u\n",
                 message.length());
     // NOLINTNEXTLINE(cppcoreguidelines-slicing)
-    const u16 par_valeur = mod05::length_by_value(message);
-    const u16 par_reference = mod05::length_by_reference(message);
+    const u16 by_value = mod05::length_by_value(message);
+    const u16 by_reference = mod05::length_by_reference(message);
 
-    std::printf("  passe PAR VALEUR      : length() = %u   <-- DECOUPE\n", par_valeur);
-    std::printf("  passe PAR REFERENCE   : length() = %u   <-- correct\n", par_reference);
+    std::printf("  passe PAR VALEUR      : length() = %u   <-- DECOUPE\n", by_value);
+    std::printf("  passe PAR REFERENCE   : length() = %u   <-- correct\n", by_reference);
 
     std::printf("\n  Le passage par valeur copie UNIQUEMENT la partie `Message` :\n");
     std::printf("  la charge utile est perdue, et la resolution dynamique avec elle.\n");
@@ -107,8 +107,8 @@ void decoupage() {
 }
 
 // -----------------------------------------------------------------------------
-void vulnerabilites_do332() {
-    titre("Les six vulnerabilites identifiees par la DO-332");
+void vulnerabilities_do332() {
+    title("Les six vulnerabilites identifiees par la DO-332");
     std::printf("  1. Heritage / polymorphisme  -> coherence locale de type   (ce module)\n");
     std::printf("  2. Polymorphisme parametrique -> couverture par instanciation (module 06)\n");
     std::printf("  3. Surcharge de fonctions     -> ambiguite de resolution     (module 06)\n");
@@ -132,9 +132,9 @@ int main() {
     std::printf("#############################################################\n");
 
     resolution_dynamique();
-    coherence_locale_de_type();
-    decoupage();
-    vulnerabilites_do332();
+    local_type_consistency();
+    split();
+    vulnerabilities_do332();
 
     std::printf("\nModule 05 termine.\n");
     return 0;

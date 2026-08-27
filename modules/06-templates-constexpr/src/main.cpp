@@ -16,29 +16,28 @@ using avio::usize;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void un_patron_plusieurs_types() {
-    titre("Un seul code source, plusieurs codes executables");
+void one_template_many_types() {
+    title("Un seul code source, plusieurs codes executables");
 
-    mod06::RingBuffer<i32, 4U> entiers;
-    mod06::RingBuffer<f32, 8U> flottants;
+    mod06::RingBuffer<i32, 4U> integers;
+    mod06::RingBuffer<f32, 8U> floats;
 
     for (i32 index = 1; index <= 6; ++index) {
-        (void)entiers.push(index * 10);
+        (void)integers.push(index * 10);
     }
     for (i32 index = 0; index < 4; ++index) {
-        (void)flottants.push(static_cast<f32>(index) * 0.5F);
+        (void)floats.push(static_cast<f32>(index) * 0.5F);
     }
 
-    std::printf("  RingBuffer<i32, 4>  : taille=%zu, ecrasements=%u, moyenne=%d\n", entiers.size(),
-                entiers.overwrite_count(), mod06::average(entiers));
-    std::printf("  RingBuffer<f32, 8>  : taille=%zu, ecrasements=%u, moyenne=%.4f\n",
-                flottants.size(), flottants.overwrite_count(),
-                static_cast<double>(mod06::average(flottants)));
+    std::printf("  RingBuffer<i32, 4>  : taille=%zu, ecrasements=%u, moyenne=%d\n", integers.size(),
+                integers.overwrite_count(), mod06::average(integers));
+    std::printf("  RingBuffer<f32, 8>  : taille=%zu, ecrasements=%u, moyenne=%.4f\n", floats.size(),
+                floats.overwrite_count(), static_cast<double>(mod06::average(floats)));
 
     std::printf("\n  sizeof(RingBuffer<i32, 4>)  = %3zu octets\n",
                 sizeof(mod06::RingBuffer<i32, 4U>));
@@ -54,8 +53,8 @@ void un_patron_plusieurs_types() {
 }
 
 // -----------------------------------------------------------------------------
-void calcul_a_la_compilation() {
-    titre("constexpr : le calcul deplace vers le compilateur");
+void compile_time_computation() {
+    title("constexpr : le calcul deplace vers le compilateur");
 
     std::printf("  Table CRC-8 (256 entrees) calculee A LA COMPILATION :\n    ");
     for (usize index = 0U; index < 16U; ++index) {
@@ -80,17 +79,17 @@ void calcul_a_la_compilation() {
 }
 
 // -----------------------------------------------------------------------------
-void dynamique_contre_statique() {
-    titre("Polymorphisme statique (CRTP) contre dynamique (module 05)");
+void dynamic_vs_static() {
+    title("Polymorphisme statique (CRTP) contre dynamique (module 05)");
 
-    const mod06::StaticPressureSensor pression;
+    const mod06::StaticPressureSensor pressure;
     const mod06::StaticTemperatureSensor temperature;
-    const i32 echantillons[4] = {0, 1365, 2730, 4095};
+    const i32 samples[4] = {0, 1365, 2730, 4095};
 
     std::printf("  moyenne pression    : %8.2f hPa\n",
-                static_cast<double>(mod06::read_average(pression, echantillons, 4U)));
+                static_cast<double>(mod06::read_average(pressure, samples, 4U)));
     std::printf("  moyenne temperature : %8.2f degres C\n",
-                static_cast<double>(mod06::read_average(temperature, echantillons, 4U)));
+                static_cast<double>(mod06::read_average(temperature, samples, 4U)));
 
     std::printf("\n  %-34s %s\n", "", "taille d'un objet");
     std::printf("  %-34s %zu octet(s)\n", "mod06::StaticPressureSensor (CRTP)",
@@ -108,8 +107,8 @@ void dynamique_contre_statique() {
 }
 
 // -----------------------------------------------------------------------------
-void pieges_des_templates() {
-    titre("Les pieges des templates");
+void template_pitfalls() {
+    title("Les pieges des templates");
 
     std::printf("  1. GONFLEMENT DU CODE (code bloat)\n");
     std::printf("     Chaque instanciation duplique le code. Dix instanciations\n");
@@ -134,10 +133,10 @@ int main() {
     std::printf("#  Module 06 : templates, constexpr, polymorphisme statique  #\n");
     std::printf("#############################################################\n");
 
-    un_patron_plusieurs_types();
-    calcul_a_la_compilation();
-    dynamique_contre_statique();
-    pieges_des_templates();
+    one_template_many_types();
+    compile_time_computation();
+    dynamic_vs_static();
+    template_pitfalls();
 
     std::printf("\nModule 06 termine.\n");
     return 0;

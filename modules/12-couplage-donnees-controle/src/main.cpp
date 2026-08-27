@@ -16,13 +16,13 @@ using mod12::Interface;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void deux_notions() {
-    titre("Deux notions a ne pas confondre");
+void two_concepts() {
+    title("Deux notions a ne pas confondre");
     std::printf("  COUPLAGE DE DONNEES (data coupling)\n");
     std::printf("    \"La dependance d'un composant vis-a-vis de donnees qui ne sont\n");
     std::printf("     pas exclusivement sous son controle.\"\n");
@@ -47,7 +47,7 @@ void deux_notions() {
 
 // -----------------------------------------------------------------------------
 void matrices() {
-    titre("Les deux matrices, livrables de l'analyse");
+    title("Les deux matrices, livrables de l'analyse");
     std::printf("  MATRICE DE COUPLAGE DE CONTROLE\n");
     std::printf("  --------------------------------------------------------------\n");
     std::printf("   #  | appelant   | appele                | condition\n");
@@ -72,14 +72,14 @@ void matrices() {
 }
 
 // -----------------------------------------------------------------------------
-void demonstration_instrumentee() {
-    titre("Demontrer le couplage par instrumentation");
+void instrumented_demonstration() {
+    title("Demontrer le couplage par instrumentation");
 
-    mod12::Acquisition acquisition_reelle;
-    mod12::Filter filtre_reel;
-    mod12::TracingAcquisition acquisition{acquisition_reelle};
-    mod12::TracingFilter filtre{filtre_reel};
-    mod12::TracedSupervisor superviseur{acquisition, filtre};
+    mod12::Acquisition real_acquisition;
+    mod12::Filter real_filter;
+    mod12::TracingAcquisition acquisition{real_acquisition};
+    mod12::TracingFilter filter{real_filter};
+    mod12::TracedSupervisor supervisor{acquisition, filter};
 
     CouplingTrace::reset();
 
@@ -87,27 +87,26 @@ void demonstration_instrumentee() {
     std::printf("    cycle | brut  | statut          | filtre  | alerte | interfaces\n");
     std::printf("    ------+-------+-----------------+---------+--------+-----------\n");
 
-    const i32 profil[8] = {2000, 2000, 2000, 2000, 2000, -1, -1, -1};
+    const i32 profile[8] = {2000, 2000, 2000, 2000, 2000, -1, -1, -1};
     // Etat local, pas de variable statique cachee : on veut pouvoir
     // relancer cette demonstration sans effet de bord residuel.
-    u32 precedent[4] = {0U, 0U, 0U, 0U};
+    u32 previous[4] = {0U, 0U, 0U, 0U};
     for (usize cycle = 0U; cycle < 8U; ++cycle) {
-        acquisition.set_raw(profil[cycle]);
-        const CycleOutcome resultat = superviseur.cycle();
+        acquisition.set_raw(profile[cycle]);
+        const CycleOutcome result = supervisor.cycle();
 
         char interfaces[8] = {'-', '-', '-', '-', '\0', '\0', '\0', '\0'};
         for (avio::u8 index = 0U; index < 4U; ++index) {
-            const u32 courant = CouplingTrace::call_count(static_cast<Interface>(index));
-            if (courant != precedent[index]) {
+            const u32 current = CouplingTrace::call_count(static_cast<Interface>(index));
+            if (current != previous[index]) {
                 interfaces[index] = static_cast<char>('1' + index);
-                precedent[index] = courant;
+                previous[index] = current;
             }
         }
 
-        std::printf("    %5zu | %5d | %-15s | %7.1f | %-6s | I%s\n", cycle + 1U, profil[cycle],
-                    mod07::status_name(resultat.status),
-                    static_cast<double>(resultat.filtered_value), resultat.alert ? "OUI" : "non",
-                    interfaces);
+        std::printf("    %5zu | %5d | %-15s | %7.1f | %-6s | I%s\n", cycle + 1U, profile[cycle],
+                    mod07::status_name(result.status), static_cast<double>(result.filtered_value),
+                    result.alert ? "OUI" : "non", interfaces);
     }
 
     std::printf("\n  Bilan des appels par interface :\n");
@@ -123,21 +122,21 @@ void demonstration_instrumentee() {
         CouplingTrace::all_interfaces_exercised() ? "OUI (objectif A-7.8 demontre)" : "NON");
 
     std::printf("\n  Donnees echangees (couplage de donnees) :\n");
-    const usize a_afficher = (CouplingTrace::data_count() < 6U) ? CouplingTrace::data_count() : 6U;
-    for (usize index = 0U; index < a_afficher; ++index) {
+    const usize to_display = (CouplingTrace::data_count() < 6U) ? CouplingTrace::data_count() : 6U;
+    for (usize index = 0U; index < to_display; ++index) {
         Interface interface = Interface::Count;
-        avio::f32 valeur = 0.0F;
-        if (CouplingTrace::data_at(index, interface, valeur)) {
+        avio::f32 value = 0.0F;
+        if (CouplingTrace::data_at(index, interface, value)) {
             std::printf("    %-38s : %.2f\n", mod12::interface_name(interface),
-                        static_cast<double>(valeur));
+                        static_cast<double>(value));
         }
     }
     std::printf("    ... (%zu echantillons au total)\n", CouplingTrace::data_count());
 }
 
 // -----------------------------------------------------------------------------
-void reduire_le_couplage() {
-    titre("Reduire le couplage : les regles qui paient");
+void reduce_coupling() {
+    title("Reduire le couplage : les regles qui paient");
     std::printf("  1. AUCUNE VARIABLE GLOBALE MUTABLE partagee entre composants.\n");
     std::printf("     Une globale cree un couplage de donnees INVISIBLE dans les\n");
     std::printf("     signatures : la matrice devient impossible a etablir par\n");
@@ -168,10 +167,10 @@ int main() {
     std::printf("#  Module 12 : couplage donnees et couplage controle         #\n");
     std::printf("#############################################################\n");
 
-    deux_notions();
+    two_concepts();
     matrices();
-    demonstration_instrumentee();
-    reduire_le_couplage();
+    instrumented_demonstration();
+    reduce_coupling();
 
     std::printf("\nModule 12 termine.\n");
     return 0;

@@ -24,24 +24,24 @@ using mod16::TankId;
 
 namespace {
 
-Mass kilogrammes(f32 valeur) noexcept {
-    Mass masse;
-    (void)Mass::from_kilograms(valeur, masse);
-    return masse;
+Mass kilograms(f32 value) noexcept {
+    Mass mass;
+    (void)Mass::from_kilograms(value, mass);
+    return mass;
 }
 
 /// Mesure brute correspondant a une fraction de la pleine echelle.
 /// 4095 = 3^2 x 5 x 7 x 13 : les cinquiemes tombent juste.
 constexpr i32 kRawZero = 0;
-constexpr i32 kRawUnCinquieme = 819;      // capacite / 5
-constexpr i32 kRawDeuxCinquiemes = 1638;  // capacite x 2/5
-constexpr i32 kRawQuatreCinquiemes = 3276;
-constexpr i32 kRawPleine = 4095;
+constexpr i32 kRawFifth = 819;       // capacite / 5
+constexpr i32 kRawTwoFifths = 1638;  // capacite x 2/5
+constexpr i32 kRawFourFifths = 3276;
+constexpr i32 kRawFull = 4095;
 
-FuelSystem systeme_de_reference() noexcept {
-    FuelSystem systeme;
-    (void)FuelSystem::create(mod16::default_config(), systeme);
-    return systeme;
+FuelSystem reference_system() noexcept {
+    FuelSystem system;
+    (void)FuelSystem::create(mod16::default_config(), system);
+    return system;
 }
 
 }  // namespace
@@ -64,114 +64,114 @@ TEST_REQ(Configuration, valeurs_de_reference, "LLR-FQMS-001") {
 }
 
 TEST_REQ(Configuration, creation_nominale, "LLR-FQMS-020") {
-    FuelSystem systeme;
-    REQUIRE(FuelSystem::create(mod16::default_config(), systeme));
-    CHECK_EQ(systeme.cycle_count(), u32{0});
-    CHECK_EQ(systeme.fault_count(TankId::Left), u32{0});
-    CHECK_EQ(systeme.fault_count(TankId::Center), u32{0});
-    CHECK_EQ(systeme.fault_count(TankId::Right), u32{0});
+    FuelSystem system;
+    REQUIRE(FuelSystem::create(mod16::default_config(), system));
+    CHECK_EQ(system.cycle_count(), u32{0});
+    CHECK_EQ(system.fault_count(TankId::Left), u32{0});
+    CHECK_EQ(system.fault_count(TankId::Center), u32{0});
+    CHECK_EQ(system.fault_count(TankId::Right), u32{0});
 }
 
 TEST_REQ(Configuration, capacite_nulle_refusee, "LLR-FQMS-020") {
     FuelSystemConfig config = mod16::default_config();
     config.tank_capacity[1] = Mass();
-    FuelSystem systeme;
-    CHECK_FALSE(FuelSystem::create(config, systeme));
+    FuelSystem system;
+    CHECK_FALSE(FuelSystem::create(config, system));
 }
 
 TEST_REQ(Configuration, seuils_nuls_refuses, "LLR-FQMS-020") {
-    FuelSystem systeme;
+    FuelSystem system;
 
-    FuelSystemConfig sans_bas_niveau = mod16::default_config();
-    sans_bas_niveau.low_fuel_threshold = Mass();
-    CHECK_FALSE(FuelSystem::create(sans_bas_niveau, systeme));
+    FuelSystemConfig without_low_fuel = mod16::default_config();
+    without_low_fuel.low_fuel_threshold = Mass();
+    CHECK_FALSE(FuelSystem::create(without_low_fuel, system));
 
-    FuelSystemConfig sans_desequilibre = mod16::default_config();
-    sans_desequilibre.imbalance_threshold = Mass();
-    CHECK_FALSE(FuelSystem::create(sans_desequilibre, systeme));
+    FuelSystemConfig without_imbalance = mod16::default_config();
+    without_imbalance.imbalance_threshold = Mass();
+    CHECK_FALSE(FuelSystem::create(without_imbalance, system));
 }
 
 TEST_REQ(Configuration, hysteresis_incoherente_refusee, "LLR-FQMS-020") {
-    FuelSystem systeme;
+    FuelSystem system;
 
     // Une hysteresis superieure ou egale au seuil rendrait l'alerte
     // ineffacable, ou la ferait battre.
-    FuelSystemConfig trop_grande = mod16::default_config();
-    trop_grande.low_fuel_hysteresis = kilogrammes(1500.0F);
-    CHECK_FALSE(FuelSystem::create(trop_grande, systeme));
+    FuelSystemConfig too_large = mod16::default_config();
+    too_large.low_fuel_hysteresis = kilograms(1500.0F);
+    CHECK_FALSE(FuelSystem::create(too_large, system));
 
-    FuelSystemConfig ecart_trop_grand = mod16::default_config();
-    ecart_trop_grand.imbalance_hysteresis = kilogrammes(600.0F);
-    CHECK_FALSE(FuelSystem::create(ecart_trop_grand, systeme));
+    FuelSystemConfig delta_too_large = mod16::default_config();
+    delta_too_large.imbalance_hysteresis = kilograms(600.0F);
+    CHECK_FALSE(FuelSystem::create(delta_too_large, system));
 }
 
 // =============================================================================
 //  Jauge
 // =============================================================================
 TEST_REQ(Jauge, creation, "LLR-FQMS-010") {
-    TankGauge jauge;
-    CHECK_FALSE(TankGauge::create(Mass(), jauge));  // capacite nulle
+    TankGauge gauge;
+    CHECK_FALSE(TankGauge::create(Mass(), gauge));  // capacite nulle
 
-    REQUIRE(TankGauge::create(kilogrammes(5000.0F), jauge));
-    CHECK_NEAR(static_cast<double>(jauge.capacity().kilograms()), 5000.0, 0.001);
-    CHECK_EQ(jauge.raw(), mod16::kRawMin);
+    REQUIRE(TankGauge::create(kilograms(5000.0F), gauge));
+    CHECK_NEAR(static_cast<double>(gauge.capacity().kilograms()), 5000.0, 0.001);
+    CHECK_EQ(gauge.raw(), mod16::kRawMin);
 }
 
 TEST_REQ(Jauge, conversion_lineaire, "LLR-FQMS-011") {
-    TankGauge jauge;
-    REQUIRE(TankGauge::create(kilogrammes(5000.0F), jauge));
+    TankGauge gauge;
+    REQUIRE(TankGauge::create(kilograms(5000.0F), gauge));
 
     struct Point {
         i32 raw;
-        double kilogrammes;
+        double kilograms;
     };
     const Point references[5] = {{kRawZero, 0.0},
-                                 {kRawUnCinquieme, 1000.0},
-                                 {kRawDeuxCinquiemes, 2000.0},
-                                 {kRawQuatreCinquiemes, 4000.0},
-                                 {kRawPleine, 5000.0}};
+                                 {kRawFifth, 1000.0},
+                                 {kRawTwoFifths, 2000.0},
+                                 {kRawFourFifths, 4000.0},
+                                 {kRawFull, 5000.0}};
 
     for (usize index = 0U; index < 5U; ++index) {
-        jauge.set_raw(references[index].raw);
-        const mod07::Result<Mass> mesure = jauge.read();
-        REQUIRE(mesure.is_ok());
-        CHECK_NEAR(static_cast<double>(mesure.value().kilograms()), references[index].kilogrammes,
-                   0.5);
+        gauge.set_raw(references[index].raw);
+        const mod07::Result<Mass> measurement = gauge.read();
+        REQUIRE(measurement.is_ok());
+        CHECK_NEAR(static_cast<double>(measurement.value().kilograms()),
+                   references[index].kilograms, 0.5);
     }
 }
 
 TEST_REQ(Jauge, bornes_du_convertisseur, "LLR-FQMS-011") {
-    TankGauge jauge;
-    REQUIRE(TankGauge::create(kilogrammes(8000.0F), jauge));
+    TankGauge gauge;
+    REQUIRE(TankGauge::create(kilograms(8000.0F), gauge));
 
-    jauge.set_raw(mod16::kRawMin);
-    const mod07::Result<Mass> vide = jauge.read();
-    REQUIRE(vide.is_ok());
-    CHECK_EQ(vide.value().grams(), 0);
+    gauge.set_raw(mod16::kRawMin);
+    const mod07::Result<Mass> empty = gauge.read();
+    REQUIRE(empty.is_ok());
+    CHECK_EQ(empty.value().grams(), 0);
 
-    jauge.set_raw(mod16::kRawMax);
-    const mod07::Result<Mass> plein = jauge.read();
-    REQUIRE(plein.is_ok());
-    CHECK_EQ(plein.value().grams(), 8000000);
+    gauge.set_raw(mod16::kRawMax);
+    const mod07::Result<Mass> full = gauge.read();
+    REQUIRE(full.is_ok());
+    CHECK_EQ(full.value().grams(), 8000000);
 }
 
 TEST_REQ(Jauge, robustesse_hors_domaine, "LLR-FQMS-012") {
-    TankGauge jauge;
-    REQUIRE(TankGauge::create(kilogrammes(5000.0F), jauge));
+    TankGauge gauge;
+    REQUIRE(TankGauge::create(kilograms(5000.0F), gauge));
 
-    jauge.set_raw(-1);
-    CHECK_EQ(jauge.read().status(), Status::OutOfRange);
+    gauge.set_raw(-1);
+    CHECK_EQ(gauge.read().status(), Status::OutOfRange);
 
-    jauge.set_raw(4096);
-    CHECK_EQ(jauge.read().status(), Status::OutOfRange);
+    gauge.set_raw(4096);
+    CHECK_EQ(gauge.read().status(), Status::OutOfRange);
 
-    jauge.set_raw(-100000);
-    CHECK_EQ(jauge.read().status(), Status::OutOfRange);
+    gauge.set_raw(-100000);
+    CHECK_EQ(gauge.read().status(), Status::OutOfRange);
 
     // Et AUCUNE quantite n'est produite : la valeur de repli est nulle,
     // impossible a confondre avec une mesure valide grace au statut.
-    jauge.set_raw(9999);
-    CHECK_EQ(jauge.read().value_or(kilogrammes(-1.0F)).grams(), 0);
+    gauge.set_raw(9999);
+    CHECK_EQ(gauge.read().value_or(kilograms(-1.0F)).grams(), 0);
 }
 
 // =============================================================================
@@ -214,123 +214,123 @@ TEST_REQ(Decisions, bas_niveau_mesurable, "LLR-FQMS-051") {
 //  Totalisation
 // =============================================================================
 TEST_REQ(Totalisation, somme_des_reservoirs_valides, "LLR-FQMS-031") {
-    FuelSystem systeme = systeme_de_reference();
-    const i32 mesures[3] = {kRawUnCinquieme, kRawUnCinquieme, kRawUnCinquieme};
+    FuelSystem system = reference_system();
+    const i32 measurements[3] = {kRawFifth, kRawFifth, kRawFifth};
 
-    const CycleReport rapport = systeme.update(mesures);
+    const CycleReport report = system.update(measurements);
     // 1000 + 1600 + 1000 = 3600 kg
-    CHECK_NEAR(static_cast<double>(rapport.total.kilograms()), 3600.0, 1.0);
-    CHECK_EQ(rapport.valid_tank_count, u8{3});
-    CHECK_EQ(rapport.status, Status::Ok);
-    CHECK_EQ(systeme.cycle_count(), u32{1});
+    CHECK_NEAR(static_cast<double>(report.total.kilograms()), 3600.0, 1.0);
+    CHECK_EQ(report.valid_tank_count, u8{3});
+    CHECK_EQ(report.status, Status::Ok);
+    CHECK_EQ(system.cycle_count(), u32{1});
 }
 
 TEST_REQ(Totalisation, reservoir_en_panne_exclu, "LLR-FQMS-031") {
-    FuelSystem systeme = systeme_de_reference();
+    FuelSystem system = reference_system();
     // Le reservoir central est en panne.
-    const i32 mesures[3] = {kRawUnCinquieme, -1, kRawUnCinquieme};
+    const i32 measurements[3] = {kRawFifth, -1, kRawFifth};
 
-    const CycleReport rapport = systeme.update(mesures);
-    CHECK(rapport.sensor_fault[1]);
-    CHECK_FALSE(rapport.sensor_fault[0]);
-    CHECK_FALSE(rapport.sensor_fault[2]);
-    CHECK_EQ(rapport.tank_quantity[1].grams(), 0);
+    const CycleReport report = system.update(measurements);
+    CHECK(report.sensor_fault[1]);
+    CHECK_FALSE(report.sensor_fault[0]);
+    CHECK_FALSE(report.sensor_fault[2]);
+    CHECK_EQ(report.tank_quantity[1].grams(), 0);
     // 1000 + 1000 = 2000 kg, le central ne contribue pas.
-    CHECK_NEAR(static_cast<double>(rapport.total.kilograms()), 2000.0, 1.0);
-    CHECK_EQ(rapport.valid_tank_count, u8{2});
-    CHECK_EQ(rapport.status, Status::NotReady);
+    CHECK_NEAR(static_cast<double>(report.total.kilograms()), 2000.0, 1.0);
+    CHECK_EQ(report.valid_tank_count, u8{2});
+    CHECK_EQ(report.status, Status::NotReady);
 }
 
 TEST_REQ(Totalisation, panne_totale, "LLR-FQMS-030,LLR-FQMS-031") {
-    FuelSystem systeme = systeme_de_reference();
-    const i32 mesures[3] = {-1, -1, -1};
+    FuelSystem system = reference_system();
+    const i32 measurements[3] = {-1, -1, -1};
 
-    const CycleReport rapport = systeme.update(mesures);
-    CHECK_EQ(rapport.valid_tank_count, u8{0});
-    CHECK_EQ(rapport.total.grams(), 0);
-    CHECK_EQ(rapport.status, Status::HardwareFault);
+    const CycleReport report = system.update(measurements);
+    CHECK_EQ(report.valid_tank_count, u8{0});
+    CHECK_EQ(report.total.grams(), 0);
+    CHECK_EQ(report.status, Status::HardwareFault);
 }
 
 TEST_REQ(Totalisation, pleins_reservoirs, "LLR-FQMS-031") {
-    FuelSystem systeme = systeme_de_reference();
-    const i32 mesures[3] = {kRawPleine, kRawPleine, kRawPleine};
+    FuelSystem system = reference_system();
+    const i32 measurements[3] = {kRawFull, kRawFull, kRawFull};
 
-    const CycleReport rapport = systeme.update(mesures);
-    CHECK_NEAR(static_cast<double>(rapport.total.kilograms()), 18000.0, 0.1);
-    CHECK_EQ(rapport.status, Status::Ok);
+    const CycleReport report = system.update(measurements);
+    CHECK_NEAR(static_cast<double>(report.total.kilograms()), 18000.0, 0.1);
+    CHECK_EQ(report.status, Status::Ok);
 }
 
 TEST_REQ(Totalisation, robustesse_pointeur_nul, "LLR-FQMS-031") {
-    FuelSystem systeme = systeme_de_reference();
-    const CycleReport rapport = systeme.update(nullptr);
+    FuelSystem system = reference_system();
+    const CycleReport report = system.update(nullptr);
 
-    CHECK_EQ(rapport.status, Status::HardwareFault);
-    CHECK(rapport.sensor_fault[0]);
-    CHECK(rapport.sensor_fault[1]);
-    CHECK(rapport.sensor_fault[2]);
-    CHECK_EQ(rapport.total.grams(), 0);
+    CHECK_EQ(report.status, Status::HardwareFault);
+    CHECK(report.sensor_fault[0]);
+    CHECK(report.sensor_fault[1]);
+    CHECK(report.sensor_fault[2]);
+    CHECK_EQ(report.total.grams(), 0);
     // Le cycle n'est PAS comptabilise : aucune mesure n'a ete traitee.
-    CHECK_EQ(systeme.cycle_count(), u32{0});
+    CHECK_EQ(system.cycle_count(), u32{0});
 }
 
 // =============================================================================
 //  Ecart d'aile
 // =============================================================================
 TEST_REQ(Desequilibre, calcul_de_l_ecart, "LLR-FQMS-040") {
-    FuelSystem systeme = systeme_de_reference();
+    FuelSystem system = reference_system();
     // gauche 5000 kg, droite 4000 kg -> ecart 1000 kg
-    const i32 mesures[3] = {kRawPleine, kRawUnCinquieme, kRawQuatreCinquiemes};
+    const i32 measurements[3] = {kRawFull, kRawFifth, kRawFourFifths};
 
-    const CycleReport rapport = systeme.update(mesures);
-    CHECK_NEAR(static_cast<double>(rapport.wing_imbalance.kilograms()), 1000.0, 1.0);
+    const CycleReport report = system.update(measurements);
+    CHECK_NEAR(static_cast<double>(report.wing_imbalance.kilograms()), 1000.0, 1.0);
 }
 
 TEST_REQ(Desequilibre, ecart_symetrique, "LLR-FQMS-040") {
-    FuelSystem systeme = systeme_de_reference();
+    FuelSystem system = reference_system();
     // L'ecart est une VALEUR ABSOLUE : peu importe quelle aile est la plus
     // pleine.
-    const i32 gauche_plus_pleine[3] = {kRawPleine, kRawUnCinquieme, kRawQuatreCinquiemes};
-    const CycleReport premier = systeme.update(gauche_plus_pleine);
+    const i32 left_fuller[3] = {kRawFull, kRawFifth, kRawFourFifths};
+    const CycleReport first = system.update(left_fuller);
 
-    FuelSystem autre = systeme_de_reference();
-    const i32 droite_plus_pleine[3] = {kRawQuatreCinquiemes, kRawUnCinquieme, kRawPleine};
-    const CycleReport second = autre.update(droite_plus_pleine);
+    FuelSystem other = reference_system();
+    const i32 right_fuller[3] = {kRawFourFifths, kRawFifth, kRawFull};
+    const CycleReport second = other.update(right_fuller);
 
-    CHECK_EQ(premier.wing_imbalance.grams(), second.wing_imbalance.grams());
+    CHECK_EQ(first.wing_imbalance.grams(), second.wing_imbalance.grams());
 }
 
 TEST_REQ(Desequilibre, ecart_nul_si_jauge_d_aile_en_panne, "LLR-FQMS-041,LLR-FQMS-042") {
-    FuelSystem systeme = systeme_de_reference();
-    const i32 mesures[3] = {kRawPleine, kRawUnCinquieme, -1};
+    FuelSystem system = reference_system();
+    const i32 measurements[3] = {kRawFull, kRawFifth, -1};
 
-    const CycleReport rapport = systeme.update(mesures);
+    const CycleReport report = system.update(measurements);
     // Un ecart calcule a partir d'une seule jauge valide n'aurait aucun sens.
-    CHECK_EQ(rapport.wing_imbalance.grams(), 0);
+    CHECK_EQ(report.wing_imbalance.grams(), 0);
 }
 
 // =============================================================================
 //  Maintenance
 // =============================================================================
 TEST_REQ(Maintenance, comptage_des_pannes_par_reservoir, "LLR-FQMS-060") {
-    FuelSystem systeme = systeme_de_reference();
+    FuelSystem system = reference_system();
 
-    const i32 gauche_en_panne[3] = {-1, kRawUnCinquieme, kRawUnCinquieme};
-    (void)systeme.update(gauche_en_panne);
-    (void)systeme.update(gauche_en_panne);
+    const i32 left_faulty[3] = {-1, kRawFifth, kRawFifth};
+    (void)system.update(left_faulty);
+    (void)system.update(left_faulty);
 
-    const i32 droite_en_panne[3] = {kRawUnCinquieme, kRawUnCinquieme, 5000};
-    (void)systeme.update(droite_en_panne);
+    const i32 right_faulty[3] = {kRawFifth, kRawFifth, 5000};
+    (void)system.update(right_faulty);
 
-    CHECK_EQ(systeme.fault_count(TankId::Left), u32{2});
-    CHECK_EQ(systeme.fault_count(TankId::Center), u32{0});
-    CHECK_EQ(systeme.fault_count(TankId::Right), u32{1});
-    CHECK_EQ(systeme.cycle_count(), u32{3});
+    CHECK_EQ(system.fault_count(TankId::Left), u32{2});
+    CHECK_EQ(system.fault_count(TankId::Center), u32{0});
+    CHECK_EQ(system.fault_count(TankId::Right), u32{1});
+    CHECK_EQ(system.cycle_count(), u32{3});
 }
 
 TEST_REQ(Maintenance, robustesse_identifiant_hors_domaine, "LLR-FQMS-060") {
-    const FuelSystem systeme = systeme_de_reference();
-    CHECK_EQ(systeme.fault_count(TankId::Count), u32{0});
-    CHECK_EQ(systeme.fault_count(static_cast<TankId>(u8{99U})), u32{0});
+    const FuelSystem system = reference_system();
+    CHECK_EQ(system.fault_count(TankId::Count), u32{0});
+    CHECK_EQ(system.fault_count(static_cast<TankId>(u8{99U})), u32{0});
 }
 
 TEST_REQ(Maintenance, libelles_des_reservoirs, "LLR-FQMS-060") {
@@ -350,25 +350,25 @@ TEST_REQ(Sequence, cinq_etapes_quelles_que_soient_les_entrees, "LLR-FQMS-021") {
     // Manifestation OBSERVABLE : les trois jauges sont lues a CHAQUE cycle,
     // quel que soit le resultat des precedentes. Si le code s'arretait a la
     // premiere panne, les compteurs des reservoirs suivants resteraient a zero.
-    FuelSystem systeme = systeme_de_reference();
-    const i32 tout_en_panne[3] = {-1, -1, -1};
+    FuelSystem system = reference_system();
+    const i32 all_faulty[3] = {-1, -1, -1};
 
     for (usize cycle = 0U; cycle < 10U; ++cycle) {
-        (void)systeme.update(tout_en_panne);
+        (void)system.update(all_faulty);
     }
-    CHECK_EQ(systeme.fault_count(TankId::Left), u32{10});
-    CHECK_EQ(systeme.fault_count(TankId::Center), u32{10});
-    CHECK_EQ(systeme.fault_count(TankId::Right), u32{10});
-    CHECK_EQ(systeme.cycle_count(), u32{10});
+    CHECK_EQ(system.fault_count(TankId::Left), u32{10});
+    CHECK_EQ(system.fault_count(TankId::Center), u32{10});
+    CHECK_EQ(system.fault_count(TankId::Right), u32{10});
+    CHECK_EQ(system.cycle_count(), u32{10});
 
     // Le nombre d'operations ne depend pas non plus des valeurs valides.
-    FuelSystem autre = systeme_de_reference();
-    const i32 tout_valide[3] = {kRawPleine, kRawPleine, kRawPleine};
+    FuelSystem other = reference_system();
+    const i32 all_valid[3] = {kRawFull, kRawFull, kRawFull};
     for (usize cycle = 0U; cycle < 10U; ++cycle) {
-        (void)autre.update(tout_valide);
+        (void)other.update(all_valid);
     }
-    CHECK_EQ(autre.cycle_count(), u32{10});
-    CHECK_EQ(autre.fault_count(TankId::Left), u32{0});
+    CHECK_EQ(other.cycle_count(), u32{10});
+    CHECK_EQ(other.fault_count(TankId::Left), u32{0});
 }
 
 TEST_REQ(BasNiveauLlr, deficit_transmis_au_moniteur, "LLR-FQMS-050") {
@@ -377,22 +377,22 @@ TEST_REQ(BasNiveauLlr, deficit_transmis_au_moniteur, "LLR-FQMS-050") {
     // sous 1500 kg, et pas avant.
     //
     // 1600 kg -> deficit = -100 -> pas d'alerte
-    FuelSystem au_dessus = systeme_de_reference();
-    const i32 mesures_1600[3] = {kRawZero, 819, kRawZero};
+    FuelSystem above = reference_system();
+    const i32 measurements_1600[3] = {kRawZero, 819, kRawZero};
     for (usize cycle = 0U; cycle < 15U; ++cycle) {
-        const CycleReport rapport = au_dessus.update(mesures_1600);
-        CHECK_FALSE(rapport.low_fuel_alert);
+        const CycleReport report = above.update(measurements_1600);
+        CHECK_FALSE(report.low_fuel_alert);
     }
 
     // 1400 kg -> deficit = +100 -> alerte apres 5 cycles
-    FuelSystem au_dessous = systeme_de_reference();
-    const i32 mesures_1400[3] = {kRawZero, 717, kRawZero};
-    CycleReport rapport;
+    FuelSystem below = reference_system();
+    const i32 measurements_1400[3] = {kRawZero, 717, kRawZero};
+    CycleReport report;
     for (usize cycle = 0U; cycle < 5U; ++cycle) {
-        rapport = au_dessous.update(mesures_1400);
+        report = below.update(measurements_1400);
     }
-    CHECK(rapport.low_fuel_alert);
-    CHECK_NEAR(static_cast<double>(rapport.total.kilograms()), 1400.0, 2.0);
+    CHECK(report.low_fuel_alert);
+    CHECK_NEAR(static_cast<double>(report.total.kilograms()), 1400.0, 2.0);
 }
 
 TEST_REQ(BasNiveauLlr, echantillon_non_fini_si_non_mesurable, "LLR-FQMS-052") {
@@ -402,22 +402,22 @@ TEST_REQ(BasNiveauLlr, echantillon_non_fini_si_non_mesurable, "LLR-FQMS-052") {
     //
     // Preuve par l'absurde : le total VISIBLE tombe tres largement sous le
     // seuil, pendant longtemps, et pourtant aucune alerte ne se leve.
-    FuelSystem systeme = systeme_de_reference();
-    const i32 avec_panne[3] = {kRawZero, -1, kRawZero};
+    FuelSystem system = reference_system();
+    const i32 with_fault[3] = {kRawZero, -1, kRawZero};
 
-    CycleReport rapport;
+    CycleReport report;
     for (usize cycle = 0U; cycle < 50U; ++cycle) {
-        rapport = systeme.update(avec_panne);
-        CHECK_FALSE(rapport.low_fuel_alert);
+        report = system.update(with_fault);
+        CHECK_FALSE(report.low_fuel_alert);
     }
-    CHECK_EQ(rapport.total.grams(), 0);
-    CHECK_EQ(rapport.status, Status::NotReady);
+    CHECK_EQ(report.total.grams(), 0);
+    CHECK_EQ(report.status, Status::NotReady);
 
     // Des que la jauge revient et que le total est reellement bas, l'alerte se
     // leve normalement : le gel n'a pas casse le mecanisme.
-    const i32 sans_panne[3] = {kRawZero, 717, kRawZero};
+    const i32 without_fault[3] = {kRawZero, 717, kRawZero};
     for (usize cycle = 0U; cycle < 5U; ++cycle) {
-        rapport = systeme.update(sans_panne);
+        report = system.update(without_fault);
     }
-    CHECK(rapport.low_fuel_alert);
+    CHECK(report.low_fuel_alert);
 }

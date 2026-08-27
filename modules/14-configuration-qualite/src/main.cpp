@@ -14,13 +14,13 @@ using mod14::SoftwareIdentity;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void donnees_de_vie() {
-    titre("Les donnees de vie du logiciel (DO-178C section 11)");
+void life_cycle_data() {
+    title("Les donnees de vie du logiciel (DO-178C section 11)");
 
     const avio::Span<const mod14::LifeCycleData> table = mod14::life_cycle_data();
 
@@ -48,44 +48,44 @@ void donnees_de_vie() {
 }
 
 // -----------------------------------------------------------------------------
-void integrite_du_chargement() {
-    titre("Verification d'integrite du logiciel charge");
+void loading_integrity() {
+    title("Verification d'integrite du logiciel charge");
 
-    SoftwareIdentity identite;
-    identite.part_number = "PN-7654321-002";
-    identite.version_major = 1U;
-    identite.version_minor = 2U;
-    identite.version_patch = 3U;
+    SoftwareIdentity identity;
+    identity.part_number = "PN-7654321-002";
+    identity.version_major = 1U;
+    identity.version_minor = 2U;
+    identity.version_patch = 3U;
 
-    const u8 image_valide[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U};
-    identite.expected_crc = mod14::crc32(avio::make_const_span(image_valide));
+    const u8 valid_image[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U};
+    identity.expected_crc = mod14::crc32(avio::make_const_span(valid_image));
 
     std::printf(
-        "  part number      : %s (%s)\n", identite.part_number,
-        mod14::is_valid_part_number(identite.part_number) ? "format valide" : "FORMAT INVALIDE");
-    std::printf("  version          : %u.%u.%u\n", identite.version_major, identite.version_minor,
-                identite.version_patch);
-    std::printf("  CRC-32 attendu   : 0x%08X\n", identite.expected_crc);
+        "  part number      : %s (%s)\n", identity.part_number,
+        mod14::is_valid_part_number(identity.part_number) ? "format valide" : "FORMAT INVALIDE");
+    std::printf("  version          : %u.%u.%u\n", identity.version_major, identity.version_minor,
+                identity.version_patch);
+    std::printf("  CRC-32 attendu   : 0x%08X\n", identity.expected_crc);
     std::printf("\n");
 
     std::printf(
         "  image conforme                 -> %s\n",
-        mod14::verify_load(identite, avio::make_const_span(image_valide)) ? "ACCEPTEE" : "refusee");
+        mod14::verify_load(identity, avio::make_const_span(valid_image)) ? "ACCEPTEE" : "refusee");
 
-    u8 image_alteree[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x38U};
+    u8 altered_image[9] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x38U};
     std::printf("  image alteree (1 octet)        -> %s\n",
-                mod14::verify_load(identite, avio::make_const_span(image_alteree)) ? "acceptee"
+                mod14::verify_load(identity, avio::make_const_span(altered_image)) ? "acceptee"
                                                                                    : "REFUSEE");
 
-    const avio::Span<const u8> vide;
+    const avio::Span<const u8> empty;
     std::printf("  image vide                     -> %s\n",
-                mod14::verify_load(identite, vide) ? "acceptee" : "REFUSEE");
+                mod14::verify_load(identity, empty) ? "acceptee" : "REFUSEE");
 
-    SoftwareIdentity mauvais_pn = identite;
-    mauvais_pn.part_number = "SW-V1.2";
-    std::printf("  part number hors format        -> %s\n",
-                mod14::verify_load(mauvais_pn, avio::make_const_span(image_valide)) ? "acceptee"
-                                                                                    : "REFUSEE");
+    SoftwareIdentity bad_pn = identity;
+    bad_pn.part_number = "SW-V1.2";
+    std::printf(
+        "  part number hors format        -> %s\n",
+        mod14::verify_load(bad_pn, avio::make_const_span(valid_image)) ? "acceptee" : "REFUSEE");
 
     std::printf("\n  Le chargement logiciel d'un equipement en atelier peut echouer\n");
     std::printf("  partiellement, la Flash peut se degrader, et un technicien peut\n");
@@ -94,8 +94,8 @@ void integrite_du_chargement() {
 }
 
 // -----------------------------------------------------------------------------
-void qualification_outils() {
-    titre("DO-330 : quand faut-il qualifier un outil ?");
+void tool_qualification() {
+    title("DO-330 : quand faut-il qualifier un outil ?");
     std::printf("  LA question n'est jamais \"l'outil est-il bon ?\" mais :\n");
     std::printf("  \"SON RESULTAT REMPLACE-T-IL UNE ACTIVITE QUE LA NORME EXIGE ?\"\n\n");
 
@@ -130,8 +130,8 @@ void qualification_outils() {
 }
 
 // -----------------------------------------------------------------------------
-void configuration_avec_git() {
-    titre("Gestion de configuration : Git au service de la DO-178C");
+void configuration_with_git() {
+    title("Gestion de configuration : Git au service de la DO-178C");
     std::printf("  La DO-178C section 7 demande six choses. Git en couvre cinq :\n\n");
     std::printf("  %-42s %s\n", "EXIGENCE DO-178C", "MOYEN");
     std::printf("  ------------------------------------------------------------------\n");
@@ -158,8 +158,8 @@ void configuration_avec_git() {
 }
 
 // -----------------------------------------------------------------------------
-void assurance_qualite() {
-    titre("Assurance qualite logicielle (section 8)");
+void quality_assurance() {
+    title("Assurance qualite logicielle (section 8)");
     std::printf("  La SQA ne verifie PAS le produit : elle verifie que le PROCESSUS\n");
     std::printf("  a ete suivi. C'est une distinction que beaucoup de candidats\n");
     std::printf("  manquent en entretien.\n\n");
@@ -184,11 +184,11 @@ int main() {
     std::printf("#  Module 14 : configuration, qualite, qualification d'outils#\n");
     std::printf("#############################################################\n");
 
-    donnees_de_vie();
-    integrite_du_chargement();
-    configuration_avec_git();
-    qualification_outils();
-    assurance_qualite();
+    life_cycle_data();
+    loading_integrity();
+    configuration_with_git();
+    tool_qualification();
+    quality_assurance();
 
     std::printf("\nModule 14 termine.\n");
     return 0;

@@ -17,13 +17,13 @@ using mod07::Status;
 
 namespace {
 
-void titre(const char* texte) {
-    std::printf("\n=== %s ===\n", texte);
+void title(const char* text) {
+    std::printf("\n=== %s ===\n", text);
 }
 
 // -----------------------------------------------------------------------------
-void pourquoi_pas_d_exceptions() {
-    titre("Pourquoi les exceptions sont interdites en avionique");
+void why_no_exceptions() {
+    title("Pourquoi les exceptions sont interdites en avionique");
     std::printf("  1. TEMPS D'EXECUTION NON BORNE\n");
     std::printf("     Le deroulement de pile parcourt des tables generees par le\n");
     std::printf("     compilateur. Aucun outil d'analyse WCET du marche ne sait le\n");
@@ -44,20 +44,21 @@ void pourquoi_pas_d_exceptions() {
 }
 
 // -----------------------------------------------------------------------------
-void motif_result() {
-    titre("Le motif Result<T> : une valeur OU une erreur");
+void result_pattern() {
+    title("Le motif Result<T> : une valeur OU une erreur");
 
-    const Result<i32> par_defaut;
+    const Result<i32> default_constructed;
     const Result<i32> succes = Result<i32>::ok(42);
-    const Result<i32> echec = Result<i32>::error(Status::Timeout);
+    const Result<i32> failure = Result<i32>::error(Status::Timeout);
 
     std::printf("  Result<i32>{}                 -> is_ok=%-5s statut=%s\n",
-                par_defaut.is_ok() ? "true" : "false", mod07::status_name(par_defaut.status()));
+                default_constructed.is_ok() ? "true" : "false",
+                mod07::status_name(default_constructed.status()));
     std::printf("  Result<i32>::ok(42)           -> is_ok=%-5s valeur=%d\n",
                 succes.is_ok() ? "true" : "false", succes.value());
     std::printf("  Result<i32>::error(Timeout)   -> is_ok=%-5s statut=%s, value_or(-1)=%d\n",
-                echec.is_ok() ? "true" : "false", mod07::status_name(echec.status()),
-                echec.value_or(-1));
+                failure.is_ok() ? "true" : "false", mod07::status_name(failure.status()),
+                failure.value_or(-1));
 
     std::printf("\n  Point de conception : le DEFAUT est une ERREUR (NonDisponible).\n");
     std::printf("  Un Result oublie ne peut donc jamais passer pour un succes.\n");
@@ -71,57 +72,58 @@ void motif_result() {
 }
 
 // -----------------------------------------------------------------------------
-void decodage_arinc() {
-    titre("ARINC 429 : un decodeur complet, sans une seule exception");
+void arinc_decoding() {
+    title("ARINC 429 : un decodeur complet, sans une seule exception");
 
     struct Scenario {
-        const char* libelle;
-        u32 mot;
+        const char* label;
+        u32 word;
     };
 
-    u32 mot_altere = mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
-    mot_altere ^= 0x00001000U;
+    u32 altered_word =
+        mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation);
+    altered_word ^= 0x00001000U;
 
     const Scenario scenarios[6] = {
         {"altitude 12000 ft, normal",
          mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::NormalOperation)},
         {"altitude -500 ft, normal",
          mod07::encode(mod07::kLabelAltitude, 0U, 524288U - 500U, SignStatus::NormalOperation)},
-        {"bit altere en transmission", mot_altere},
+        {"bit altere en transmission", altered_word},
         {"label non traite (42)", mod07::encode(u8{42U}, 0U, 12000U, SignStatus::NormalOperation)},
         {"source en panne",
          mod07::encode(mod07::kLabelAltitude, 0U, 12000U, SignStatus::FailureWarning)},
         {"altitude 200000 ft (aberrante)",
          mod07::encode(mod07::kLabelAltitude, 0U, 200000U, SignStatus::NormalOperation)}};
 
-    mod07::StatusCounters compteurs;
-    compteurs.reset();
+    mod07::StatusCounters counters;
+    counters.reset();
 
     std::printf("  %-32s %-12s %s\n", "scenario", "mot brut", "resultat");
     std::printf("  ---------------------------------------------------------------------\n");
     for (usize index = 0U; index < 6U; ++index) {
-        const Result<i32> resultat = mod07::extract_altitude_feet(scenarios[index].mot);
-        compteurs.record(resultat.status());
+        const Result<i32> result = mod07::extract_altitude_feet(scenarios[index].word);
+        counters.record(result.status());
 
-        if (resultat.is_ok()) {
-            std::printf("  %-32s 0x%08X   %d ft\n", scenarios[index].libelle, scenarios[index].mot,
-                        resultat.value());
+        if (result.is_ok()) {
+            std::printf("  %-32s 0x%08X   %d ft\n", scenarios[index].label, scenarios[index].word,
+                        result.value());
         } else {
-            std::printf("  %-32s 0x%08X   ERREUR : %s\n", scenarios[index].libelle,
-                        scenarios[index].mot, mod07::status_name(resultat.status()));
+            std::printf("  %-32s 0x%08X   ERREUR : %s\n", scenarios[index].label,
+                        scenarios[index].word, mod07::status_name(result.status()));
         }
     }
 
     std::printf("\n  Surveillance (BITE) : %u anomalie(s), dominante = %s\n",
-                compteurs.total_faults(), mod07::status_name(compteurs.dominant_fault()));
+                counters.total_faults(), mod07::status_name(counters.dominant_fault()));
     std::printf("\n  Une erreur qui n'est ni traitee ni COMPTEE est une erreur\n");
     std::printf("  invisible. Tout calculateur certifie tient ces compteurs, relus\n");
     std::printf("  par la maintenance au sol.\n");
 }
 
 // -----------------------------------------------------------------------------
-void code_mort_et_desactive() {
-    titre("Code mort, code desactive : deux notions a ne pas confondre");
+void dead_and_deactivated_code() {
+    title("Code mort, code desactive : deux notions a ne pas confondre");
     std::printf("  CODE MORT (dead code) -- DO-178C 6.4.4.3\n");
     std::printf("    Du code qui ne peut JAMAIS s'executer, quelle que soit\n");
     std::printf("    l'entree. Ce n'est pas une exigence, c'est un DEFAUT.\n");
@@ -152,10 +154,10 @@ int main() {
     std::printf("#  Module 07 : gestion d'erreurs sans exceptions             #\n");
     std::printf("#############################################################\n");
 
-    pourquoi_pas_d_exceptions();
-    motif_result();
-    decodage_arinc();
-    code_mort_et_desactive();
+    why_no_exceptions();
+    result_pattern();
+    arinc_decoding();
+    dead_and_deactivated_code();
 
     std::printf("\nModule 07 termine.\n");
     return 0;

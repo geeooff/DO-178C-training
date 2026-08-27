@@ -126,8 +126,8 @@ instance.
 
 ```cpp
 TEST_REQ(DO332, capteur_pression_est_substituable, "LLR-M05-001,OO.6.7") {
-    const mod05::PressureSensor capteur;
-    verifier_sous_type_conforme(capteur);   // la campagne de la BASE
+    const mod05::PressureSensor sensor;
+    check_conforming_subtype(sensor);   // la campagne de la BASE
 }
 ```
 

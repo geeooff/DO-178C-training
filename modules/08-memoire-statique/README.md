@@ -42,10 +42,10 @@ réussit toujours, et qu'aucune libération n'a lieu ensuite. C'est le modèle
 La **taille** varie à l'exécution, la **capacité** est fixée à la compilation.
 
 ```cpp
-mod08::StaticVector<avio::i32, 4U> mesures;
-mesures.push_back(10);   // true
+mod08::StaticVector<avio::i32, 4U> measurements;
+measurements.push_back(10);   // true
 …
-mesures.push_back(50);   // FALSE : plein, l'élément n'est pas ajouté
+measurements.push_back(50);   // FALSE : plein, l'élément n'est pas ajouté
 ```
 
 La différence avec `std::vector` est décisive : là où `std::vector` réallouerait
