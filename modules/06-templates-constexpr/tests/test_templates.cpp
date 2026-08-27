@@ -176,11 +176,11 @@ TEST_REQ(Constexpr, functions_usable_at_both_times, "LLR-M06-024") {
 }
 
 TEST_REQ(Constexpr, linearization_table, "LLR-M06-025") {
-    CHECK_EQ(mod06::kLinearisation.values[0], avio::i16{-600});
-    CHECK_EQ(mod06::kLinearisation.values[15], avio::i16{800});
+    CHECK_EQ(mod06::kLinearization.values[0], avio::i16{-600});
+    CHECK_EQ(mod06::kLinearization.values[15], avio::i16{800});
     // Monotonie de la table : propriete verifiable a l'execution.
-    for (usize index = 1U; index < mod06::LinearisationTable::kPointCount; ++index) {
-        CHECK(mod06::kLinearisation.values[index] > mod06::kLinearisation.values[index - 1U]);
+    for (usize index = 1U; index < mod06::LinearizationTable::kPointCount; ++index) {
+        CHECK(mod06::kLinearization.values[index] > mod06::kLinearization.values[index - 1U]);
     }
 }
 

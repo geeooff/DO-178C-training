@@ -48,14 +48,14 @@ void result_pattern() {
     title("Le motif Result<T> : une valeur OU une erreur");
 
     const Result<i32> default_constructed;
-    const Result<i32> succes = Result<i32>::ok(42);
+    const Result<i32> success = Result<i32>::ok(42);
     const Result<i32> failure = Result<i32>::error(Status::Timeout);
 
     std::printf("  Result<i32>{}                 -> is_ok=%-5s statut=%s\n",
                 default_constructed.is_ok() ? "true" : "false",
                 mod07::status_name(default_constructed.status()));
     std::printf("  Result<i32>::ok(42)           -> is_ok=%-5s valeur=%d\n",
-                succes.is_ok() ? "true" : "false", succes.value());
+                success.is_ok() ? "true" : "false", success.value());
     std::printf("  Result<i32>::error(Timeout)   -> is_ok=%-5s statut=%s, value_or(-1)=%d\n",
                 failure.is_ok() ? "true" : "false", mod07::status_name(failure.status()),
                 failure.value_or(-1));

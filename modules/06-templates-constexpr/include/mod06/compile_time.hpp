@@ -101,11 +101,11 @@ static_assert(even_parity(0x03U), "parite paire attendue pour 0x03");
 /// Table de linearisation d'une sonde de temperature (16 points).
 /// Dans un vrai calculateur, ce genre de table evite un calcul flottant
 /// couteux dans la boucle temps reel : on interpole entre deux points.
-struct LinearisationTable {
+struct LinearizationTable {
     static constexpr avio::usize kPointCount = 16U;
     avio::i16 values[kPointCount];
 
-    constexpr LinearisationTable() noexcept : values{} {
+    constexpr LinearizationTable() noexcept : values{} {
         // -60 degres au point 0, +80 degres au point 15, en dixiemes de degre.
         for (avio::usize index = 0U; index < kPointCount; ++index) {
             const avio::i32 min_tenths = -600;
@@ -118,10 +118,10 @@ struct LinearisationTable {
     }
 };
 
-inline constexpr LinearisationTable kLinearisation{};
+inline constexpr LinearizationTable kLinearization{};
 
-static_assert(kLinearisation.values[0] == -600, "premier point incorrect");
-static_assert(kLinearisation.values[15] == 800, "dernier point incorrect");
+static_assert(kLinearization.values[0] == -600, "premier point incorrect");
+static_assert(kLinearization.values[15] == 800, "dernier point incorrect");
 
 }  // namespace mod06
 

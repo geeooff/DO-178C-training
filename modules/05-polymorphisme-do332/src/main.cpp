@@ -34,7 +34,7 @@ void print_report(const mod05::Sensor& sensor) {
 }
 
 // -----------------------------------------------------------------------------
-void resolution_dynamique() {
+void dynamic_resolution() {
     title("Resolution dynamique : un seul code, plusieurs comportements");
 
     const mod05::PressureSensor pressure;
@@ -131,7 +131,7 @@ int main() {
     std::printf("#  Module 05 : polymorphisme et supplement DO-332            #\n");
     std::printf("#############################################################\n");
 
-    resolution_dynamique();
+    dynamic_resolution();
     local_type_consistency();
     split();
     vulnerabilities_do332();

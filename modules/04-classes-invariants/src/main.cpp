@@ -70,13 +70,13 @@ void boundary_validation() {
 
     const f32 inputs[5] = {35000.0F, -5000.0F, 80000.0F, std::numeric_limits<f32>::quiet_NaN(),
                            std::numeric_limits<f32>::infinity()};
-    const char* libelles[5] = {"35000 ft (nominal)", "-5000 ft (sous le domaine)",
-                               "80000 ft (au-dessus)", "NaN", "+infini"};
+    const char* labels[5] = {"35000 ft (nominal)", "-5000 ft (sous le domaine)",
+                             "80000 ft (au-dessus)", "NaN", "+infini"};
 
     for (avio::usize index = 0U; index < 5U; ++index) {
         Altitude altitude;
         const bool accepted = Altitude::from_feet(inputs[index], altitude);
-        std::printf("  %-28s -> %s\n", libelles[index], accepted ? "ACCEPTE" : "REJETE");
+        std::printf("  %-28s -> %s\n", labels[index], accepted ? "ACCEPTE" : "REJETE");
     }
 
     std::printf("\n  Un NaN qui entre dans un calcul en ressort partout : toute\n");
