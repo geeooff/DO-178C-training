@@ -128,6 +128,89 @@ le dossier de certification : *« occupation RAM du composant : 704 octets,
 budget alloué : 2 ko, marge : 65 % »* — et le **démontrer** par un simple
 `sizeof`.
 
+### 1.6 Quand le compilateur ne peut pas vous croire
+
+Voici un cas rencontré **dans ce dépôt**, pas un exemple inventé. Le code de
+`StaticVector::erase()` était celui-ci :
+
+```cpp
+bool erase(avio::usize index) noexcept {
+    if (index >= size_) {
+        return false;
+    }
+    for (avio::usize k = index; (k + 1U) < size_; ++k) {
+        storage_[k] = storage_[k + 1U];
+    }
+    size_ -= 1U;
+    return true;
+}
+```
+
+Ce code est **correct**. Aucune méthode de la classe ne permet à `size_` de
+dépasser `Capacity`, donc `k + 1 < size_ <= Capacity` : l'écriture est toujours
+dans les bornes. Il passe sous MSVC, sous Clang, et sous GCC en `-O0`.
+
+Compilé par **GCC 15 en `-O2`**, il produit ceci :
+
+```
+static_vector.hpp:104:35: warning: array subscript 100 is above array bounds
+                                   of 'int [5]' [-Warray-bounds=]
+   inlined from 'mt_body_StaticVector_removal_by_index()'
+        at tests/test_memory.cpp:86
+```
+
+La ligne 86 du test est `CHECK_FALSE(vector.erase(100U));` — un test de
+robustesse tout à fait légitime, sur un vecteur de capacité 5.
+
+**Le compilateur n'a pas tort.** Il inline l'appel avec `index = 100`, entre
+dans la fonction, et cherche à savoir si la boucle peut s'exécuter. Pour cela
+il lui faudrait savoir que `size_ <= 5`. Or cette information n'existe **nulle
+part dans le corps de la fonction** : elle est répartie dans `push_back()`,
+dans le constructeur, dans l'ensemble de la classe. Le compilateur ne raisonne
+que sur ce qu'il voit. Il doit donc envisager un `size_` valant 200, cas où
+`storage_[100]` sortirait effectivement des bornes.
+
+Retenez la formulation : **un invariant qui n'est vrai que « globalement »
+n'est pas exploitable localement**, ni par le compilateur, ni par un analyseur
+statique, ni par un relecteur qui n'a pas la classe entière en tête.
+
+#### Les trois façons de le traiter, et leur prix
+
+| Option | Effet | Prix |
+|---|---|---|
+| Ne rien faire | L'avertissement reste | Un avertissement toléré aujourd'hui en masque un vrai demain |
+| `-Wno-array-bounds` | Silence global | On éteint le détecteur, pas le problème. Inacceptable |
+| **Borner explicitement** | L'écriture devient *prouvable* | Une branche inatteignable, donc non couvrable |
+
+C'est la troisième qui est retenue ici :
+
+```cpp
+const avio::usize last = (size_ < Capacity) ? size_ : Capacity;
+for (avio::usize k = index; (k + 1U) < last; ++k) {
+```
+
+#### Le prix à payer, et pourquoi on l'assume
+
+`size_` étant toujours `<= Capacity`, la branche `: Capacity` **ne s'exécute
+jamais**. C'est du code défensif : une protection contre une situation que la
+conception rend impossible.
+
+Et vous venez de créer, volontairement, un problème de **couverture
+structurelle** (module 11) : une décision dont un seul résultat est atteignable
+ne sera jamais couverte à 100 %, quel que soit le jeu de tests.
+
+Ce conflit est explicite dans la norme (§6.4.4.3) et fait l'objet d'un position
+paper dédié, **CAST-17**. La réponse admise n'est pas de supprimer la
+protection, mais de la **justifier par analyse** : on documente que le code est
+inatteignable, on explique pourquoi il est là, et on démontre qu'il ne peut pas
+nuire. C'est une justification écrite, pas une case à cocher.
+
+> **Ce qu'un entretien peut en tirer.** « Vous avez du code défensif non
+> couvrable. Que faites-vous ? » La mauvaise réponse est « je le supprime pour
+> avoir 100 % ». La bonne : « je le justifie par analyse au titre de CAST-17,
+> ou je démontre qu'il est réellement atteignable. Supprimer une protection
+> pour améliorer une métrique, c'est optimiser la métrique contre le produit. »
+
 ---
 
 ## 2. Ce que dit la DO-178C

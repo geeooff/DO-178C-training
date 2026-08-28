@@ -100,7 +100,24 @@ public:
         if (index >= size_) {
             return false;
         }
-        for (avio::usize k = index; (k + 1U) < size_; ++k) {
+        // BORNE DEFENSIVE -- voir README du module, section "quand le
+        // compilateur ne peut pas vous croire".
+        //
+        // `size_ <= Capacity` est un invariant de la classe : aucune methode ne
+        // permet de le violer. Mais cet invariant n'est visible NULLE PART dans
+        // ce corps de fonction, et le compilateur ne raisonne que sur ce qu'il
+        // voit. GCC -O2, en inlinant l'appel de robustesse `erase(100)`, doit
+        // donc envisager un `size_` de 200 -- d'ou un avertissement d'ecriture
+        // hors bornes (-Warray-bounds) parfaitement logique de son point de vue.
+        //
+        // Cette borne rend l'ecriture PROUVABLE et non plus seulement vraie.
+        // Son prix est assume : la branche `Capacity` est inatteignable, donc
+        // NON COUVRABLE. C'est le conflit classique entre programmation
+        // defensive et couverture structurelle (paragraphe 6.4.4.3, CAST-17) :
+        // il se traite par une justification d'analyse, pas en supprimant la
+        // protection.
+        const avio::usize last = (size_ < Capacity) ? size_ : Capacity;
+        for (avio::usize k = index; (k + 1U) < last; ++k) {
             storage_[k] = storage_[k + 1U];
         }
         size_ -= 1U;
