@@ -94,7 +94,12 @@ Les presets CMake portent les mêmes noms partout.
 | CI GitHub Actions | `ubuntu-26.04` (préversion), 5 jobs |
 | devcontainer | `ubuntu:26.04` |
 
-**Ne pas installer Docker** sur le poste de développement.
+**Docker Desktop est installé** sur le poste Windows depuis le 2026-08-28. Le
+devcontainer est donc utilisable, et surtout **vérifiable** : son image n'a
+jamais été construite à ce jour, faute d'un Docker disponible. Le
+`useradd` défensif du Dockerfile — qui ne suppose pas que l'image de base
+fournisse l'utilisateur `ubuntu` — a été écrit sans pouvoir être testé. À
+confirmer par une construction réelle.
 
 Sous Debian et Ubuntu, `libclang-rt-dev` est **obligatoire** pour les
 sanitizers Clang : le métapaquet `clang` ne fournit pas les runtimes de
