@@ -443,6 +443,12 @@ def print_report(findings: Findings) -> int:
 
 
 def write_csv(findings: Findings, path: Path) -> None:
+    # Le repertoire de destination n'existe pas forcement : `reports/` est
+    # ignore par Git, donc absent de tout depot fraichement clone -- ce qui
+    # est exactement le cas d'une machine d'integration continue.
+    if path.parent != Path(""):
+        path.parent.mkdir(parents=True, exist_ok=True)
+
     lignes = ["exigence;type;derivee;parents;sites_code;cas_de_test"]
     for identifier in sorted(findings.requirements):
         requirement = findings.requirements[identifier]
