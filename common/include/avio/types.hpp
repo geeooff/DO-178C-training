@@ -35,6 +35,14 @@ using f64 = double;
 
 using usize = std::size_t;
 
+/// Entier capable de contenir la representation d'un pointeur.
+/// Sert a comparer des adresses SANS comparer des pointeurs : en C++, le
+/// resultat de `<` entre deux pointeurs qui ne designent pas le meme objet
+/// est NON SPECIFIE ([expr.rel]/4), et MISRA C++ l'interdit. La conversion
+/// vers un entier, elle, a un comportement defini par l'implementation --
+/// donc analysable et documentable.
+using uptr = std::uintptr_t;
+
 /// Verifications de representation faites A LA COMPILATION.
 /// En DO-178C, une hypothese non verifiee est une hypothese fausse : on la
 /// transforme donc en contrainte que le compilateur controle.

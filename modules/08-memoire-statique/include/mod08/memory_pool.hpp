@@ -96,11 +96,10 @@ public:
         if (pointer == nullptr) {
             return false;
         }
-        avio::u8* block = static_cast<avio::u8*>(pointer);
-        if (!owns(block)) {
-            return false;
+        avio::usize offset = 0U;
+        if (!offset_of(pointer, offset)) {
+            return false;  // pointeur ETRANGER a la reserve
         }
-        const avio::usize offset = static_cast<avio::usize>(block - storage_);
         if ((offset % BlockSize) != 0U) {
             return false;  // pointeur au milieu d'un bloc
         }
@@ -108,6 +107,14 @@ public:
         if (!is_used(index)) {
             return false;  // DOUBLE LIBERATION detectee
         }
+
+        // On ecrit a travers un pointeur RECONSTRUIT depuis `storage_`, et non
+        // a travers celui du client. Les deux designent le meme octet, mais le
+        // premier est visiblement issu de la reserve : le compilateur peut
+        // alors PROUVER que l'ecriture reste dans les bornes. Avec le pointeur
+        // du client, GCC -O2 signalait une ecriture de 8 octets potentiellement
+        // hors bornes (-Warray-bounds), faute de pouvoir suivre la provenance.
+        avio::u8* const block = block_at(index);
 
         set_used(index, false);
         store_next(block, free_list_);
@@ -117,8 +124,8 @@ public:
     }
 
     bool owns(const void* pointer) const noexcept {
-        const avio::u8* candidate = static_cast<const avio::u8*>(pointer);
-        return (candidate >= storage_) && (candidate < (storage_ + (BlockSize * BlockCount)));
+        avio::usize offset = 0U;
+        return offset_of(pointer, offset);
     }
 
     avio::usize in_use() const noexcept { return in_use_; }
@@ -133,6 +140,27 @@ private:
     static constexpr avio::usize kBitmapBytes = (BlockCount + 7U) / 8U;
 
     avio::u8* block_at(avio::usize index) noexcept { return storage_ + (index * BlockSize); }
+
+    /// Rend true si `pointer` designe un octet DE LA RESERVE, et fournit alors
+    /// son decalage depuis le premier bloc.
+    ///
+    /// La comparaison porte sur des ENTIERS et non sur des pointeurs : `<` et
+    /// `>=` entre deux pointeurs d'objets differents donnent un resultat non
+    /// specifie ([expr.rel]/4). Un test d'appartenance ecrit avec des pointeurs
+    /// est donc, formellement, sans valeur -- meme s'il "marche" en pratique.
+    bool offset_of(const void* pointer, avio::usize& out_offset) const noexcept {
+        const avio::uptr address = reinterpret_cast<avio::uptr>(pointer);
+        const avio::uptr base = reinterpret_cast<avio::uptr>(storage_);
+        if (address < base) {
+            return false;
+        }
+        const avio::usize offset = static_cast<avio::usize>(address - base);
+        if (offset >= (BlockSize * BlockCount)) {
+            return false;
+        }
+        out_offset = offset;
+        return true;
+    }
 
     avio::usize index_of(const avio::u8* block) const noexcept {
         return static_cast<avio::usize>(block - storage_) / BlockSize;
