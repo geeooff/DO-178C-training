@@ -16,6 +16,27 @@
 #  DEUX COMPILATEURS, DÉLIBÉRÉMENT. GCC et Clang ne détectent pas les mêmes
 #  défauts. Les faire tourner tous les deux, c'est deux analyses statiques pour
 #  le prix d'une — et c'est la façon la moins chère d'augmenter la confiance.
+#
+#  POURQUOI `ubuntu-26.04` ET NON `ubuntu-latest`
+#  ----------------------------------------------
+#  `ubuntu-latest` est une cible MOUVANTE : GitHub la fait basculer d'une
+#  version d'Ubuntu à la suivante sans que le dépôt change d'une ligne. Un
+#  build qui passe aujourd'hui et échoue demain, sans commit entre les deux,
+#  n'est pas sous contrôle de configuration (§7). On épingle donc la version.
+#
+#  26.04 est retenue pour deux raisons :
+#    * c'est la LTS courante, et celle du devcontainer et du poste WSL de
+#      développement — le SECI décrit ainsi UN environnement, pas trois ;
+#    * elle fournit GCC 15 et Clang 21, nettement plus sévères que le GCC 13
+#      de 24.04. C'est ce GCC 15 qui a mis au jour, en `-O2`, la comparaison
+#      de pointeurs non spécifiée du module 08 (voir sa section 1.6).
+#
+#  RÉSERVE À CONNAÎTRE : l'image `ubuntu-26.04` est en PRÉVERSION chez GitHub.
+#  Une image beta peut évoluer sans préavis — ce qui est précisément ce qu'un
+#  SECI cherche à éviter. Sur un vrai programme on resterait sur l'image GA, ou
+#  l'on utiliserait un runner auto-hébergé dont on maîtrise le contenu. Ici, la
+#  cohérence avec l'environnement de développement l'emporte. À rebasculer sur
+#  l'image GA dès que 26.04 y passe.
 # =============================================================================
 name: CI
 
@@ -39,7 +60,7 @@ jobs:
   # ---------------------------------------------------------------------------
   build:
     name: ${{ matrix.compilateur }} — strict
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       # On veut voir TOUS les échecs, pas seulement le premier : un défaut GCC
       # et un défaut Clang doivent apparaître dans la même exécution.
@@ -106,18 +127,23 @@ jobs:
   # ---------------------------------------------------------------------------
   sanitizers:
     name: Sanitizers (ASan + UBSan)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Installer la chaîne d'outils
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y cmake ninja-build clang
+          # libclang-rt-dev : les runtimes de sanitizers de Clang (compiler-rt).
+          # Le metapaquet `clang` ne les embarque PAS sous Debian et Ubuntu.
+          # Sans lui, la compilation passe et c'est l'EDITION DE LIENS qui
+          # echoue -- sur un `cannot find libclang_rt.asan.a` peu parlant.
+          # Le metapaquet sans numero suit la version par defaut de `clang`.
+          sudo apt-get install --no-install-recommends -y cmake ninja-build clang libclang-rt-dev
 
       - name: Configurer et compiler
         run: |
-          cmake --preset asan -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+          cmake --preset asan -DCMAKE_CXX_COMPILER=clang++
           cmake --build --preset asan -- -k 0
 
       # halt_on_error=1 : le premier comportement indéfini fait échouer le
@@ -133,7 +159,7 @@ jobs:
   # ---------------------------------------------------------------------------
   tracabilite:
     name: Traçabilité et index de configuration
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       # fetch-depth: 0 — l'historique complet est nécessaire à `git describe`,
       # dont config_index.py se sert pour identifier la baseline.
@@ -166,7 +192,7 @@ jobs:
   # ---------------------------------------------------------------------------
   couverture:
     name: Couverture (instructions et branches)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
 
@@ -194,7 +220,7 @@ jobs:
   # ---------------------------------------------------------------------------
   format:
     name: Formatage (clang-format)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
 

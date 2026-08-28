@@ -61,7 +61,7 @@ Le script localise Visual Studio via `vswhere` : rien à ajouter au `PATH`.
 **Ubuntu / Debian / WSL**
 
 ```bash
-sudo apt-get update && sudo apt-get install -y build-essential clang clang-tidy clang-format cmake ninja-build gcovr git python3
+sudo apt-get update && sudo apt-get install -y build-essential clang clang-tidy clang-format libclang-rt-dev cmake ninja-build gcovr git python3
 ```
 
 **Fedora**
@@ -111,7 +111,7 @@ Si vous avez Docker et VS Code (ou tout autre client devcontainer) :
 **Ouvrir le dossier → « Reopen in Container »**
 
 L'image est décrite dans [`.devcontainer/Dockerfile`](../.devcontainer/Dockerfile) :
-Ubuntu 24.04, GCC, Clang, CMake, Ninja, clang-tidy, gcovr, lcov, gdb,
+Ubuntu 26.04, GCC, Clang, CMake, Ninja, clang-tidy, gcovr, lcov, gdb,
 valgrind, Python 3.
 
 > **C'est le SECI le plus concret de toute la formation.** La section 11.15 de

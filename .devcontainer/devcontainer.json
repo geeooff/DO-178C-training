@@ -1,5 +1,5 @@
 {
-  "name": "DO-178C training (Ubuntu 24.04, GCC + Clang)",
+  "name": "DO-178C training (Ubuntu 26.04, GCC + Clang)",
 
   "build": {
     "dockerfile": "Dockerfile",

@@ -21,9 +21,9 @@
 #  ----------------------------------------------------
 #    * epingler l'image de base par EMPREINTE, pas par etiquette :
 #          FROM ubuntu@sha256:<64 caracteres>
-#      `ubuntu:24.04` designe une image qui CHANGE (mises a jour de securite).
+#      `ubuntu:26.04` designe une image qui CHANGE (mises a jour de securite).
 #      Une empreinte designe des octets. C'est la difference entre "la version
-#      24.04" et "cette version-la".
+#      26.04" et "cette version-la".
 #    * epingler chaque paquet a sa version exacte (apt-get install paquet=1.2.3) ;
 #    * archiver l'image construite, pas seulement le Dockerfile ;
 #    * placer le tout sous controle de configuration CC1.
@@ -32,7 +32,7 @@
 #  rester installable dans deux ans. Mais SAVOIR pourquoi on ne le fait pas est
 #  exactement ce qu'un auditeur attend d'un ingenieur.
 # =============================================================================
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # Evite toute question interactive pendant la construction : un build
 # non reproductible parce qu'il attend une reponse humaine n'est pas un build.
@@ -42,6 +42,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 #  Chaine de production et de verification
 # -----------------------------------------------------------------------------
 #  build-essential  : GCC et g++
+#  libclang-rt-dev  : runtimes de sanitizers de Clang. Le metapaquet `clang`
+#      ne les fournit pas : sans lui, `-fsanitize=address` compile mais ne
+#      s'edite pas.
 #  clang, clang-tidy, clang-format : la SECONDE chaine. Compiler avec deux
 #      compilateurs, c'est deux analyses statiques pour le prix d'une : chacun
 #      detecte ce que l'autre laisse passer.
@@ -53,6 +56,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install --no-install-recommends -y \
         build-essential \
         clang \
+        libclang-rt-dev \
         clang-format \
         clang-tidy \
         cmake \
@@ -81,9 +85,20 @@ ENV LANG=en_US.UTF-8 \
 # -----------------------------------------------------------------------------
 #  Utilisateur non privilegie
 # -----------------------------------------------------------------------------
-#  L'image Ubuntu 24.04 fournit deja un utilisateur `ubuntu` (uid 1000), ce qui
-#  correspond a l'uid par defaut sur la plupart des postes Linux et evite les
-#  problemes de droits sur les fichiers montes depuis l'hote.
+#  On veut un utilisateur d'uid 1000 : c'est l'uid par defaut sur la plupart
+#  des postes Linux, ce qui evite les problemes de droits sur les fichiers
+#  montes depuis l'hote.
+#
+#  Depuis 24.04, l'image Ubuntu fournit un utilisateur `ubuntu` (uid 1000).
+#  On ne S'APPUIE PAS sur cette hypothese : elle est vraie aujourd'hui, elle
+#  n'est garantie par aucun contrat, et un `USER ubuntu` sur une image qui ne
+#  le fournirait plus ferait echouer la construction avec un message obscur.
+#  On cree donc l'utilisateur s'il manque. Le meme reflexe que partout
+#  ailleurs dans ce depot : une hypothese verifiee vaut mieux qu'une
+#  hypothese vraie.
+RUN id -u ubuntu >/dev/null 2>&1 \
+    || useradd --uid 1000 --user-group --create-home --shell /bin/bash ubuntu
+
 USER ubuntu
 WORKDIR /workspace
 
