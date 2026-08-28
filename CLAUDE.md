@@ -94,12 +94,26 @@ Les presets CMake portent les mêmes noms partout.
 | CI GitHub Actions | `ubuntu-26.04` (préversion), 5 jobs |
 | devcontainer | `ubuntu:26.04` |
 
-**Docker Desktop est installé** sur le poste Windows depuis le 2026-08-28. Le
-devcontainer est donc utilisable, et surtout **vérifiable** : son image n'a
-jamais été construite à ce jour, faute d'un Docker disponible. Le
-`useradd` défensif du Dockerfile — qui ne suppose pas que l'image de base
-fournisse l'utilisateur `ubuntu` — a été écrit sans pouvoir être testé. À
-confirmer par une construction réelle.
+**Docker Desktop est installé** sur le poste Windows depuis le 2026-08-28
+(29.7.2, conteneurs Linux, installation par utilisateur dans
+`%LOCALAPPDATA%\Programs\DockerDesktop` et non dans `Program Files`).
+
+L'image du devcontainer a été **construite et vérifiée** ce même jour, pour la
+première fois depuis sa création. Sur un clone frais monté dans le conteneur :
+`gcc-strict`, `clang-strict` et `asan` à **0 avertissement et 19/19**,
+traçabilité et format propres, couverture 89,6 % lignes / 79,2 % branches. Le
+SECI décrit par le module 00 est donc démontré, pas seulement affirmé.
+
+Deux constats de cette première construction :
+
+- `ubuntu:26.04` **fournit bien** l'utilisateur `ubuntu` en uid 1000. Le
+  `useradd` défensif du Dockerfile ne s'exécute donc jamais : c'est du code
+  dont une branche est inatteignable, même situation qu'en module 08 §1.6.
+  Le garder reste justifié — il ne coûte rien et l'étiquette `26.04` désigne
+  une image qui change.
+- `post-create.sh` déclare `safe.directory /workspace`, ce qui suffit pour
+  **travailler dans** le dépôt. Cloner **depuis** le montage exige en plus
+  `/workspace/.git`.
 
 Sous Debian et Ubuntu, `libclang-rt-dev` est **obligatoire** pour les
 sanitizers Clang : le métapaquet `clang` ne fournit pas les runtimes de
