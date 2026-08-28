@@ -296,3 +296,44 @@ qu'ils existent et où ils s'appliquent est déjà beaucoup.
    qui alimenteront vos réponses en entretien.
 
 Bon vol.
+
+---
+
+## Licence et normes citées
+
+| Contenu | Licence |
+|---|---|
+| **Code** — `common/`, `modules/*/{include,src,tests}`, `tools/`, `scripts/`, `cmake/` | [MIT](LICENSE) |
+| **Documentation** — README, `docs/`, `modules/*/README.md`, `requirements/`, `templates/` | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+
+Deux licences parce que ce dépôt contient deux natures d'objets. MIT est
+rédigée pour du logiciel ; l'essentiel de la valeur est ici du support de
+formation, que CC BY 4.0 couvre correctement. Dans les deux cas : réutilisation
+libre, y compris commerciale, à condition de citer l'auteur.
+
+Le dépôt ne contient **aucun code tiers** et n'a **aucune dépendance externe** —
+le harnais de test `microtest` inclus est écrit pour l'occasion.
+
+### Ce que la licence ne couvre pas
+
+La DO-178C, ses suppléments (DO-330, DO-331, DO-332, DO-333), MISRA C++, les
+normes ARINC et les documents ARP sont la **propriété de leurs éditeurs
+respectifs** — RTCA, EUROCAE, MISRA, SAE. Ils sont payants et ne sont pas
+redistribuables.
+
+Ce dépôt ne reproduit aucun de ces textes. Il les **cite** — numéro d'objectif,
+de tableau, de paragraphe — et les explique avec ses propres mots, ce que le
+droit d'auteur permet : une idée, un numéro de paragraphe et un concept ne sont
+pas protégés, seule leur expression l'est. Le standard de codage du
+[module 13](modules/13-standards-codage/) (règles R-01 à R-15) est propre au
+projet ; il s'inspire de MISRA C++ et d'AUTOSAR C++14 sans en recopier une
+seule règle.
+
+Où se procurer les documents normatifs : voir
+[`docs/05-ressources.md`](docs/05-ressources.md).
+
+> Identifier ses propres droits et distinguer sa production des documents
+> normatifs qu'elle référence, c'est le même réflexe que celui du
+> [module 14](modules/14-configuration-qualite/) sur les données de vie du
+> logiciel. Un dépôt qui enseigne la gestion de configuration sans le faire
+> serait mal placé pour en parler.
