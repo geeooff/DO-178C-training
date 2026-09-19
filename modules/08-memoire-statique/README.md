@@ -89,10 +89,12 @@ La pile est une ressource **finie**, dimensionnée à la conception (typiquement
 une exception propre : il écrase la mémoire voisine, souvent celle d'une autre
 tâche. C'est la perte de la *freedom from interference*.
 
-La DO-178C ne cite pas la pile explicitement, mais l'objectif **A-5.6**
-(*accuracy and consistency*) couvre le *stack usage*. En pratique, tout dossier
-de certification contient une **analyse de pile** démontrant que l'usage maximal
-reste sous le budget alloué, avec une marge (souvent 30 %).
+La DO-178C cite la pile **en toutes lettres** : le §6.3.4.f (objectif
+**A-5.6**, *accuracy and consistency*) liste le *stack usage* parmi ce que la
+revue du code source doit examiner, aux côtés du temps d'exécution au pire cas
+et des débordements arithmétiques. En pratique, tout dossier de certification
+contient une **analyse de pile** démontrant que l'usage maximal reste sous le
+budget alloué, avec une marge (souvent 30 %).
 
 **Ce qui rend l'analyse possible :**
 

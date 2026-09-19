@@ -6,10 +6,11 @@
 //  une exception propre : il ecrase la memoire voisine, souvent celle d'une
 //  autre tache. C'est la perte de "freedom from interference".
 //
-//  La DO-178C ne cite pas la pile explicitement, mais l'objectif A-5.6
-//  ("accuracy and consistency") couvre le "stack usage". En pratique, tout
-//  dossier de certification contient une ANALYSE DE PILE demontrant que
-//  l'usage maximal reste sous le budget alloue, avec une marge (souvent 30 %).
+//  La DO-178C cite la pile en toutes lettres : le paragraphe 6.3.4.f
+//  (objectif A-5.6, "accuracy and consistency") liste le "stack usage" parmi
+//  ce que la revue du code source doit examiner. En pratique, tout dossier de
+//  certification contient une ANALYSE DE PILE demontrant que l'usage maximal
+//  reste sous le budget alloue, avec une marge (souvent 30 %).
 //
 //  CE QUI REND L'ANALYSE POSSIBLE :
 //    * profondeur d'appel BORNEE et connue -> pas de recursion ;
