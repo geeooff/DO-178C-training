@@ -171,7 +171,7 @@ module porte un identifiant `LLR-M07-0xx` **et** un test qui l'exerce.
 | Objectif | Application |
 |---|---|
 | **A-4.11** — architecture vérifiable | Le flot de contrôle est explicite : aucun chemin caché. |
-| **A-6.3 / A-6.4** — robustesse de l'exécutable | Chaque cas d'erreur du catalogue est exercé par un test. |
+| **A-6.2 / A-6.4** — robustesse de l'exécutable | Chaque cas d'erreur du catalogue est exercé par un test. |
 | **§6.4.4.3** — analyse du code non couvert | Distinction code mort / code désactivé. |
 | **DO-332 vulnérabilité 6** | Évitée par construction. |
 | **§6.3.4.f** — algorithmes exacts | La validation de domaine complète le contrôle d'intégrité. |

@@ -157,7 +157,7 @@ Parades :
 | **Déterminisme temporel** | §6.3.4 (accuracy and consistency), analyses de temps d'exécution | Un destructeur s'exécute à un instant connu ; un finaliseur GC, non. Le GC est de fait inutilisable en DAL A/B. |
 | **Gestion des ressources** | A-5.6 | Toute ressource acquise doit être libérée sur **tous** les chemins. RAII transforme cette obligation en propriété structurelle du code. |
 | **DO-332 (OOT)** — *Dynamic memory management* | OO.6.8.2 | La DO-332 exige de démontrer l'absence de fuite, de fragmentation et d'épuisement mémoire. La discipline RAII est un prérequis (voir aussi module 08). |
-| **Robustesse** | A-6.3 | Le comportement en cas d'échec d'acquisition (`is_valid() == false`) est une exigence, à écrire puis à tester. |
+| **Robustesse** | A-6.2 / A-6.4 | Le comportement en cas d'échec d'acquisition (`is_valid() == false`) est une exigence, à écrire puis à tester. |
 | **Couverture structurelle** | A-7.x | Attention : les destructeurs sont du **code exécutable**. Ils apparaissent dans le rapport de couverture et doivent être couverts. Un destructeur jamais appelé = code mort. |
 
 **Point d'attention** : un destructeur ne doit **jamais** échouer. En C++, il

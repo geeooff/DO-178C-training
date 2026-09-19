@@ -138,7 +138,7 @@ Règles générales de surcharge :
 | **A-4.1** — LLR conformes aux HLR | Les invariants de classe sont des LLR. | « 0 ≤ quantité ≤ capacité » se trace vers une HLR système. |
 | **A-4.7** — Algorithmes exacts | La conversion pieds/mètres, le facteur livre/kg | Toute constante de conversion doit être **tracée** à une source normative (ici : la définition légale de la livre, 0,45359237 kg). |
 | **A-5.6** — accuracy and consistency | Domaine de validité, NaN, débordement | Les fabriques rejettent NaN, ±∞ et hors domaine. |
-| **A-6.3** — robustesse de l'exécutable | Comportement pour entrées hors domaine | Testé explicitement (`robustesse_*`). |
+| **A-6.2 / A-6.4** — robustesse de l'exécutable | Comportement pour entrées hors domaine | Testé explicitement (`robustesse_*`). |
 | **DO-332 OO.6.8.1** — cohérence de type | Typage fort | Les types forts sont un moyen direct de satisfaire l'objectif : la confusion de types devient impossible. |
 
 **À retenir pour un entretien** : savoir dire *« l'invariant de cette classe

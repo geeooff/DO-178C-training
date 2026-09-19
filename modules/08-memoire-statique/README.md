@@ -219,7 +219,7 @@ nuire. C'est une justification écrite, pas une case à cocher.
 |---|---|
 | **DO-332 OO.6.8.2** — Dynamic Memory Management | Absence de fuite, fragmentation, épuisement, référence pendante : acquis par construction. |
 | **A-5.6** — accuracy and consistency | Couvre explicitement le *stack usage* et l'usage mémoire. |
-| **A-6.3** — robustesse | Épuisement de la réserve, double libération, pointeur étranger : tous testés. |
+| **A-6.2 / A-6.4** — robustesse | Épuisement de la réserve, double libération, pointeur étranger : tous testés. |
 | **A-4.11** — architecture vérifiable | Le budget mémoire est une donnée d'architecture, à figer dans le SDD. |
 | **§2.4 / CAST-32A** — freedom from interference | Un débordement de pile ou de tampon casse la ségrégation entre partitions. |
 
