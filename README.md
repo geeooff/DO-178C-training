@@ -1,5 +1,7 @@
 # C++ et DO-178C — Formation par la pratique
 
+[![CI](https://github.com/geeooff/DO-178C-training/actions/workflows/ci.yml/badge.svg)](https://github.com/geeooff/DO-178C-training/actions/workflows/ci.yml)
+
 > Une montée en compétences complète, pour un développeur **C#** qui vise le
 > logiciel embarqué **avionique**.
 >
@@ -24,6 +26,22 @@ entretien comme en poste.
 Tout est **exécutable** : chaque module compile, s'exécute et se teste. Les
 deux outils Python (traçabilité, index de configuration) fonctionnent sur le
 dépôt lui-même.
+
+---
+
+## Le dépôt frère
+
+[`DO-178C-training-ADA`](https://github.com/geeooff/DO-178C-training-ADA)
+traite la même démarche en **Ada / SPARK**. Les deux dépôts partagent le
+**même cas d'étude** — un système de jaugeage carburant **FQMS**, DAL B —
+contre les **mêmes exigences de haut niveau**, énoncé pour énoncé.
+
+L'intérêt est là : *le processus est la constante, le langage est la
+variable*. Ce que la DO-178C oblige à construire à la main en C++ — types
+forts, absence d'exceptions, mémoire statique — Ada le donne par le langage,
+et SPARK permet en plus de **prouver** ce qu'ici l'on ne peut que tester.
+
+Chacun des deux dépôts se lit **seul**.
 
 ---
 
