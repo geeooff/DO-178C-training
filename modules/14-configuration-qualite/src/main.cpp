@@ -99,21 +99,24 @@ void tool_qualification() {
     std::printf("  LA question n'est jamais \"l'outil est-il bon ?\" mais :\n");
     std::printf("  \"SON RESULTAT REMPLACE-T-IL UNE ACTIVITE QUE LA NORME EXIGE ?\"\n\n");
 
-    std::printf("  TROIS CRITERES (DO-178C 12.2.1) :\n");
+    std::printf("  TROIS CRITERES (DO-178C 12.2.2) :\n");
     std::printf("    Critere 1 : l'outil produit du code embarque SANS que sa sortie\n");
     std::printf("                soit verifiee -> outil de DEVELOPPEMENT\n");
     std::printf("                (compilateur qualifie, generateur de code)\n");
-    std::printf("    Critere 2 : l'outil automatise une verification ET pourrait ne\n");
-    std::printf("                pas detecter une erreur\n");
-    std::printf("    Critere 3 : l'outil, par son resultat, permet de REDUIRE une\n");
-    std::printf("                autre activite que la selection des cas de test\n\n");
+    std::printf("    Critere 2 : l'outil automatise une verification, pourrait ne\n");
+    std::printf("                pas detecter une erreur, ET son resultat sert a\n");
+    std::printf("                ELIMINER ou REDUIRE une autre activite\n");
+    std::printf("                (preuve formelle remplacant des tests, DO-333)\n");
+    std::printf("    Critere 3 : l'outil automatise une verification et pourrait ne\n");
+    std::printf("                pas detecter une erreur, sans rien eliminer d'autre\n");
+    std::printf("                (outil de couverture, analyseur statique)\n\n");
 
-    std::printf("  CINQ NIVEAUX (TQL) :\n");
-    std::printf("    TQL-1 a 3 : outils de DEVELOPPEMENT (critere 1), selon le DAL.\n");
+    std::printf("  CINQ NIVEAUX (TQL, table 12-1) :\n");
+    std::printf("    TQL-1 a 3 : critere 1 (outils de DEVELOPPEMENT), DAL A, B ou C.\n");
     std::printf("                Tres couteux : un compilateur qualifie TQL-1 se\n");
     std::printf("                compte en millions d'euros.\n");
-    std::printf("    TQL-4     : criteres 2 ou 3, DAL A ou B\n");
-    std::printf("    TQL-5     : criteres 2 ou 3, DAL C ou D\n\n");
+    std::printf("    TQL-4     : critere 1 en DAL D ; critere 2 en DAL A ou B\n");
+    std::printf("    TQL-5     : critere 2 en DAL C ou D ; critere 3 a TOUT DAL\n\n");
 
     std::printf("  APPLICATION AUX OUTILS DE CE DEPOT :\n");
     std::printf("    %-24s %s\n", "microtest", "non qualifie : complete la revue");

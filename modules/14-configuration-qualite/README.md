@@ -165,21 +165,21 @@ Concrètement, la SQA :
 > **La question n'est jamais « l'outil est-il bon ? »** mais :
 > **« son résultat remplace-t-il une activité que la norme exige ? »**
 
-**Trois critères** (DO-178C §12.2.1) :
+**Trois critères** (DO-178C §12.2.2) :
 
 | Critère | Description | Exemples |
 |---|---|---|
 | **1** | L'outil produit du code embarqué **sans que sa sortie soit vérifiée** | générateur de code qualifié, compilateur qualifié |
-| **2** | L'outil automatise une vérification **et pourrait ne pas détecter une erreur** | outil de couverture, analyseur statique remplaçant une revue |
-| **3** | L'outil permet de **réduire** une autre activité | générateur de cas de test |
+| **2** | L'outil automatise une vérification, pourrait ne pas détecter une erreur, **et** son résultat sert à **éliminer ou réduire une autre activité** — de vérification ou de développement | outil de preuve formelle dont le résultat remplace des tests (DO-333) |
+| **3** | L'outil automatise une vérification et **pourrait ne pas détecter une erreur**, sans rien éliminer d'autre | outil de couverture, analyseur statique remplaçant une revue |
 
 **Cinq niveaux (TQL)** :
 
 | TQL | Quand | Coût |
 |---|---|---|
-| **1–3** | Critère 1 (outils de développement), selon le DAL | un compilateur qualifié TQL-1 se compte en **millions d'euros** |
-| **4** | Critères 2 ou 3, DAL A ou B | élevé |
-| **5** | Critères 2 ou 3, DAL C ou D | modéré |
+| **1–3** | Critère 1 (outils de développement), DAL A, B ou C | un compilateur qualifié TQL-1 se compte en **millions d'euros** |
+| **4** | Critère 1 en DAL D ; critère 2 en DAL A ou B | élevé |
+| **5** | Critère 2 en DAL C ou D ; critère 3, **à tout DAL** | modéré |
 
 **Application aux outils de ce dépôt** :
 
@@ -189,7 +189,7 @@ Concrètement, la SQA :
 | `clang-tidy` | non qualifié | n'élimine aucune activité exigée |
 | `tools/trace_check.py` | non qualifié | complète la revue manuelle de la matrice |
 | `tools/config_index.py` | non qualifié | produit une donnée, relue et approuvée |
-| `OpenCppCoverage` | **TQL-5 si** son résultat remplace l'analyse manuelle de couverture | critère 2 |
+| `OpenCppCoverage` | **TQL-5 si** son résultat remplace l'analyse manuelle de couverture | critère 3 — il pourrait rater une erreur, mais n'élimine aucune *autre* activité |
 
 > Le compilateur MSVC n'est **pas** qualifié — et c'est la situation normale.
 > On ne qualifie pas le compilateur : on **vérifie sa sortie** (tests sur
