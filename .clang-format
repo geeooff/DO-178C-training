@@ -1,6 +1,6 @@
 # Style de formatage du projet de formation.
 # Un standard de codage DO-178C impose un formatage homogene et VERIFIABLE
-# automatiquement (objectif A-5.1 : conformite du code source aux standards).
+# automatiquement (objectif A-5.4 : conformite du code source aux standards).
 ---
 Language:        Cpp
 BasedOnStyle:    Google

@@ -24,7 +24,7 @@
 | # | Raison | Conséquence DO-178C |
 |---|---|---|
 | 1 | **Temps d'exécution non borné.** Le déroulement de pile parcourt des tables générées par le compilateur ; le coût dépend de la profondeur d'appel et du nombre d'objets à détruire. | Le WCET doit être **démontré** (module 15). Aucun outil du marché ne borne utilement l'*unwinding*. |
-| 2 | **Flot de contrôle implicite.** `f(); g();` — si `f` peut lancer, `g` peut ne jamais s'exécuter, sans que rien ne l'indique. | Objectif **A-4.8** : architecture de flot de contrôle vérifiable. L'analyse de couplage de contrôle (module 12) devient très difficile. |
+| 2 | **Flot de contrôle implicite.** `f(); g();` — si `f` peut lancer, `g` peut ne jamais s'exécuter, sans que rien ne l'indique. | Objectif **A-4.11** : architecture de flot de contrôle vérifiable. L'analyse de couplage de contrôle (module 12) devient très difficile. |
 | 3 | **Allocation dynamique.** Sur la plupart des ABI, l'objet exception est alloué sur un tas dédié. | Interdit après l'initialisation (module 08), **DO-332 OO.6.8.2**. |
 | 4 | **Taille du code.** Les tables de déroulement pèsent typiquement 10 à 30 % du binaire. | Budget Flash. |
 | 5 | **DO-332, vulnérabilité 6.** Le supplément OO ajoute des objectifs spécifiques à la gestion des exceptions. | Les éviter, c'est éviter ces objectifs. |
@@ -170,7 +170,7 @@ module porte un identifiant `LLR-M07-0xx` **et** un test qui l'exerce.
 
 | Objectif | Application |
 |---|---|
-| **A-4.8** — architecture vérifiable | Le flot de contrôle est explicite : aucun chemin caché. |
+| **A-4.11** — architecture vérifiable | Le flot de contrôle est explicite : aucun chemin caché. |
 | **A-6.3 / A-6.4** — robustesse de l'exécutable | Chaque cas d'erreur du catalogue est exercé par un test. |
 | **§6.4.4.3** — analyse du code non couvert | Distinction code mort / code désactivé. |
 | **DO-332 vulnérabilité 6** | Évitée par construction. |

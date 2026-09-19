@@ -199,7 +199,7 @@ partout dans le métier :
 | A-9 | Assurance qualité |
 | A-10 | Liaison avec la certification |
 
-Quand un collègue dit *« c'est un objectif A-7.4 »*, il parle de la couverture
+Quand un collègue dit *« c'est un objectif A-7.5 »*, il parle de la couverture
 MC/DC. Apprendre à lire ces tables est un investissement rentable.
 
 ### 2.5 Les suppléments

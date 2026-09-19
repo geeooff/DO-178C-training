@@ -200,7 +200,7 @@ sert vraiment (banc de test contre calculateur réel).
 | **OO.6.8.1** | Type conversion | Pas de downcast, pas de RTTI, pas de slicing. |
 | **OO.6.8.2** | Dynamic memory management | Aucune allocation : les capteurs vivent sur la pile (module 08). |
 | **A-7.x** | Couverture structurelle | Chaque redéfinition virtuelle est du code à couvrir. Une méthode virtuelle jamais appelée dans les tests = code non couvert. |
-| **A-4.8** | Architecture cohérente et vérifiable | La profondeur de la hiérarchie et le nombre de niveaux virtuels sont des paramètres d'architecture à justifier dans le SDD. |
+| **A-4.9, A-4.11** | Architecture cohérente et vérifiable | La profondeur de la hiérarchie et le nombre de niveaux virtuels sont des paramètres d'architecture à justifier dans le SDD. |
 
 ---
 

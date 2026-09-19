@@ -157,7 +157,7 @@ binaire qui n'est pas celui qui vole — et il faut alors justifier l'équivalen
 | **A-7.8** | *Verification of Software Integration Process* — couplage données et contrôle vérifié | A, B, C |
 | **§6.4.4.2.c** | L'analyse de couverture confirme le couplage données/contrôle | — |
 | **A-5.2** | Le code source est conforme à l'architecture | — |
-| **A-4.9** | L'architecture logicielle est vérifiable | — |
+| **A-4.11** | L'architecture logicielle est vérifiable | — |
 | **§2.4** | *Freedom from interference* entre composants | — |
 
 **Formulation d'auditeur, à savoir anticiper** :

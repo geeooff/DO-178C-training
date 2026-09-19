@@ -160,7 +160,7 @@ part réellement dans le binaire.
 |---|---|
 | **A-7.5/6/7** — couverture statement / decision / MC/DC | par instanciation |
 | **OO.6.7** (DO-332) | s'applique aussi au CRTP : chaque dérivé doit respecter le contrat de la base |
-| **A-4.8** — architecture vérifiable | la liste des instanciations est une donnée d'architecture |
+| **A-4.11** — architecture vérifiable | la liste des instanciations est une donnée d'architecture |
 | **A-5.6** — accuracy and consistency | `static_assert` sur les contraintes et sur les valeurs de table |
 
 ---

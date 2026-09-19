@@ -14,7 +14,7 @@
 //  2. FLOT DE CONTROLE IMPLICITE
 //     `f(); g();` : si `f` peut lancer, `g` peut ne jamais s'executer, sans
 //     que rien ne l'indique dans le code. La DO-178C exige une architecture
-//     de flot de controle VERIFIABLE (objectif A-4.8) ; l'analyse de couplage
+//     de flot de controle VERIFIABLE (objectif A-4.11) ; l'analyse de couplage
 //     de controle (module 12) devient tres difficile.
 //
 //  3. ALLOCATION DYNAMIQUE

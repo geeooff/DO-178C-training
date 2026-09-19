@@ -37,7 +37,7 @@
 | 04 | [Classes et invariants](../modules/04-classes-invariants/) | invariants, fabriques validantes, **types forts** | A-4.1, Air Canada 143 |
 | 05 | [Polymorphisme et DO-332](../modules/05-polymorphisme-do332/) | `virtual`, découpage, **cohérence locale de type** | **DO-332 OO.6.7** |
 | 06 | [Templates et `constexpr`](../modules/06-templates-constexpr/) | templates, CRTP, calcul à la compilation | **couverture par instanciation** |
-| 07 | [Erreurs sans exceptions](../modules/07-erreurs-sans-exceptions/) | `Result<T>`, ARINC 429, code mort/désactivé | A-4.8, §6.4.4.3 |
+| 07 | [Erreurs sans exceptions](../modules/07-erreurs-sans-exceptions/) | `Result<T>`, ARINC 429, code mort/désactivé | A-4.11, §6.4.4.3 |
 | 08 | [Mémoire statique](../modules/08-memoire-statique/) | `StaticVector`, réserve de blocs, analyse de pile | DO-332 OO.6.8.2, A-5.6 |
 
 ### Partie 2 — Les processus DO-178C (7 jours)
