@@ -103,7 +103,7 @@ employeur du secteur ne s'attend à ce que vous les ayez achetés vous-même.**
 |---|---|
 | <https://en.cppreference.com/> | **la** référence C++. Précise, à jour, gratuite. |
 | <https://compiler-explorer.com/> (Godbolt) | voir l'assembleur généré. Irremplaçable pour comprendre le coût réel d'une abstraction. |
-| <https://clang.llvm.org/extra/clang-tidy/checks/> | documentation de chaque vérificateur |
+| <https://clang.llvm.org/extra/clang-tidy/checks/list.html> | documentation de chaque vérificateur |
 | <https://github.com/OpenCppCoverage/OpenCppCoverage> | l'outil de couverture du module 11 |
 | Chaîne YouTube **CppCon** | conférences ; cherchez « embedded », « safety critical », « constexpr » |
 

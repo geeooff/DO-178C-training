@@ -1,8 +1,9 @@
 # Outils : ce dont vous avez besoin
 
-> La formation se compile et se teste **à l'identique** sous Windows, Linux et
-> macOS, avec MSVC, GCC ou Clang. Les commandes changent de nom ; les presets,
-> les résultats et les messages sont les mêmes.
+> La formation se compile et se teste **à l'identique** sous Windows et sous
+> Linux, avec MSVC, GCC ou Clang. Les commandes changent de nom ; les presets,
+> les résultats et les messages sont les mêmes. macOS est prévu par les
+> scripts (section 3), sans avoir été vérifié.
 
 ---
 

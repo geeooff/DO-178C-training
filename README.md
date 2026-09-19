@@ -213,8 +213,11 @@ template). Le binaire vérifié reste le binaire embarqué.
 ## Trois plateformes, trois chaînes, un seul comportement
 
 Le dépôt se compile et se teste à l'identique avec **MSVC**, **GCC** et
-**Clang**, sous Windows, Linux, WSL et macOS. Les presets CMake portent les
-mêmes noms partout ; seul le lanceur change (`build.ps1` ou `build.sh`).
+**Clang** — vérifié sous Windows, sous Linux (WSL, conteneur et intégration
+continue). Les scripts prévoient macOS, mais aucune exécution n'y a été faite :
+conformément à l'esprit du dépôt, ce qui n'a pas été exécuté n'est pas
+affirmé. Les presets CMake portent les mêmes noms partout ; seul le lanceur
+change (`build.ps1` ou `build.sh`).
 
 Ce n'est pas du confort : **chaque compilateur détecte ce que les autres
 laissent passer**. MSVC `/W4` ne voit pas ce que GCC `-Wconversion` voit. Faire
@@ -265,8 +268,9 @@ la vérification du formatage.
 
 ## Conventions
 
-- **Langue** : français dans les README, les commentaires et les noms de tests.
-  Les identifiants de code sont en anglais, comme dans l'industrie.
+- **Langue** : français dans les README, les exigences et les commentaires —
+  le support de formation. Anglais pour les identifiants de code et les noms
+  de cas de test, comme dans l'industrie.
 - **Accents** : absents des fichiers `.cpp`/`.hpp` (portabilité des chaînes de
   compilation embarquées), présents dans les Markdown.
 - **Norme** : C++17, cible de MISRA C++:2023 et choix réaliste en avionique.

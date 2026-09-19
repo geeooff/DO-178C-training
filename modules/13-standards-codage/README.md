@@ -249,7 +249,7 @@ temps de revue cet outil vous fait-il gagner sur un fichier de 500 lignes ?
 * MISRA C++:2023 — la référence actuelle, à demander à votre employeur.
 * **C++ Core Guidelines** — <https://isocpp.github.io/CppCoreGuidelines/> —
   gratuit, moderne, et c'est la base de la moitié des règles clang-tidy.
-* Documentation clang-tidy : <https://clang.llvm.org/extra/clang-tidy/checks/>
+* Documentation clang-tidy : <https://clang.llvm.org/extra/clang-tidy/checks/list.html>
 
 ---
 
