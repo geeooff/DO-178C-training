@@ -267,8 +267,10 @@ de `decode()`. Que dit le compilateur avec `/W4` ? Et si vous ajoutez un
 * `std::expected` (C++23) : la version normalisée de `Result`.
 * JSF++ (Joint Strike Fighter Air Vehicle C++ Coding Standards), règles sur les
   exceptions — un des rares standards publics et gratuits.
-* CAST-6 — *Dead Code vs. Deactivated Code* (position officielle des autorités,
-  document public).
+* DO-178C §6.4.4.3, *Structural Coverage Analysis Resolution* — la
+  distinction entre code mort et code désactivé, et ce que la norme demande
+  pour chacun ; le DO-248C (*Supporting Information for DO-178C*) en discute
+  les cas limites.
 
 ---
 

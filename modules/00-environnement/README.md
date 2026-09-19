@@ -317,8 +317,10 @@ de vol sur tablette (EFB) non certifiée. Justifiez en une phrase chacun.
   la RTCA ou de l'EUROCAE — la plupart des employeurs vous le fournissent).
 * FAA AC 20-115D : l'avis de la FAA qui reconnaît la DO-178C.
 * CAST papers (Certification Authorities Software Team) : notes de position
-  publiques et gratuites, très éclairantes (CAST-6 sur le code mort, CAST-10 sur
-  la traçabilité, CAST-12 sur le code désactivé).
+  publiques et gratuites, très éclairantes (CAST-6 sur le MC/DC masqué,
+  CAST-10 sur ce qu'est une « décision », CAST-12 sur la traçabilité entre
+  code source et code objet). La liste est dans
+  [`docs/05-ressources.md`](../../docs/05-ressources.md).
 
 ---
 

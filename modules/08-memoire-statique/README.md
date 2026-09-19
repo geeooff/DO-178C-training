@@ -199,15 +199,16 @@ Et vous venez de créer, volontairement, un problème de **couverture
 structurelle** (module 11) : une décision dont un seul résultat est atteignable
 ne sera jamais couverte à 100 %, quel que soit le jeu de tests.
 
-Ce conflit est explicite dans la norme (§6.4.4.3) et fait l'objet d'un position
-paper dédié, **CAST-17**. La réponse admise n'est pas de supprimer la
-protection, mais de la **justifier par analyse** : on documente que le code est
-inatteignable, on explique pourquoi il est là, et on démontre qu'il ne peut pas
-nuire. C'est une justification écrite, pas une case à cocher.
+Ce conflit est traité par la norme elle-même, au §6.4.4.3 (*Structural
+Coverage Analysis Resolution*), et discuté dans les FAQ du DO-248C. La réponse
+admise n'est pas de supprimer la protection, mais de la **justifier par
+analyse** : on documente que le code est inatteignable, on explique pourquoi il
+est là, et on démontre qu'il ne peut pas nuire. C'est une justification écrite,
+pas une case à cocher.
 
 > **Ce qu'un entretien peut en tirer.** « Vous avez du code défensif non
 > couvrable. Que faites-vous ? » La mauvaise réponse est « je le supprime pour
-> avoir 100 % ». La bonne : « je le justifie par analyse au titre de CAST-17,
+> avoir 100 % ». La bonne : « je le justifie par analyse au titre du §6.4.4.3,
 > ou je démontre qu'il est réellement atteignable. Supprimer une protection
 > pour améliorer une métrique, c'est optimiser la métrique contre le produit. »
 

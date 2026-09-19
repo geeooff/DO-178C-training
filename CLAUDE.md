@@ -125,7 +125,7 @@ compiler-rt, la compilation passe et c'est l'édition de liens qui échoue.
   `strict` sont en `-O0` : passer aussi `release` avant de conclure.
 - **Un invariant vrai « globalement » n'est pas exploitable localement** par le
   compilateur. Voir module 08, section 1.6, qui documente le cas et le conflit
-  §6.4.4.3 / CAST-17 qui en découle.
+  §6.4.4.3 qui en découle.
 - **`trace_check.py` est le filet de sécurité de tout renommage.** Il vérifie
   que les citations `` `Suite.cas` `` des documents désignent des tests réels.
   Le lancer *avant* et *après* toute opération de masse.

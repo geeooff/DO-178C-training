@@ -113,7 +113,7 @@ public:
         // Cette borne rend l'ecriture PROUVABLE et non plus seulement vraie.
         // Son prix est assume : la branche `Capacity` est inatteignable, donc
         // NON COUVRABLE. C'est le conflit classique entre programmation
-        // defensive et couverture structurelle (paragraphe 6.4.4.3, CAST-17) :
+        // defensive et couverture structurelle (paragraphe 6.4.4.3) :
         // il se traite par une justification d'analyse, pas en supprimant la
         // protection.
         const avio::usize last = (size_ < Capacity) ? size_ : Capacity;
