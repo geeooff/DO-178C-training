@@ -79,38 +79,32 @@ Presets disponibles : `debug`, `release`, `strict`, `asan`, `vs2026` (Windows),
 - `modules/13-standards-codage/src/nonconforming.cpp` viole volontairement le
   standard de codage. Cible séparée, clang-tidy désactivé, avertissements
   relâchés. Les `D9025` de MSVC à la compilation viennent de là.
-- `refs/original` a été purgé après la réécriture d'historique ; l'adresse
-  d'auteur est l'adresse *noreply* GitHub.
 
 ## Environnements
 
 Le dépôt doit se compiler et se tester **à l'identique** sur les trois chaînes.
 Les presets CMake portent les mêmes noms partout.
 
-| Environnement | Chaîne |
-|---|---|
-| Windows | Visual Studio 2026 Community, MSVC 14.51 |
-| WSL Ubuntu 26.04 | GCC 15.2, Clang 21.1.8, CMake 4.2.3, Ninja |
-| CI GitHub Actions | `ubuntu-26.04` (préversion), 5 jobs |
-| devcontainer | `ubuntu:26.04` |
+| Environnement | Chaîne | Vérifié |
+|---|---|---|
+| Windows | Visual Studio 2026 Community, MSVC 14.51 | oui |
+| Linux (WSL Ubuntu 26.04) | GCC 15.2, Clang 21.1.8, CMake 4.2.3, Ninja | oui |
+| CI GitHub Actions | `ubuntu-26.04`, 5 jobs, actions épinglées par SHA | oui, à chaque poussée |
+| devcontainer | `ubuntu:26.04`, même chaîne que WSL | oui, sur un clone frais |
+| macOS | prévu par les scripts | **non** — ne pas l'affirmer |
 
-**Docker Desktop est installé** sur le poste Windows depuis le 2026-08-28
-(29.7.2, conteneurs Linux, installation par utilisateur dans
-`%LOCALAPPDATA%\Programs\DockerDesktop` et non dans `Program Files`).
+Résultat de référence du devcontainer sur un clone frais : `gcc-strict`,
+`clang-strict` et `asan` à **0 avertissement et 19/19**, traçabilité et
+format propres, couverture 89,6 % lignes / 79,2 % branches. Le SECI décrit par
+le module 00 est ainsi démontré, pas seulement affirmé.
 
-L'image du devcontainer a été **construite et vérifiée** ce même jour, pour la
-première fois depuis sa création. Sur un clone frais monté dans le conteneur :
-`gcc-strict`, `clang-strict` et `asan` à **0 avertissement et 19/19**,
-traçabilité et format propres, couverture 89,6 % lignes / 79,2 % branches. Le
-SECI décrit par le module 00 est donc démontré, pas seulement affirmé.
+Deux faits sur l'image, établis en la construisant :
 
-Deux constats de cette première construction :
-
-- `ubuntu:26.04` **fournit bien** l'utilisateur `ubuntu` en uid 1000. Le
-  `useradd` défensif du Dockerfile ne s'exécute donc jamais : c'est du code
-  dont une branche est inatteignable, même situation qu'en module 08 §1.6.
-  Le garder reste justifié — il ne coûte rien et l'étiquette `26.04` désigne
-  une image qui change.
+- `ubuntu:26.04` **fournit** l'utilisateur `ubuntu` en uid 1000. Le `useradd`
+  défensif du Dockerfile ne s'exécute donc jamais : c'est du code dont une
+  branche est inatteignable, même situation qu'en module 08 §1.6. Le garder
+  reste justifié — il ne coûte rien et l'étiquette `26.04` désigne une image
+  qui change.
 - `post-create.sh` déclare `safe.directory /workspace`, ce qui suffit pour
   **travailler dans** le dépôt. Cloner **depuis** le montage exige en plus
   `/workspace/.git`.
@@ -146,6 +140,7 @@ compiler-rt, la compilation passe et c'est l'édition de liens qui échoue.
   messages de ce dépôt font partie de sa valeur pédagogique.
 - **Un sujet par commit.** Ne jamais mélanger un renommage de masse avec une
   correction de fond : `git blame` doit rester exploitable.
+- Adresse d'auteur : l'adresse *noreply* GitHub.
 - Ne rien pousser sans demande explicite.
 
 ## Hors périmètre, assumé
@@ -159,6 +154,7 @@ traiter sans demande explicite.
 
 ## Projet frère
 
-`../DO-178C-training-ADA` — même démarche, mêmes objectifs, en **Ada/SPARK**.
-Les modules de processus (09 à 12, 14) sont indépendants du langage et font
-autorité ici ; le dépôt Ada les référence plutôt que de les réécrire.
+[`DO-178C-training-ADA`](https://github.com/geeooff/DO-178C-training-ADA) —
+même démarche, mêmes objectifs, en **Ada/SPARK**, contre le même cas d'étude
+FQMS. Les modules de processus (09 à 12, 14) sont indépendants du langage et
+font autorité ici ; le dépôt Ada les référence plutôt que de les réécrire.
