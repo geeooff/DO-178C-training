@@ -1,0 +1,48 @@
+# =============================================================================
+#  Suivi des dépendances de la chaîne de vérification.
+#
+#  POURQUOI CE FICHIER EXISTE
+#  --------------------------
+#  Un dépôt qui enseigne la gestion de configuration (module 14) ne peut pas
+#  laisser ses propres dépendances vieillir en silence. Ce dépôt a utilisé
+#  actions/checkout@v4 pendant que v7 était disponible : trois majeures de
+#  retard, visibles seulement par l'avertissement jaune « Node.js 20 is
+#  deprecated » que GitHub affichait sur chaque exécution. Une mise à jour
+#  ponctuelle ne fait que relancer le compteur ; ce qu'il faut, c'est que le
+#  retard redevienne VISIBLE — sous la forme d'une pull request à relire.
+#
+#  Les propositions arrivent avec les notes de version. Elles se relisent :
+#  on ne fusionne pas une mise à jour de la chaîne de vérification sans
+#  regarder ce qui change, pas plus qu'on ne changerait une version dans le
+#  Dockerfile sans rejouer la vérification complète.
+#
+#  CE QUE DEPENDABOT NE VOIT PAS
+#  -----------------------------
+#  La chaîne elle-même — GCC, Clang, CMake, Ninja, gcovr — vient des paquets
+#  apt de l'image `ubuntu:26.04`, sans épinglage de version : c'est celle de
+#  la LTS, qui n'évolue que par correctifs. Dependabot suit l'image de base ;
+#  une proposition de passer à une version non LTS (26.10, 27.04) est à
+#  REFUSER, le choix de la LTS étant documenté dans ci.yml et le CLAUDE.md.
+# =============================================================================
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "CI"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "SECI"

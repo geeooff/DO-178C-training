@@ -31,12 +31,22 @@
 #      de 24.04. C'est ce GCC 15 qui a mis au jour, en `-O2`, la comparaison
 #      de pointeurs non spécifiée du module 08 (voir sa section 1.6).
 #
-#  RÉSERVE À CONNAÎTRE : l'image `ubuntu-26.04` est en PRÉVERSION chez GitHub.
-#  Une image beta peut évoluer sans préavis — ce qui est précisément ce qu'un
-#  SECI cherche à éviter. Sur un vrai programme on resterait sur l'image GA, ou
-#  l'on utiliserait un runner auto-hébergé dont on maîtrise le contenu. Ici, la
-#  cohérence avec l'environnement de développement l'emporte. À rebasculer sur
-#  l'image GA dès que 26.04 y passe.
+#  L'image `ubuntu-26.04` est en disponibilité générale chez GitHub depuis le
+#  2026-09-17 (actions/runner-images#14747), après six mois de préversion. Le
+#  même jour, GitHub a annoncé que `ubuntu-latest` y basculerait en novembre
+#  2026 (#14748) : c'est exactement le mouvement silencieux que l'épinglage
+#  ci-dessus neutralise. Sur un vrai programme, on irait plus loin — runner
+#  auto-hébergé dont on maîtrise le contenu, ou image conteneur figée comme
+#  le fait le devcontainer.
+#
+#  ACTIONS ÉPINGLÉES PAR SHA, PAS PAR ÉTIQUETTE
+#  --------------------------------------------
+#  `actions/checkout@v7` désigne une étiquette MOBILE : son mainteneur peut la
+#  déplacer sur un autre commit, et l'a déjà fait. Un SHA de 40 caractères
+#  désigne un contenu, et un seul — c'est la même différence qu'entre un
+#  numéro de version et une empreinte dans un SCI (§11.16). Le commentaire
+#  `# vX.Y.Z` qui suit chaque SHA est là pour l'humain ; Dependabot
+#  (`.github/dependabot.yml`) le tient à jour avec le SHA.
 # =============================================================================
 name: CI
 
@@ -75,7 +85,7 @@ jobs:
             paquets: clang clang-tidy
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Installer la chaîne d'outils
         run: |
@@ -110,7 +120,7 @@ jobs:
 
       - name: Archiver les résultats de test
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: resultats-test-${{ matrix.compilateur }}
           path: build/${{ matrix.preset }}/Testing/
@@ -129,7 +139,7 @@ jobs:
     name: Sanitizers (ASan + UBSan)
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Installer la chaîne d'outils
         run: |
@@ -163,11 +173,11 @@ jobs:
     steps:
       # fetch-depth: 0 — l'historique complet est nécessaire à `git describe`,
       # dont config_index.py se sert pour identifier la baseline.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
@@ -181,7 +191,7 @@ jobs:
         run: python3 tools/config_index.py
 
       - name: Archiver les données de vie du logiciel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: donnees-de-vie
           path: reports/
@@ -194,7 +204,7 @@ jobs:
     name: Couverture (instructions et branches)
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Installer la chaîne d'outils
         run: |
@@ -205,7 +215,7 @@ jobs:
         run: ./scripts/coverage.sh
 
       - name: Archiver le rapport
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: rapport-couverture
           path: reports/coverage/
@@ -222,7 +232,7 @@ jobs:
     name: Formatage (clang-format)
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Installer clang-format
         run: |
