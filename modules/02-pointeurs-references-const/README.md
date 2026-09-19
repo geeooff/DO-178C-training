@@ -185,11 +185,11 @@ puis le code, puis le test*.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_02-pointeurs-references-const.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_02-pointeurs-references-const.exe --verbose --req
 ```
 

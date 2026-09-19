@@ -241,11 +241,11 @@ nuire. C'est une justification écrite, pas une case à cocher.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_08-memoire-statique.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_08-memoire-statique.exe --verbose --req
 ```
 

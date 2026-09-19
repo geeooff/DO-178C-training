@@ -223,7 +223,7 @@ SRD d'un composant fait entre 30 et 300 pages.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_09-exigences-tracabilite.exe
 ```
 

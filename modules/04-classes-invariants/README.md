@@ -163,11 +163,11 @@ compris ce que la norme attend.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_04-classes-invariants.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_04-classes-invariants.exe --verbose --req
 ```
 

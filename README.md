@@ -31,7 +31,7 @@ dépôt lui-même.
 
 **Windows** — depuis n'importe quel PowerShell, à la racine du dépôt :
 
-```bash
+```powershell
 .\scripts\build.ps1 -Preset debug -Test
 ```
 
@@ -163,7 +163,7 @@ artefacts réels.
 TEST_REQ(Limits, exact_threshold_does_not_trigger, "LLR-ALERT-020") { … }
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_16-projet-integre.exe --verbose --req
 ```
 
@@ -242,7 +242,7 @@ du SECI : un environnement de production figé, versionné et **reconstructible*
 
 ## Vérifier que tout fonctionne
 
-```bash
+```powershell
 .\scripts\build.ps1 -Preset strict -Test
 ```
 

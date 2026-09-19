@@ -196,11 +196,11 @@ module porte un identifiant `LLR-M07-0xx` **et** un test qui l'exerce.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_07-erreurs-sans-exceptions.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_07-erreurs-sans-exceptions.exe --verbose --req
 ```
 

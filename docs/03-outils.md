@@ -40,7 +40,7 @@ fournit **tout**. Aucune installation supplémentaire.
 | **clang-tidy**, **clang-format** 22 | analyse statique, formatage | `VC\Tools\Llvm\x64\bin\` |
 | **Git**, **Python 3** | configuration, outillage | installations séparées |
 
-```bash
+```powershell
 .\scripts\build.ps1 -Preset debug -Test
 ```
 

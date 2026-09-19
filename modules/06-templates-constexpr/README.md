@@ -180,11 +180,11 @@ part réellement dans le binaire.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_06-templates-constexpr.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_06-templates-constexpr.exe --verbose --req
 ```
 

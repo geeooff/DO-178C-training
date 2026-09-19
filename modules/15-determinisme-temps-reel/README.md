@@ -296,11 +296,11 @@ simultanément. **Encore un bénéfice du partitionnement temporel.**
 
 ## 7. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_15-determinisme-temps-reel.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_15-determinisme-temps-reel.exe --verbose --req
 ```
 

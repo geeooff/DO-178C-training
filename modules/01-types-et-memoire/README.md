@@ -225,11 +225,11 @@ rend le test possible.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_01-types-et-memoire.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_01-types-et-memoire.exe --verbose --req
 ```
 

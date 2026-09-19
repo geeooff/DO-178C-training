@@ -161,7 +161,7 @@ plus rien, l'analyse devient exacte, et le code est plus lisible.
 L'analyseur de ce module raisonne sur les **décisions**. Pour la couverture
 d'**instructions** et de **branches**, il faut instrumenter le binaire.
 
-```bash
+```powershell
 .\scripts\coverage.ps1
 ```
 
@@ -229,15 +229,15 @@ quatre réponses ci-dessus.
 
 ## 3. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_11-couverture-structurelle.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_11-couverture-structurelle.exe --verbose --req
 ```
 
-```bash
+```powershell
 .\scripts\coverage.ps1 -Module 11-couverture-structurelle
 ```
 

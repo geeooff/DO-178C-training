@@ -183,11 +183,11 @@ les chemins d'erreur.
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_03-raii-cycle-de-vie.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_03-raii-cycle-de-vie.exe --verbose --req
 ```
 

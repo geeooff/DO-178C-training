@@ -238,7 +238,7 @@ Quatre checklists sont fournies dans ce dépôt :
 
 ## 3. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_14-configuration-qualite.exe
 ```
 
@@ -246,7 +246,7 @@ Quatre checklists sont fournies dans ce dépôt :
 python tools/config_index.py --print
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_14-configuration-qualite.exe --verbose --req
 ```
 

@@ -155,15 +155,15 @@ affichée est incomplète (`HLR-FQMS-011`).
 
 ## 6. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_16-projet-integre.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_16-projet-integre.exe --verbose --req
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_16-projet-integre-hlr.exe --verbose --req
 ```
 

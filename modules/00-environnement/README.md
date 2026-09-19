@@ -247,19 +247,19 @@ l'environnement, depuis le code lui-même.
 
 Depuis un PowerShell ordinaire, à la racine du dépôt :
 
-```bash
+```powershell
 .\scripts\build.ps1 -Preset debug -Test
 ```
 
 Puis lancez la démonstration :
 
-```bash
+```powershell
 .\build\debug\bin\demo_00-environnement.exe
 ```
 
 Et les tests seuls, avec le détail :
 
-```bash
+```powershell
 .\build\debug\bin\tests_00-environnement.exe --verbose --req
 ```
 

@@ -171,11 +171,11 @@ C'est exactement ce que produit ce module.
 
 ## 3. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_12-couplage-donnees-controle.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_12-couplage-donnees-controle.exe --verbose --req
 ```
 

@@ -220,11 +220,11 @@ sert vraiment (banc de test contre calculateur réel).
 
 ## 4. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_05-polymorphisme-do332.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_05-polymorphisme-do332.exe --verbose --req
 ```
 

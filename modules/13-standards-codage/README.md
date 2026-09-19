@@ -149,7 +149,7 @@ qu'une dérogation bruyante.
 
 **Commandes** :
 
-```bash
+```powershell
 .\scripts\build.ps1 -Preset strict
 ```
 
@@ -199,11 +199,11 @@ commentaire qui explique **pourquoi**.
 
 ## 3. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_13-standards-codage.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_13-standards-codage.exe --verbose --req
 ```
 

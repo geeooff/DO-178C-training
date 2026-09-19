@@ -194,11 +194,11 @@ d'un état résiduel n'est pas une preuve.
 
 ## 3. Manipulation
 
-```bash
+```powershell
 .\build\debug\bin\demo_10-tests-bases-exigences.exe
 ```
 
-```bash
+```powershell
 .\build\debug\bin\tests_10-tests-bases-exigences.exe --verbose --req
 ```
 
