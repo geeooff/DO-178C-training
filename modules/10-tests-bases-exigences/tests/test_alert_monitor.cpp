@@ -4,7 +4,7 @@
 //  Les cas sont regroupes PAR TECHNIQUE DE CONCEPTION, pas par ordre
 //  d'ecriture du code. C'est ce regroupement que l'on presente en revue de
 //  test : il montre que la couverture des exigences a ete RAISONNEE, et non
-//  obtenue au jugé.
+//  obtenue au juge.
 //
 //    1. classes d'equivalence
 //    2. analyse des valeurs limites

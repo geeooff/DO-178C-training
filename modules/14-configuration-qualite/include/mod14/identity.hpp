@@ -2,7 +2,7 @@
 //  Module 14 -- identite logicielle et integrite du chargement.
 //
 //  Tout logiciel embarque certifie porte une IDENTITE :
-//    * un PART NUMBER, referencé au dossier de certification et sur la plaque
+//    * un PART NUMBER, reference au dossier de certification et sur la plaque
 //      constructeur de l'equipement ;
 //    * une VERSION ;
 //    * une EMPREINTE (CRC) qui permet de verifier, a chaque demarrage, que le

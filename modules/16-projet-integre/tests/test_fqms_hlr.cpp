@@ -314,7 +314,7 @@ TEST_REQ(Flight, complete_profile, "HLR-FQMS-010,HLR-FQMS-030,HLR-FQMS-020") {
     CHECK_FALSE(report.imbalance_alert);
 
     // Croisiere : le central se vide en premier (sequence de consommation
-    // reelle sur un biréacteur).
+    // reelle sur un bireacteur).
     report = hold(system, kFull, kCentral1600kg, kFull, 10U);
     CHECK_NEAR(static_cast<double>(report.total.kilograms()), 11600.0, 2.0);
     CHECK_FALSE(report.low_fuel_alert);

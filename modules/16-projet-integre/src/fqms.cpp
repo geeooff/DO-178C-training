@@ -86,7 +86,7 @@ Result<Mass> TankGauge::read() const noexcept {
 FuelSystemConfig default_config() noexcept {
     FuelSystemConfig config;
 
-    // Capacites typiques d'un biréacteur court/moyen courrier : 18 000 kg.
+    // Capacites typiques d'un bireacteur court/moyen courrier : 18 000 kg.
     (void)Mass::from_kilograms(5000.0F, config.tank_capacity[0]);  // aile gauche
     (void)Mass::from_kilograms(8000.0F, config.tank_capacity[1]);  // central
     (void)Mass::from_kilograms(5000.0F, config.tank_capacity[2]);  // aile droite

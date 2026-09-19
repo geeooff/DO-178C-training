@@ -1,7 +1,7 @@
 // =============================================================================
 //  PROJET INTEGRE -- FQMS : Fuel Quantity Management System.
 //
-//  Systeme de gestion de la quantite de carburant d'un biréacteur court/moyen
+//  Systeme de gestion de la quantite de carburant d'un bireacteur court/moyen
 //  courrier. Trois reservoirs : aile gauche, caisson central, aile droite.
 //
 //  Ce composant rassemble TOUT ce que la formation a couvert :
